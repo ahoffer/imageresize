@@ -35,11 +35,12 @@ Map<String, String> configuration = new HashMap<>();
 
 
     public void validateBeforeResize() {
-        Validate.notNull(source);
-        Validate.inclusiveBetween(1, Integer.MAX_VALUE, pixels);
+        Validate.inclusiveBetween(1, Integer.MAX_VALUE, getPixels());
 
     };
 
-
+    public int getPixels() {
+        return -1;
+    }
 
 }
