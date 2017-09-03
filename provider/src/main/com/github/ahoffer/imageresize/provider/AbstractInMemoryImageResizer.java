@@ -38,9 +38,5 @@ public abstract class AbstractInMemoryImageResizer extends AbstractImageResizer 
     public void validateBeforeResize() {
         super.validateBeforeResize();
         Validate.notNull(source);
-
     }
-
-    ;
-
 }
