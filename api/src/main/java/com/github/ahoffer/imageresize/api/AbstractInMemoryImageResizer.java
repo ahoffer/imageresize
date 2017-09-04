@@ -18,7 +18,7 @@ public abstract class AbstractInMemoryImageResizer extends AbstractImageResizer 
     public static final String JPEG_2000_FORMAT_NAME = "jpeg 2000";
 
 
-    InputStream inputStream;
+    protected InputStream inputStream;
 
     ImageReader reader;
 

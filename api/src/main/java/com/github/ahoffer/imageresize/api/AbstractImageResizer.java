@@ -10,7 +10,7 @@ public abstract class AbstractImageResizer implements ImageResizer {
 
     public static final String OUTPUT_SIZE_PIXELS = "outputSize";
 
-    Map<String, String> configuration = new HashMap<>();
+    protected Map<String, String> configuration = new HashMap<>();
 
     public ImageResizer setConfiguration(Map<String, String> configuration)
 
