@@ -1,21 +1,25 @@
 package com.github.ahoffer.imageresize.provider;
 
 import java.awt.image.BufferedImage;
-import java.util.Map;
+import java.io.IOException;
 
-import com.github.ahoffer.imageresize.api.ImageResizer;
+import com.github.ahoffer.imageresize.api.AbstractInMemoryImageResizer;
+import com.github.ahoffer.imageresize.provider.internal.SampledImageReader;
 
-public class SamplingResizer extends AbstractImageResizer {
+public class SamplingResizer extends AbstractInMemoryImageResizer {
 
-    public ImageResizer setConfiguration(Map<String, String> configuration) {
-        return null;
+    public static final String SAMPLE_PERIOD = "samplePeriod";
+
+    public BufferedImage resize() throws IOException {
+        SampledImageReader reader = SampledImageReader.of(inputStream);
+        if (configuration.containsKey(SAMPLE_PERIOD)) {
+            reader.samplePeriod(Integer.valueOf(configuration.get(SAMPLE_PERIOD)));
+        }
+
+        return super.resize(reader.read());
     }
 
-    public BufferedImage resize() {
-        return null;
-    }
-
-    public boolean recommened(String imageFormat) {
-        return false;
+    public boolean recommendedFor(String imageFormat) {
+        return !(JPEG_2000_FORMAT_NAME.equalsIgnoreCase(imageFormat));
     }
 }

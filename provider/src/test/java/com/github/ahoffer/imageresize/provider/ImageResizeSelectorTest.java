@@ -32,15 +32,15 @@ public class ImageResizeSelectorTest {
         assertTrue(true);
     }
 
-    @Test
-    public void verifyTestResources() throws IOException {
-        String actualFormatName1 = ThumbnailGenerator.getReader(vanillaJpeg)
-                .getFormatName();
-        assertEquals("Unexpected image format name", "JPEG", actualFormatName1);
-        String actualFormatName2 = ThumbnailGenerator.getReader(jpeg2000)
-                .getFormatName();
-        assertEquals("Unexpected image format name", "jpeg 2000", actualFormatName2);
-    }
+//    @Test
+//    public void verifyTestResources() throws IOException {
+//        String actualFormatName1 = ThumbnailGenerator.getReader(vanillaJpeg)
+//                .getFormatName();
+//        assertEquals("Unexpected image format name", "JPEG", actualFormatName1);
+//        String actualFormatName2 = ThumbnailGenerator.getReader(jpeg2000)
+//                .getFormatName();
+//        assertEquals("Unexpected image format name", "jpeg 2000", actualFormatName2);
+//    }
 
     @Test
     public void testGetFormat() {

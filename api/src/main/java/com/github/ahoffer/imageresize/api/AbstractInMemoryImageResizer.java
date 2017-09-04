@@ -1,5 +1,6 @@
-package com.github.ahoffer.imageresize.provider;
+package com.github.ahoffer.imageresize.api;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -10,15 +11,16 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.lang3.Validate;
 
+import net.coobird.thumbnailator.Thumbnails;
+
 public abstract class AbstractInMemoryImageResizer extends AbstractImageResizer {
 
-    protected void initialize() throws IOException {
-        reader = getReader(source);
-    }
+    public static final String JPEG_2000_FORMAT_NAME = "jpeg 2000";
 
-    private InputStream source;
 
-    private ImageReader reader;
+    InputStream inputStream;
+
+    ImageReader reader;
 
     public static ImageReader getReader(InputStream inputStream) throws IOException {
 
@@ -29,14 +31,18 @@ public abstract class AbstractInMemoryImageResizer extends AbstractImageResizer 
         return reader;
     }
 
-    public String getFormatName() throws IOException {
-
-        return reader.getFormatName();
+    public BufferedImage resize(BufferedImage inputImage) throws IOException {
+        validateBeforeResize();
+        return Thumbnails.of(inputImage)
+                .height(getOutputSize())
+                .asBufferedImage();
 
     }
 
     public void validateBeforeResize() {
         super.validateBeforeResize();
-        Validate.notNull(source);
+        Validate.notNull(inputStream);
     }
+
+
 }

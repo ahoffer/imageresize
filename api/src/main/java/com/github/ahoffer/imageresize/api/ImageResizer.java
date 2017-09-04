@@ -1,6 +1,7 @@
 package com.github.ahoffer.imageresize.api;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -10,13 +11,13 @@ public interface ImageResizer {
 
     ImageResizer setInput(InputStream inputStream);
 
-    ImageResizer setImageIndex(int imageIndex);
+    ImageResizer setOutputSize(int pixels);
 
-    ImageResizer setSize(int pixels);
+    int getOutputSize();
 
-    BufferedImage resize();
+    BufferedImage resize() throws IOException;
 
-    boolean recommened(String imageFormat);
+    boolean recommendedFor(String imageFormat);
 
 }
 
