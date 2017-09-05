@@ -1,9 +1,10 @@
 package com.github.ahoffer.imageresize.provider;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import static com.github.ahoffer.imageresize.provider.ImageResizeTestData.JPEG;
-import static com.github.ahoffer.imageresize.provider.MagickResizer.*;
+import static com.github.ahoffer.imageresize.provider.MagickResizer.INPUT_IMAGE_PATH;
+import static com.github.ahoffer.imageresize.provider.MagickResizer.OUTPUT_FORMAT;
+import static com.github.ahoffer.imageresize.provider.MagickResizer.PATH_TO_IMAGE_MAGICK_EXECUTABLES;
 import static junit.framework.TestCase.assertTrue;
 
 import java.awt.image.BufferedImage;
@@ -20,6 +21,7 @@ import com.github.ahoffer.imageresize.api.ImageResizer;
 public class MagickResizerTest {
 
     ImageResizeTestData data;
+
     public static final String PATH_TO_MAGICK_EXEC = "/opt/local/bin/";
 
     @Before
@@ -53,5 +55,10 @@ public class MagickResizerTest {
     @Test
     public void testSupportedFormats() {
         assertTrue("ImageMacgic should support JPEG", new MagickResizer().recommendedFor(JPEG));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testSetInput() {
+        new MagickResizer().setInput(null);
     }
 }

@@ -27,6 +27,12 @@ public class MagickResizer extends AbstractImageResizer {
 
     public static final String OUTPUT_FORMAT = "outputFormat";
 
+    @Override
+    public ImageResizer setInput(InputStream inputStream) {
+        throw new java.lang.UnsupportedOperationException(
+                getClass().getSimpleName() + " does not implement setInput()");
+    }
+
     public BufferedImage resize() throws IOException {
 
         if (!configuration.containsKey(INPUT_IMAGE_PATH)) {
@@ -55,11 +61,7 @@ public class MagickResizer extends AbstractImageResizer {
         op.addImage(inputFile.getCanonicalPath());
         op.thumbnail(getOutputSize());
         String imageMagickOutputFormat;
-        if (configuration.containsKey(OUTPUT_FORMAT)) {
-            imageMagickOutputFormat = configuration.get(OUTPUT_FORMAT);
-        } else {
-            imageMagickOutputFormat = DEFAULT_OUTPUT_FORMAT; //PNG is about as good as anyone is going to do.
-        }
+        imageMagickOutputFormat = configuration.getOrDefault(OUTPUT_FORMAT, DEFAULT_OUTPUT_FORMAT);
 
         //TODO There is probably a better method than addImage() convert.setSearchPath() ?
         String outputFormatDirectedToStandardOut = imageMagickOutputFormat + ":-";
@@ -77,10 +79,6 @@ public class MagickResizer extends AbstractImageResizer {
                     + "Process does not inherit a PATH environment variable.", e);
         }
         return outputConsumer.getImage();
-    }
-
-    public ImageResizer setInput(InputStream inputStream) {
-        return null;
     }
 }
 

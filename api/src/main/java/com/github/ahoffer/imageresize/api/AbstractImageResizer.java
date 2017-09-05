@@ -1,6 +1,5 @@
 package com.github.ahoffer.imageresize.api;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,10 +11,8 @@ public abstract class AbstractImageResizer implements ImageResizer {
 
     protected Map<String, String> configuration = new HashMap<>();
 
-    public ImageResizer setConfiguration(Map<String, String> configuration)
-
-    {
-        // Add or replace configuration
+    public ImageResizer setConfiguration(Map<String, String> configuration) {
+        // Add or replace configuration items
         this.configuration.putAll(configuration);
         return this;
     }

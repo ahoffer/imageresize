@@ -8,14 +8,13 @@ import com.github.ahoffer.imageresize.provider.internal.SampledImageReader;
 
 public class SamplingResizer extends AbstractInMemoryImageResizer {
 
-    public static final String SAMPLE_PERIOD = "samplePeriod";
+    public static final String SAMPLING_PERIOD = "samplePeriod";
 
     public BufferedImage resize() throws IOException {
         SampledImageReader reader = SampledImageReader.of(inputStream);
-        if (configuration.containsKey(SAMPLE_PERIOD)) {
-            reader.samplePeriod(Integer.valueOf(configuration.get(SAMPLE_PERIOD)));
+        if (configuration.containsKey(SAMPLING_PERIOD)) {
+            reader.samplePeriod(Integer.valueOf(configuration.get(SAMPLING_PERIOD)));
         }
-
         return super.resize(reader.read());
     }
 
