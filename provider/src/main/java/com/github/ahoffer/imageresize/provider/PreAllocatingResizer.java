@@ -19,6 +19,7 @@ public class PreAllocatingResizer extends AbstractInMemoryImageResizer {
     }
 
     public BufferedImage resize() throws IOException {
+        validateBeforeResize();
         Image inputImage = ImageIO.read(inputStream);
         if (null != inputImage) {
             BufferedImage imageCopy = new BufferedImage(inputImage.getWidth(null),

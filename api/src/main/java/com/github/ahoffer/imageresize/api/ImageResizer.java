@@ -19,5 +19,6 @@ public interface ImageResizer {
 
     boolean recommendedFor(String imageFormat);
 
+
 }
 

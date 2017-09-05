@@ -12,6 +12,8 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import com.github.ahoffer.imageresize.api.GetImageReader;
+
 public class SampledImageReader {
     //TODO: Maybe change some of these fields to Optional value holders.
     protected int samplePeriod;
@@ -27,21 +29,15 @@ public class SampledImageReader {
     static public SampledImageReader of(InputStream source) throws IOException {
         SampledImageReader object = new SampledImageReader();
         object.source = source;
-        return object.init();
+        object.reader = GetImageReader.get(source);
+        return object;
     }
 
     static public SampledImageReader of(File sourceFile) throws IOException {
         SampledImageReader object = new SampledImageReader();
         object.source = new FileInputStream(sourceFile);
-        return object.init();
-    }
-
-    protected SampledImageReader init() throws IOException {
-        ImageInputStream imageInputStream = ImageIO.createImageInputStream(source);
-        Iterator iter = ImageIO.getImageReaders(imageInputStream);
-        reader = (ImageReader) iter.next();
-        reader.setInput(imageInputStream);
-        return this;
+        object.reader = GetImageReader.get(new FileInputStream(sourceFile));
+        return object;
     }
 
     public SampledImageReader subsamplingHint(int hint) {

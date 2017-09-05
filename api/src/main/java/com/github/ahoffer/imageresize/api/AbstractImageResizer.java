@@ -16,16 +16,13 @@ public abstract class AbstractImageResizer implements ImageResizer {
 
     {
         // Add or replace configuration
-        configuration.putAll(configuration);
+        this.configuration.putAll(configuration);
         return this;
     }
 
-    public ImageResizer setInput(InputStream inputStream) {
-        return null;
-    }
-
     public ImageResizer setOutputSize(int pixels) {
-        return null;
+        configuration.put(OUTPUT_SIZE_PIXELS, Integer.toString(pixels));
+        return this;
     }
 
     public void validateBeforeResize() {

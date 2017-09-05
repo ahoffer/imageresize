@@ -3,6 +3,7 @@ package com.github.ahoffer.imageresize.provider;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
@@ -10,10 +11,13 @@ import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 
 import com.github.ahoffer.imageresize.api.AbstractImageResizer;
+import com.github.ahoffer.imageresize.api.ImageResizer;
 
 public class MagickResizer extends AbstractImageResizer {
 
     public static final String PATH_TO_IMAGE_MAGICK_EXECUTABLES = "pathToImageMagickExecutables";
+
+    public static final String DEFAULT_OUTPUT_FORMAT = "png";
 
     public boolean recommendedFor(String imageFormat) {
         return true;
@@ -50,13 +54,14 @@ public class MagickResizer extends AbstractImageResizer {
         convert.setOutputConsumer(outputConsumer);
         op.addImage(inputFile.getCanonicalPath());
         op.thumbnail(getOutputSize());
-        String imageMagickOutputFormat = "png"; //PNG is about as good as anyone is going to do.
-
+        String imageMagickOutputFormat;
         if (configuration.containsKey(OUTPUT_FORMAT)) {
             imageMagickOutputFormat = configuration.get(OUTPUT_FORMAT);
+        } else {
+            imageMagickOutputFormat = DEFAULT_OUTPUT_FORMAT; //PNG is about as good as anyone is going to do.
         }
 
-        //There is probably a better method than addImage()
+        //TODO There is probably a better method than addImage() convert.setSearchPath() ?
         String outputFormatDirectedToStandardOut = imageMagickOutputFormat + ":-";
         op.addImage(outputFormatDirectedToStandardOut);
 
@@ -72,6 +77,10 @@ public class MagickResizer extends AbstractImageResizer {
                     + "Process does not inherit a PATH environment variable.", e);
         }
         return outputConsumer.getImage();
+    }
+
+    public ImageResizer setInput(InputStream inputStream) {
+        return null;
     }
 }
 
