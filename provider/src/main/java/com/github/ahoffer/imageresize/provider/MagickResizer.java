@@ -69,7 +69,6 @@ public class MagickResizer extends AbstractImageResizer {
         }
 
         String filePath = configuration.get(INPUT_IMAGE_PATH);
-
         File inputFile = new File(filePath);
 
         if (!inputFile.exists()) {
