@@ -1,9 +1,13 @@
 package com.github.ahoffer.imageresize.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,5 +50,18 @@ public class PreAllocatingResizerTest {
     public void testNoOutputSize() throws IOException {
         ImageResizer resizer = new PreAllocatingResizer();
         resizer.resize();
+    }
+
+    @Test
+    public void testNewInstance() {
+        Map<String, String> configuration = new HashMap<>();
+        configuration.put("KEY", "VALUE");
+        ImageResizer resizer1 = new PreAllocatingResizer();
+        resizer1.setConfiguration(configuration);
+        ImageResizer resizer2 = resizer1.start();
+        assertNotSame("The start() method should return a new instance", resizer1, resizer2);
+        assertTrue("The start() method did not instantiate the correct class",
+                resizer2 instanceof PreAllocatingResizer);
+
     }
 }

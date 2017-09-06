@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -17,15 +18,38 @@ public class MagickResizer extends AbstractImageResizer {
 
     public static final String PATH_TO_IMAGE_MAGICK_EXECUTABLES = "pathToImageMagickExecutables";
 
+    public static final String EXEC_NAME = "executableName";
+
     public static final String DEFAULT_OUTPUT_FORMAT = "png";
+
+    public static final String WINDOWS_EXEC_NAME = "convert.exe";
+
+    public static final String NIX_EXEC_NAME = "convert";
+
+    public static final String INPUT_IMAGE_PATH = "inputImagePath";
+
+    public static final String OUTPUT_FORMAT = "outputFormat";
 
     public boolean recommendedFor(String imageFormat) {
         return true;
     }
 
-    public static final String INPUT_IMAGE_PATH = "inputImagePath";
+    @Override
+    public boolean isAvailable() {
+        return getImageMagickExecutable().canExecute();
+    }
 
-    public static final String OUTPUT_FORMAT = "outputFormat";
+    File getImageMagickExecutable() {
+        String execName = configuration.getOrDefault(EXEC_NAME,
+                SystemUtils.IS_OS_WINDOWS ? WINDOWS_EXEC_NAME : NIX_EXEC_NAME);
+        File exec;
+        if (configuration.containsKey(PATH_TO_IMAGE_MAGICK_EXECUTABLES)) {
+            exec = new File(configuration.get(PATH_TO_IMAGE_MAGICK_EXECUTABLES), execName);
+        } else {
+            exec = new File(execName);
+        }
+        return exec;
+    }
 
     @Override
     public ImageResizer setInput(InputStream inputStream) {
@@ -34,6 +58,10 @@ public class MagickResizer extends AbstractImageResizer {
     }
 
     public BufferedImage resize() throws IOException {
+
+        if (!isAvailable()) {
+            throw new RuntimeException("Cannot resize image. ImageMagick executable not found.");
+        }
 
         if (!configuration.containsKey(INPUT_IMAGE_PATH)) {
             throw new IllegalArgumentException(
@@ -74,9 +102,9 @@ public class MagickResizer extends AbstractImageResizer {
         try {
             convert.run(op);
         } catch (InterruptedException | IM4JavaException e) {
-            throw new RuntimeException("Problem resizing and image with ImageMagick."
-                    + "Check the path to the executuable."
-                    + "Process does not inherit a PATH environment variable.", e);
+            throw new RuntimeException(
+                    "Problem resizing image with ImageMagick." + " Check executable path."
+                            + "Process does not inherit a PATH environment variable", e);
         }
         return outputConsumer.getImage();
     }

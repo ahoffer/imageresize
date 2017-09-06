@@ -14,7 +14,7 @@ import org.osgi.framework.ServiceReference;
 
 import com.github.ahoffer.imageresize.api.ImageResizer;
 
-public class ImageResizeSelector {
+public class ImageResizeFactory {
 
     BundleContext bundleContext;
 

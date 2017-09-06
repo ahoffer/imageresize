@@ -1,16 +1,13 @@
-package com.github.ahoffer.imageresize.provider.internal;
+package com.github.ahoffer.imageresize.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 
-import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 
 import com.github.ahoffer.imageresize.api.GetImageReader;
 

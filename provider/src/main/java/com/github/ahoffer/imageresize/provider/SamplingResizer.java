@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import com.github.ahoffer.imageresize.api.AbstractInMemoryImageResizer;
-import com.github.ahoffer.imageresize.provider.internal.SampledImageReader;
 
 public class SamplingResizer extends AbstractInMemoryImageResizer {
 

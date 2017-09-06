@@ -30,4 +30,5 @@ public abstract class AbstractInMemoryImageResizer extends AbstractImageResizer 
         this.inputStream = inputStream;
         return this;
     }
+
 }

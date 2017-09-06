@@ -64,4 +64,5 @@ public class SamplingResizerTest {
         BufferedImage output = resizer.resize();
         assertEquals(256, output.getHeight());
     }
+
 }
