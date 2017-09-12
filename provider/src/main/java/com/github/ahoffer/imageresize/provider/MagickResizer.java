@@ -11,7 +11,6 @@ import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 
-import com.github.ahoffer.imageresize.api.AbstractImageResizer;
 import com.github.ahoffer.imageresize.api.ImageResizer;
 
 public class MagickResizer extends AbstractImageResizer {

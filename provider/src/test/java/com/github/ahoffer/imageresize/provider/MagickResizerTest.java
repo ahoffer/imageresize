@@ -21,7 +21,8 @@ import com.github.ahoffer.imageresize.api.ImageResizer;
 
 public class MagickResizerTest {
 
-    public static final String TEST_PATH_TO_MAGICK_EXEC = FilenameUtils.getFullPath("/opt/local/bin/");
+    public static final String TEST_PATH_TO_MAGICK_EXEC = FilenameUtils.getFullPath(
+            "/opt/local/bin/");
 
     ImageResizeTestData data;
 

@@ -9,8 +9,6 @@ import java.io.InputStream;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 
-import com.github.ahoffer.imageresize.api.GetImageReader;
-
 public class SampledImageReader {
     //TODO: Maybe change some of these fields to Optional value holders.
     protected int samplePeriod;

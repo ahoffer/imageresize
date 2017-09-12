@@ -1,10 +1,12 @@
-package com.github.ahoffer.imageresize.api;
+package com.github.ahoffer.imageresize.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.lang3.Validate;
+
+import com.github.ahoffer.imageresize.api.ImageResizer;
 
 import net.coobird.thumbnailator.Thumbnails;
 

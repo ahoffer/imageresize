@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <cm:managed-service-factory
-            id="com.github.ahoffer.imageresize.provider.SamplingResizer"
-            factory-pid="sampling-image-resizer"
-            interface="com.github.ahoffer.imageresize.api.ImageResizer">
-        <cm:managed-component></cm:managed-component>
-    </cm:managed-service-factory>
+    <bean id="imageResizeBean" class="com.github.ahoffer.imageresize.bundle.ImageResizeService">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+    </bean>
 
+    <service id="imageResizeService" auto-export="all-classes" ref="imageResizeBean"/>
 
+    <bean id="subsampleResizerBean" class="com.github.ahoffer.imageresize.provider.SamplingResizer"
+          scope="prototype"/>
+
+    <service id="subsampleResizer" auto-export="interfaces" ref="subsampleResizerBean"/>
+
+    <!--<service id="magickResizer" auto-export="interfaces">-->
+        <!--<bean class="com.github.ahoffer.imageresize.provider.MagickResizer"/>-->
+    <!--</service>-->
+
+    <!--<service id="preallocateResizer" auto-export="interfaces">-->
+        <!--<bean class="com.github.ahoffer.imageresize.provider.PreAllocatingResizer"/>-->
+    <!--</service>-->
 </blueprint>

@@ -1,4 +1,4 @@
-package com.github.ahoffer.imageresize.api;
+package com.github.ahoffer.imageresize.provider;
 
 import java.io.IOException;
 import java.io.InputStream;

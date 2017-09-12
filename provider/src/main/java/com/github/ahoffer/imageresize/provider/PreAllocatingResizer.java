@@ -6,17 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.imageio.spi.IIORegistry;
-
-import com.github.ahoffer.imageresize.api.AbstractInMemoryImageResizer;
-import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 
 public class PreAllocatingResizer extends AbstractInMemoryImageResizer {
-
-    static {
-        IIORegistry.getDefaultInstance()
-                .registerServiceProvider(new J2KImageReaderSpi());
-    }
 
     public BufferedImage resize() throws IOException {
         validateBeforeResize();

@@ -1,6 +1,6 @@
 package com.github.ahoffer.imageresize.provider;
 
-import static com.github.ahoffer.imageresize.api.AbstractImageResizer.OUTPUT_SIZE_PIXELS;
+import static com.github.ahoffer.imageresize.provider.AbstractImageResizer.OUTPUT_SIZE_PIXELS;
 import static com.github.ahoffer.imageresize.provider.SamplingResizer.SAMPLING_PERIOD;
 import static junit.framework.TestCase.assertEquals;
 

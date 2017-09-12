@@ -1,10 +1,12 @@
-package com.github.ahoffer.imageresize.api;
+package com.github.ahoffer.imageresize.provider;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+
+import com.github.ahoffer.imageresize.api.ImageResizer;
 
 public abstract class AbstractImageResizer implements ImageResizer {
 

@@ -3,8 +3,6 @@ package com.github.ahoffer.imageresize.provider;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import com.github.ahoffer.imageresize.api.AbstractInMemoryImageResizer;
-
 public class SamplingResizer extends AbstractInMemoryImageResizer {
 
     public static final String SAMPLING_PERIOD = "samplePeriod";
