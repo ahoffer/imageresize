@@ -34,10 +34,15 @@ public abstract class AbstractImageResizer implements ImageResizer {
     }
 
     public int getOutputSize() {
-        return Integer.valueOf(configuration.get(OUTPUT_SIZE_PIXELS));
+        try {
+            return Integer.valueOf(configuration.get(OUTPUT_SIZE_PIXELS));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Cannot read output dimensions for image resize", e);
+        }
+
     }
 
-    public ImageResizer start() {
+    public ImageResizer getNew() {
         try {
             ImageResizer newInstance = getClass().newInstance();
             newInstance.setConfiguration(configuration);

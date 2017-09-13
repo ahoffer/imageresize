@@ -8,6 +8,8 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.ahoffer.imageresize.api.ImageResizer;
+
 public class ImageResizeProvidersTest {
 
     ImageResizeTestData data;
@@ -24,14 +26,26 @@ public class ImageResizeProvidersTest {
 
     @Test
     public void ioVerifyTestResources() throws IOException {
-        String actualFormatName1 = GetImageReader.get(data.vanillaJpegStream)
+
+        String actualFormatName1 = ImageReaderUtils.getReader(data.vanillaJpegStream)
                 .getFormatName();
         assertEquals("Unexpected image format name", ImageResizeTestData.JPEG, actualFormatName1);
-        String actualFormatName2 = GetImageReader.get(data.jpeg2000Stream)
+        String actualFormatName2 = ImageReaderUtils.getReader(data.jpeg2000Stream)
                 .getFormatName();
         assertEquals("Unexpected image format name",
                 ImageResizeTestData.JPEG_2000,
                 actualFormatName2);
     }
 
+    @Test
+    public void ioTestInputStreamSafety() throws IOException {
+        //Use stream once
+        ImageReaderUtils.getFormat(data.vanillaJpegStream);
+
+        // Make sure stream can be used again
+        ImageResizer resizer = new SamplingResizer();
+        resizer.setInput(data.vanillaJpegStream)
+                .setOutputSize(250)
+                .resize();
+    }
 }

@@ -38,10 +38,11 @@ public class SamplingResizerTest {
         resizer.resize();
     }
 
-    @Test(expected = Exception.class)
+    @Test(expected = RuntimeException.class)
     public void testNoOutputSize() throws IOException {
         ImageResizer resizer = new SamplingResizer();
-        resizer.resize();
+        resizer.setInput(data.vanillaJpegStream)
+                .resize();
     }
 
     @Test
@@ -56,12 +57,12 @@ public class SamplingResizerTest {
     @Test
     public void happyPathWithCustomSamplingPeriod() throws IOException {
         ImageResizer resizer = new SamplingResizer();
-        resizer.setInput(data.vanillaJpegStream);
         Map<String, String> configuration = new HashMap<>();
         configuration.put(OUTPUT_SIZE_PIXELS, "256");
         configuration.put(SAMPLING_PERIOD, "4");
-        resizer.setConfiguration(configuration);
-        BufferedImage output = resizer.resize();
+        BufferedImage output = resizer.setInput(data.vanillaJpegStream)
+                .setConfiguration(configuration)
+                .resize();
         assertEquals(256, output.getHeight());
     }
 

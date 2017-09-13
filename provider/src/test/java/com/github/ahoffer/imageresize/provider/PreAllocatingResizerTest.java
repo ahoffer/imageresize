@@ -58,7 +58,7 @@ public class PreAllocatingResizerTest {
         configuration.put("KEY", "VALUE");
         ImageResizer resizer1 = new PreAllocatingResizer();
         resizer1.setConfiguration(configuration);
-        ImageResizer resizer2 = resizer1.start();
+        ImageResizer resizer2 = resizer1.getNew();
         assertNotSame("The start() method should return a new instance", resizer1, resizer2);
         assertTrue("The start() method did not instantiate the correct class",
                 resizer2 instanceof PreAllocatingResizer);

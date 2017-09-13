@@ -24,14 +24,14 @@ public class SampledImageReader {
     static public SampledImageReader of(InputStream source) throws IOException {
         SampledImageReader object = new SampledImageReader();
         object.source = source;
-        object.reader = GetImageReader.get(source);
+        object.reader = ImageReaderUtils.getReader(source);
         return object;
     }
 
     static public SampledImageReader of(File sourceFile) throws IOException {
         SampledImageReader object = new SampledImageReader();
         object.source = new FileInputStream(sourceFile);
-        object.reader = GetImageReader.get(new FileInputStream(sourceFile));
+        object.reader = ImageReaderUtils.getReader(new FileInputStream(sourceFile));
         return object;
     }
 

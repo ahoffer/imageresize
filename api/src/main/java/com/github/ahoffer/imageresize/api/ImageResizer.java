@@ -32,6 +32,6 @@ public interface ImageResizer {
      *
      * @return instance of a concrete image resiezr
      */
-    ImageResizer start();
+    ImageResizer getNew();
 }
 

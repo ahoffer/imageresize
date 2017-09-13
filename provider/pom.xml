@@ -59,5 +59,10 @@
             <version>2.5</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

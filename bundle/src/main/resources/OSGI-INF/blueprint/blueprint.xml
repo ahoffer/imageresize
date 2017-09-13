@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="imageResizeBean" class="com.github.ahoffer.imageresize.bundle.ImageResizeService">
+    <bean id="imageResizeBean" class="com.github.ahoffer.imageresize.bundle.ImageResizerFactory">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
