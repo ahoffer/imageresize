@@ -29,7 +29,7 @@ public class ImageResizerFactory {
         return null;
     }
 
-    public List<ImageResizer> getAllAvailableImageResizers() {
+    public List<ImageResizer> getImageResizers() {
 
         Collection<ServiceReference<ImageResizer>> serviceReferences = null;
         try {
@@ -56,7 +56,7 @@ public class ImageResizerFactory {
 
     public List<ImageResizer> getRecommendedResizers(String format) {
 
-        return getAllAvailableImageResizers().stream()
+        return getImageResizers().stream()
                 .filter(ImageResizer::isAvailable)
                 .filter(resizer -> resizer.recommendedFor(format))
                 .collect(Collectors.toList());
