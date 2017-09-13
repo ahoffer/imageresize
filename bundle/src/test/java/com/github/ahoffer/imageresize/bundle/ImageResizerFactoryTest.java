@@ -26,11 +26,8 @@ public class ImageResizerFactoryTest {
 
     ImageResizer resizer;
 
-    ImageResizeTestData data;
-
     @Before
     public void setup() throws InvalidSyntaxException {
-        data = new ImageResizeTestData();
         bundleContext = mock(BundleContext.class);
         doReturn(Collections.singletonList(sref)).when(bundleContext)
                 .getServiceReferences((Class) any(), any());
