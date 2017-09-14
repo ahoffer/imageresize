@@ -7,16 +7,16 @@
 
     <service id="imageSizeService" auto-export="all-classes" ref="imageSizeBean"/>
 
-    <service id="subsampleSizer" auto-export="interfaces" ref="subsampleSizerBean">
+    <service id="subsampleSizer" auto-export="interfaces">
         <bean class="com.github.ahoffer.imagesize.provider.SamplingSizer"/>
     </service>
 
     <service id="magickSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.imagesizerovider.MagickSizer"/>
+        <bean class="com.github.ahoffer.imagesize.provider.MagickSizer"/>
     </service>
 
     <service id="preallocatingSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.imagesizerovider.PreAllocatingSizer"/>
+        <bean class="com.github.ahoffer.imagesize.provider.PreAllocatingSizer"/>
     </service>
 
 </blueprint>

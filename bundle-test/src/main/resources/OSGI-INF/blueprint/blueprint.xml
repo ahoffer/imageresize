@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.2.0">
+
+    <reference id="sizerService" interface="com.github.ahoffer.imagesize.bundle.ImageSizerFactory"
+               ext:proxy-method="classes"/>
+
+    <bean id="sizerTest" class="com.github.ahoffer.imagesize.bundletest.SizerTest"
+          init-method="init">
+        <property name="imageSizerFactory" ref="sizerService"/>
+    </bean>
+
+</blueprint>

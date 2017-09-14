@@ -46,16 +46,16 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            com.github.ahoffer.imagesize.api
+                            com.github.ahoffer.imagesize.api,
+                            com.github.ahoffer.imagesize.bundle
                         </Export-Package>
                         <Embed-Dependency>
-                            *;scope=!provided|test;inline=true,
-                            javax.imageio.spi
+                            *;scope=!provided|test
                         </Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                         <Import-Package>
                             !sun.security.action,
-                            *
+                            org.osgi.framework
                         </Import-Package>
                     </instructions>
                 </configuration>

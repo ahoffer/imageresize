@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.ahoffer</groupId>
-            <artifactId>imageresize-api</artifactId>
+            <artifactId>imagesize-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
