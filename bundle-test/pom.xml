@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.github.ahoffer</groupId>
-        <artifactId>imagesize-parent</artifactId>
+        <artifactId>sizeimage-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <packaging>bundle</packaging>
-    <artifactId>imagesize-bundle-test</artifactId>
+    <artifactId>sizeimage-bundle-test</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.ahoffer</groupId>
-            <artifactId>imagesize-bundle</artifactId>
+            <artifactId>sizeimage-bundle</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

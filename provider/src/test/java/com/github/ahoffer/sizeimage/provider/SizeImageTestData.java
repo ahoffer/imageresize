@@ -1,4 +1,4 @@
-package com.github.ahoffer.imagesize.provider;
+package com.github.ahoffer.sizeimage.provider;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -7,7 +7,7 @@ import javax.imageio.spi.IIORegistry;
 
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 
-public class ImageSizeTestData {
+public class SizeImageTestData {
 
     public static final String JPEG = "JPEG";
 
@@ -21,7 +21,7 @@ public class ImageSizeTestData {
 
     URL jpeg2000Url;
 
-    public ImageSizeTestData() {
+    public SizeImageTestData() {
         vanillaJpegUrl = getClass().getResource("/sample-jpeg.jpg");
         jpeg2000Url = getClass().getResource("/sample-jpeg2000.jpg");
         vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg.jpg");

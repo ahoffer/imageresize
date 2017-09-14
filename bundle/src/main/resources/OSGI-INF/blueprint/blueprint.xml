@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="imageSizeBean" class="com.github.ahoffer.imagesize.bundle.ImageSizerFactory">
+    <bean id="imageSizeBean" class="com.github.ahoffer.sizeimage.bundle.ImageSizerFactory">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
     <service id="imageSizeService" auto-export="all-classes" ref="imageSizeBean"/>
 
     <service id="subsampleSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.imagesize.provider.SamplingSizer"/>
+        <bean class="com.github.ahoffer.sizeimage.provider.SamplingServiceSize"/>
     </service>
 
     <service id="magickSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.imagesize.provider.MagickSizer"/>
+        <bean class="com.github.ahoffer.sizeimage.provider.MagickServiceSize"/>
     </service>
 
     <service id="preallocatingSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.imagesize.provider.PreAllocatingSizer"/>
+        <bean class="com.github.ahoffer.sizeimage.provider.PreAllocatingServiceSize"/>
     </service>
 
 </blueprint>

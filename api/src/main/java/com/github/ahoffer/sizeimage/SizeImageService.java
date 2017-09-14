@@ -1,21 +1,21 @@
-package com.github.ahoffer.imagesize.api;
+package com.github.ahoffer.sizeimage;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public interface ImageSizer {
+public interface SizeImageService {
 
     Map<String, String> getConfiguration();
 
-    ImageSizer setConfiguration(Map<String, String> configuration);
+    SizeImageService setConfiguration(Map<String, String> configuration);
 
-    ImageSizer setInput(InputStream inputStream);
+    SizeImageService setInput(InputStream inputStream);
 
     int getOutputSize();
 
-    ImageSizer setOutputSize(int pixels);
+    SizeImageService setOutputSize(int pixels);
 
     BufferedImage size() throws IOException;
 
@@ -32,6 +32,6 @@ public interface ImageSizer {
      *
      * @return instance of a concrete image resiezr
      */
-    ImageSizer getNew();
+    SizeImageService getNew();
 }
 

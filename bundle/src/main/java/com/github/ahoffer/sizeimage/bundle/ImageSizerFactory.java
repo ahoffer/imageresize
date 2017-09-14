@@ -1,4 +1,4 @@
-package com.github.ahoffer.imagesize.bundle;
+package com.github.ahoffer.sizeimage.bundle;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,39 +12,39 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.github.ahoffer.imagesize.api.ImageSizer;
-import com.github.ahoffer.imagesize.provider.ImageReaderUtils;
+import com.github.ahoffer.sizeimage.SizeImageService;
+import com.github.ahoffer.sizeimage.provider.ImageReaderUtils;
 
 public class ImageSizerFactory {
 
     private BundleContext bundleContext;
 
-    public ImageSizer getBestSizerFor(InputStream stream) {
+    public SizeImageService getBestSizerFor(InputStream stream) {
         System.out.println("Hello World 1");
         return null;
     }
 
-    public ImageSizer getBestSizerFor(String format) {
+    public SizeImageService getBestSizerFor(String format) {
         System.out.println("Hello World 1");
         return null;
     }
 
-    public List<ImageSizer> getImageSizers() {
+    public List<SizeImageService> getImageSizers() {
 
-        Collection<ServiceReference<ImageSizer>> serviceReferences = null;
+        Collection<ServiceReference<SizeImageService>> serviceReferences = null;
         try {
-            serviceReferences = getBundleContext().getServiceReferences(ImageSizer.class, null);
+            serviceReferences = getBundleContext().getServiceReferences(SizeImageService.class, null);
         } catch (InvalidSyntaxException | NullPointerException e) {
             // TODO: ADD SOME LOOGING HERE
             return new ArrayList<>();
         }
         return Collections.unmodifiableList(serviceReferences.stream()
                 .map(ref -> getBundleContext().getService(ref))
-                .map(ImageSizer::getNew)
+                .map(SizeImageService::getNew)
                 .collect(Collectors.toList()));
     }
 
-    public List<ImageSizer> getRecommendedSizers(InputStream stream) {
+    public List<SizeImageService> getRecommendedSizers(InputStream stream) {
 
         try {
             return getRecommendedSizers(ImageReaderUtils.getFormat(stream));
@@ -54,10 +54,10 @@ public class ImageSizerFactory {
         }
     }
 
-    public List<ImageSizer> getRecommendedSizers(String format) {
+    public List<SizeImageService> getRecommendedSizers(String format) {
 
         return getImageSizers().stream()
-                .filter(ImageSizer::isAvailable)
+                .filter(SizeImageService::isAvailable)
                 .filter(sizer -> sizer.recommendedFor(format))
                 .collect(Collectors.toList());
     }

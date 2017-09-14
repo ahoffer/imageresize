@@ -1,4 +1,4 @@
-package com.github.ahoffer.imagesize.provider;
+package com.github.ahoffer.sizeimage.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,9 +11,9 @@ import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 
-import com.github.ahoffer.imagesize.api.ImageSizer;
+import com.github.ahoffer.sizeimage.SizeImageService;
 
-public class MagickSizer extends AbstractImageSizer {
+public class MagickServiceSize extends AbstractSizeImageService {
 
     public static final String PATH_TO_IMAGE_MAGICK_EXECUTABLES = "pathToImageMagickExecutables";
 
@@ -51,7 +51,7 @@ public class MagickSizer extends AbstractImageSizer {
     }
 
     @Override
-    public ImageSizer setInput(InputStream inputStream) {
+    public SizeImageService setInput(InputStream inputStream) {
         throw new java.lang.UnsupportedOperationException(
                 getClass().getSimpleName() + " does not implement setInput()");
     }

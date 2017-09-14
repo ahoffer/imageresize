@@ -1,9 +1,9 @@
-package com.github.ahoffer.imagesize.provider;
+package com.github.ahoffer.sizeimage.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class SamplingSizer extends AbstractInMemoryImageSizer {
+public class SamplingServiceSize extends AbstractInMemorySizeImageService {
 
     public static final String SAMPLING_PERIOD = "samplePeriod";
 

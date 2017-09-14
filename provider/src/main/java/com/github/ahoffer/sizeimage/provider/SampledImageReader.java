@@ -1,4 +1,4 @@
-package com.github.ahoffer.imagesize.provider;
+package com.github.ahoffer.sizeimage.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

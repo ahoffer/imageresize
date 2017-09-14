@@ -1,4 +1,4 @@
-package com.github.ahoffer.imagesize.provider;
+package com.github.ahoffer.sizeimage.provider;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class PreAllocatingSizer extends AbstractInMemoryImageSizer {
+public class PreAllocatingServiceSize extends AbstractInMemorySizeImageService {
 
     public BufferedImage size() throws IOException {
         validateBeforeSize();

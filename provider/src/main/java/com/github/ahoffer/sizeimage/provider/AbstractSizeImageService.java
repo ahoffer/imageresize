@@ -1,4 +1,4 @@
-package com.github.ahoffer.imagesize.provider;
+package com.github.ahoffer.sizeimage.provider;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
-import com.github.ahoffer.imagesize.api.ImageSizer;
+import com.github.ahoffer.sizeimage.SizeImageService;
 
-public abstract class AbstractImageSizer implements ImageSizer {
+public abstract class AbstractSizeImageService implements SizeImageService {
 
     public static final String OUTPUT_SIZE_PIXELS = "outputSize";
 
@@ -18,13 +18,13 @@ public abstract class AbstractImageSizer implements ImageSizer {
         return Collections.unmodifiableMap(configuration);
     }
 
-    public ImageSizer setConfiguration(Map<String, String> configuration) {
+    public SizeImageService setConfiguration(Map<String, String> configuration) {
         // Add or replace configuration items
         this.configuration.putAll(configuration);
         return this;
     }
 
-    public ImageSizer setOutputSize(int pixels) {
+    public SizeImageService setOutputSize(int pixels) {
         configuration.put(OUTPUT_SIZE_PIXELS, Integer.toString(pixels));
         return this;
     }
@@ -42,9 +42,9 @@ public abstract class AbstractImageSizer implements ImageSizer {
 
     }
 
-    public ImageSizer getNew() {
+    public SizeImageService getNew() {
         try {
-            ImageSizer newInstance = getClass().newInstance();
+            SizeImageService newInstance = getClass().newInstance();
             newInstance.setConfiguration(configuration);
             return newInstance;
         } catch (InstantiationException | IllegalAccessException e) {
