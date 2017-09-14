@@ -1,4 +1,4 @@
-package com.github.ahoffer.imageresize.provider;
+package com.github.ahoffer.imagesize.provider;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
-import com.github.ahoffer.imageresize.api.ImageResizer;
+import com.github.ahoffer.imagesize.api.ImageSizer;
 
-public abstract class AbstractImageResizer implements ImageResizer {
+public abstract class AbstractImageSizer implements ImageSizer {
 
     public static final String OUTPUT_SIZE_PIXELS = "outputSize";
 
@@ -18,18 +18,18 @@ public abstract class AbstractImageResizer implements ImageResizer {
         return Collections.unmodifiableMap(configuration);
     }
 
-    public ImageResizer setConfiguration(Map<String, String> configuration) {
+    public ImageSizer setConfiguration(Map<String, String> configuration) {
         // Add or replace configuration items
         this.configuration.putAll(configuration);
         return this;
     }
 
-    public ImageResizer setOutputSize(int pixels) {
+    public ImageSizer setOutputSize(int pixels) {
         configuration.put(OUTPUT_SIZE_PIXELS, Integer.toString(pixels));
         return this;
     }
 
-    public void validateBeforeResize() {
+    public void validateBeforeSize() {
         Validate.inclusiveBetween(1, Integer.MAX_VALUE, getOutputSize());
     }
 
@@ -37,14 +37,14 @@ public abstract class AbstractImageResizer implements ImageResizer {
         try {
             return Integer.valueOf(configuration.get(OUTPUT_SIZE_PIXELS));
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Cannot read output dimensions for image resize", e);
+            throw new RuntimeException("Cannot read output dimensions for image size", e);
         }
 
     }
 
-    public ImageResizer getNew() {
+    public ImageSizer getNew() {
         try {
-            ImageResizer newInstance = getClass().newInstance();
+            ImageSizer newInstance = getClass().newInstance();
             newInstance.setConfiguration(configuration);
             return newInstance;
         } catch (InstantiationException | IllegalAccessException e) {

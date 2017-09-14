@@ -1,4 +1,4 @@
-package com.github.ahoffer.imageresize.provider;
+package com.github.ahoffer.imagesize.provider;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -7,10 +7,10 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class PreAllocatingResizer extends AbstractInMemoryImageResizer {
+public class PreAllocatingSizer extends AbstractInMemoryImageSizer {
 
-    public BufferedImage resize() throws IOException {
-        validateBeforeResize();
+    public BufferedImage size() throws IOException {
+        validateBeforeSize();
         Image inputImage = ImageIO.read(inputStream);
         if (null != inputImage) {
             BufferedImage imageCopy = new BufferedImage(inputImage.getWidth(null),
@@ -19,7 +19,7 @@ public class PreAllocatingResizer extends AbstractInMemoryImageResizer {
             Graphics2D graphics = imageCopy.createGraphics();
             graphics.drawImage(inputImage, null, null);
             graphics.dispose();
-            return super.resize(imageCopy);
+            return this.size(imageCopy);
         }
         return null;
     }

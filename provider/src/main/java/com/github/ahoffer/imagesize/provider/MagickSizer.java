@@ -1,4 +1,4 @@
-package com.github.ahoffer.imageresize.provider;
+package com.github.ahoffer.imagesize.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,9 +11,9 @@ import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 
-import com.github.ahoffer.imageresize.api.ImageResizer;
+import com.github.ahoffer.imagesize.api.ImageSizer;
 
-public class MagickResizer extends AbstractImageResizer {
+public class MagickSizer extends AbstractImageSizer {
 
     public static final String PATH_TO_IMAGE_MAGICK_EXECUTABLES = "pathToImageMagickExecutables";
 
@@ -51,15 +51,15 @@ public class MagickResizer extends AbstractImageResizer {
     }
 
     @Override
-    public ImageResizer setInput(InputStream inputStream) {
+    public ImageSizer setInput(InputStream inputStream) {
         throw new java.lang.UnsupportedOperationException(
                 getClass().getSimpleName() + " does not implement setInput()");
     }
 
-    public BufferedImage resize() throws IOException {
+    public BufferedImage size() throws IOException {
 
         if (!isAvailable()) {
-            throw new RuntimeException("Cannot resize image. ImageMagick executable not found.");
+            throw new RuntimeException("Cannot size image. ImageMagick executable not found.");
         }
 
         if (!configuration.containsKey(INPUT_IMAGE_PATH)) {

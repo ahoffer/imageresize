@@ -1,4 +1,4 @@
-package com.github.ahoffer.imageresize.bundle;
+package com.github.ahoffer.imagesize.bundle;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,53 +12,53 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.github.ahoffer.imageresize.api.ImageResizer;
-import com.github.ahoffer.imageresize.provider.ImageReaderUtils;
+import com.github.ahoffer.imagesize.api.ImageSizer;
+import com.github.ahoffer.imagesize.provider.ImageReaderUtils;
 
-public class ImageResizerFactory {
+public class ImageSizerFactory {
 
     private BundleContext bundleContext;
 
-    public ImageResizer getBestResizerFor(InputStream stream) {
+    public ImageSizer getBestSizerFor(InputStream stream) {
         System.out.println("Hello World 1");
         return null;
     }
 
-    public ImageResizer getBestResizerFor(String format) {
+    public ImageSizer getBestSizerFor(String format) {
         System.out.println("Hello World 1");
         return null;
     }
 
-    public List<ImageResizer> getImageResizers() {
+    public List<ImageSizer> getImageSizers() {
 
-        Collection<ServiceReference<ImageResizer>> serviceReferences = null;
+        Collection<ServiceReference<ImageSizer>> serviceReferences = null;
         try {
-            serviceReferences = getBundleContext().getServiceReferences(ImageResizer.class, null);
+            serviceReferences = getBundleContext().getServiceReferences(ImageSizer.class, null);
         } catch (InvalidSyntaxException | NullPointerException e) {
             // TODO: ADD SOME LOOGING HERE
             return new ArrayList<>();
         }
         return Collections.unmodifiableList(serviceReferences.stream()
                 .map(ref -> getBundleContext().getService(ref))
-                .map(ImageResizer::getNew)
+                .map(ImageSizer::getNew)
                 .collect(Collectors.toList()));
     }
 
-    public List<ImageResizer> getRecommendedResizers(InputStream stream) {
+    public List<ImageSizer> getRecommendedSizers(InputStream stream) {
 
         try {
-            return getRecommendedResizers(ImageReaderUtils.getFormat(stream));
+            return getRecommendedSizers(ImageReaderUtils.getFormat(stream));
         } catch (IOException e) {
             // TODO: ADD SOME LOOGING HERE
             return new ArrayList<>();
         }
     }
 
-    public List<ImageResizer> getRecommendedResizers(String format) {
+    public List<ImageSizer> getRecommendedSizers(String format) {
 
-        return getImageResizers().stream()
-                .filter(ImageResizer::isAvailable)
-                .filter(resizer -> resizer.recommendedFor(format))
+        return getImageSizers().stream()
+                .filter(ImageSizer::isAvailable)
+                .filter(sizer -> sizer.recommendedFor(format))
                 .collect(Collectors.toList());
     }
 

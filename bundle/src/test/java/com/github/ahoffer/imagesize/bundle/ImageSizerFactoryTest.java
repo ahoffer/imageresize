@@ -1,4 +1,4 @@
-package com.github.ahoffer.imageresize.bundle;
+package com.github.ahoffer.imagesize.bundle;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -16,15 +16,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.github.ahoffer.imageresize.api.ImageResizer;
+import com.github.ahoffer.imagesize.api.ImageSizer;
 
-public class ImageResizerFactoryTest {
+public class ImageSizerFactoryTest {
 
     BundleContext bundleContext;
 
-    ServiceReference<ImageResizer> sref;
+    ServiceReference<ImageSizer> sref;
 
-    ImageResizer resizer;
+    ImageSizer sizer;
 
     @Before
     public void setup() throws InvalidSyntaxException {
@@ -32,18 +32,18 @@ public class ImageResizerFactoryTest {
         doReturn(Collections.singletonList(sref)).when(bundleContext)
                 .getServiceReferences((Class) any(), any());
         sref = mock(ServiceReference.class);
-        resizer = mock(ImageResizer.class);
-        doReturn(resizer).when(bundleContext)
+        sizer = mock(ImageSizer.class);
+        doReturn(sizer).when(bundleContext)
                 .getService(any());
-        when(resizer.getNew()).thenReturn(resizer);
+        when(sizer.getNew()).thenReturn(sizer);
     }
 
     @Test
-    public void testGetImageResizers() {
-        ImageResizerFactory factory = new ImageResizerFactory();
+    public void testGetImageSizers() {
+        ImageSizerFactory factory = new ImageSizerFactory();
         factory.setBundleContext(bundleContext);
-        List<ImageResizer> list = factory.getImageResizers();
+        List<ImageSizer> list = factory.getImageSizers();
         assertEquals("Expected a single object", 1, list.size());
-        assertSame(resizer, list.get(0));
+        assertSame(sizer, list.get(0));
     }
 }

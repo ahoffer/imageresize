@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>imageresize-parent</artifactId>
+        <artifactId>imagesize-parent</artifactId>
         <groupId>com.github.ahoffer</groupId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>imageresize-api</artifactId>
+    <artifactId>imagesize-api</artifactId>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>

@@ -1,4 +1,4 @@
-package com.github.ahoffer.imageresize.provider;
+package com.github.ahoffer.imagesize.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -6,29 +6,29 @@ import java.io.InputStream;
 
 import org.apache.commons.lang3.Validate;
 
-import com.github.ahoffer.imageresize.api.ImageResizer;
+import com.github.ahoffer.imagesize.api.ImageSizer;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public abstract class AbstractInMemoryImageResizer extends AbstractImageResizer {
+public abstract class AbstractInMemoryImageSizer extends AbstractImageSizer {
 
     public static final String JPEG_2000_FORMAT_NAME = "jpeg 2000";
 
     protected InputStream inputStream;
 
-    public BufferedImage resize(BufferedImage inputImage) throws IOException {
-        validateBeforeResize();
+    public BufferedImage size(BufferedImage inputImage) throws IOException {
+        validateBeforeSize();
         return Thumbnails.of(inputImage)
                 .height(getOutputSize())
                 .asBufferedImage();
     }
 
-    public void validateBeforeResize() {
-        super.validateBeforeResize();
+    public void validateBeforeSize() {
+        super.validateBeforeSize();
         Validate.notNull(inputStream);
     }
 
-    public ImageResizer setInput(InputStream inputStream) {
+    public ImageSizer setInput(InputStream inputStream) {
         this.inputStream = inputStream;
         return this;
     }
