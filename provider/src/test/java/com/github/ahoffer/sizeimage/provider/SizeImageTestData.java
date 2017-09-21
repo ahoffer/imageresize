@@ -1,11 +1,9 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.io.InputStream;
 import java.net.URL;
-
 import javax.imageio.spi.IIORegistry;
-
-import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 
 public class SizeImageTestData {
 

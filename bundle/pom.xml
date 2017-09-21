@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>com.github.ahoffer</groupId>
@@ -14,13 +14,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>sizeimage-provider</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-core</artifactId>
+            <version>${jai-imageio-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-jpeg2000</artifactId>
+            <version>${jpeg2000.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.ahoffer</groupId>
             <artifactId>sizeimage-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ahoffer</groupId>
+            <artifactId>sizeimage-provider</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -46,8 +56,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            com.github.ahoffer.sizeimage.api,
-                            com.github.ahoffer.sizeimage.bundle
+                            com.github.ahoffer.sizeimage.*,
                         </Export-Package>
                         <Embed-Dependency>
                             *;scope=!provided|test
@@ -55,11 +64,18 @@
                         <Embed-Transitive>true</Embed-Transitive>
                         <Import-Package>
                             !sun.security.action,
-                            org.osgi.framework
+                            *
                         </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>codice</id>
+            <name>Codice Repository</name>
+            <url>https://artifacts.codice.org/content/groups/public/</url>
+        </repository>
+    </repositories>
 </project>

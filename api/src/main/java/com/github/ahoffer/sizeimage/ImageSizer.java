@@ -5,17 +5,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public interface SizeImageService {
+public interface ImageSizer {
 
+    @SuppressWarnings("unused")
     Map<String, String> getConfiguration();
 
-    SizeImageService setConfiguration(Map<String, String> configuration);
+    ImageSizer setConfiguration(Map<String, String> configuration);
 
-    SizeImageService setInput(InputStream inputStream);
+    ImageSizer setInput(InputStream inputStream);
 
     int getOutputSize();
 
-    SizeImageService setOutputSize(int pixels);
+    ImageSizer setOutputSize(int pixels);
 
     BufferedImage size() throws IOException;
 
@@ -27,11 +28,14 @@ public interface SizeImageService {
 
     /**
      * Create a new instance of the concrete implementor of the image sizer. For thread safety,
-     * create a new instance of sizer before using it. The reason is that the resziers can
+     * create a new instance of sizer before using it. The reason is that the sizers can
      * be registered as OSGi services, and OSGI creates a single bean shared by all threads.
+     * <p>
+     * TODO: I tried using scope=prototype in the blueprint, then using getServiceObjects(),
+     * TODO: but I still got the same instance.
      *
-     * @return instance of a concrete image resiezr
+     * @return instance of a concrete image sizer
      */
-    SizeImageService getNew();
+    ImageSizer getNew();
 }
 

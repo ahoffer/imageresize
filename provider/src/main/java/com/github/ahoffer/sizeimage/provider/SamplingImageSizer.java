@@ -2,8 +2,9 @@ package com.github.ahoffer.sizeimage.provider;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import net.coobird.thumbnailator.Thumbnails;
 
-public class SamplingServiceSize extends AbstractInMemorySizeImageService {
+public class SamplingImageSizer extends AbstractImageSizer {
 
     public static final String SAMPLING_PERIOD = "samplePeriod";
 
@@ -12,7 +13,9 @@ public class SamplingServiceSize extends AbstractInMemorySizeImageService {
         if (configuration.containsKey(SAMPLING_PERIOD)) {
             reader.samplePeriod(Integer.valueOf(configuration.get(SAMPLING_PERIOD)));
         }
-        return this.size(reader.read());
+        return Thumbnails.of(reader.read())
+                .height(getOutputSize())
+                .asBufferedImage();
     }
 
     public boolean recommendedFor(String imageFormat) {

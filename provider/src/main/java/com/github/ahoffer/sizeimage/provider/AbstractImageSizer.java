@@ -1,35 +1,39 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import com.github.ahoffer.sizeimage.ImageSizer;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.Validate;
 
-import com.github.ahoffer.sizeimage.SizeImageService;
-
-public abstract class AbstractSizeImageService implements SizeImageService {
+public abstract class AbstractImageSizer implements ImageSizer {
 
     public static final String OUTPUT_SIZE_PIXELS = "outputSize";
 
+    public static final String JPEG_2000_FORMAT_NAME = "jpeg 2000";
+
     protected Map<String, String> configuration = new HashMap<>();
+
+    protected InputStream inputStream;
 
     public Map<String, String> getConfiguration() {
         return Collections.unmodifiableMap(configuration);
     }
 
-    public SizeImageService setConfiguration(Map<String, String> configuration) {
+    public ImageSizer setConfiguration(Map<String, String> configuration) {
         // Add or replace configuration items
         this.configuration.putAll(configuration);
         return this;
     }
 
-    public SizeImageService setOutputSize(int pixels) {
+    public ImageSizer setOutputSize(int pixels) {
         configuration.put(OUTPUT_SIZE_PIXELS, Integer.toString(pixels));
         return this;
     }
 
-    public void validateBeforeSize() {
+    public void validateBeforeResizing() {
+        Validate.notNull(inputStream);
         Validate.inclusiveBetween(1, Integer.MAX_VALUE, getOutputSize());
     }
 
@@ -42,13 +46,18 @@ public abstract class AbstractSizeImageService implements SizeImageService {
 
     }
 
-    public SizeImageService getNew() {
+    public ImageSizer getNew() {
         try {
-            SizeImageService newInstance = getClass().newInstance();
+            ImageSizer newInstance = getClass().newInstance();
             newInstance.setConfiguration(configuration);
             return newInstance;
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ImageSizer setInput(InputStream inputStream) {
+        this.inputStream = inputStream;
+        return this;
     }
 }

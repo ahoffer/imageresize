@@ -8,15 +8,15 @@
     <service id="imageSizeService" auto-export="all-classes" ref="imageSizeBean"/>
 
     <service id="subsampleSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.sizeimage.provider.SamplingServiceSize"/>
+        <bean class="com.github.ahoffer.sizeimage.provider.SamplingImageSizer"/>
     </service>
 
     <service id="magickSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.sizeimage.provider.MagickServiceSize"/>
+        <bean class="com.github.ahoffer.sizeimage.provider.ImageMagickSizer"/>
     </service>
 
     <service id="preallocatingSizer" auto-export="interfaces">
-        <bean class="com.github.ahoffer.sizeimage.provider.PreAllocatingServiceSize"/>
+        <bean class="com.github.ahoffer.sizeimage.provider.BasicImageSizer"/>
     </service>
 
 </blueprint>

@@ -1,5 +1,8 @@
 package com.github.ahoffer.sizeimage.bundle;
 
+import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.provider.ImageReaderUtils;
+import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -7,57 +10,55 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import javax.imageio.spi.IIORegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.github.ahoffer.sizeimage.SizeImageService;
-import com.github.ahoffer.sizeimage.provider.ImageReaderUtils;
-
 public class ImageSizerFactory {
+
+    static {
+        IIORegistry.getDefaultInstance()
+                .registerServiceProvider(new J2KImageReaderSpi());
+    }
 
     private BundleContext bundleContext;
 
-    public SizeImageService getBestSizerFor(InputStream stream) {
+    public ImageSizer getBestSizerFor(String format) {
         System.out.println("Hello World 1");
         return null;
     }
 
-    public SizeImageService getBestSizerFor(String format) {
-        System.out.println("Hello World 1");
-        return null;
-    }
+    public List<ImageSizer> getImageSizers() {
 
-    public List<SizeImageService> getImageSizers() {
-
-        Collection<ServiceReference<SizeImageService>> serviceReferences = null;
+        Collection<ServiceReference<ImageSizer>> serviceReferences = null;
         try {
-            serviceReferences = getBundleContext().getServiceReferences(SizeImageService.class, null);
+            serviceReferences = getBundleContext().getServiceReferences(ImageSizer.class,
+                    null);
         } catch (InvalidSyntaxException | NullPointerException e) {
             // TODO: ADD SOME LOOGING HERE
             return new ArrayList<>();
         }
         return Collections.unmodifiableList(serviceReferences.stream()
                 .map(ref -> getBundleContext().getService(ref))
-                .map(SizeImageService::getNew)
+                .map(ImageSizer::getNew)
                 .collect(Collectors.toList()));
     }
 
-    public List<SizeImageService> getRecommendedSizers(InputStream stream) {
+    public List<ImageSizer> getRecommendedSizers(InputStream stream) {
 
         try {
             return getRecommendedSizers(ImageReaderUtils.getFormat(stream));
         } catch (IOException e) {
-            // TODO: ADD SOME LOOGING HERE
+            // TODO: ADD SOME LOGGING HERE
             return new ArrayList<>();
         }
     }
 
-    public List<SizeImageService> getRecommendedSizers(String format) {
+    public List<ImageSizer> getRecommendedSizers(String format) {
 
         return getImageSizers().stream()
-                .filter(SizeImageService::isAvailable)
+                .filter(ImageSizer::isAvailable)
                 .filter(sizer -> sizer.recommendedFor(format))
                 .collect(Collectors.toList());
     }

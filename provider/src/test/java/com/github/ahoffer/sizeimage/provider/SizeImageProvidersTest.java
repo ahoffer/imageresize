@@ -1,14 +1,11 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static org.junit.Assert.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-
+import com.github.ahoffer.sizeimage.ImageSizer;
 import java.io.IOException;
-
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.github.ahoffer.sizeimage.SizeImageService;
 
 public class SizeImageProvidersTest {
 
@@ -43,7 +40,7 @@ public class SizeImageProvidersTest {
         ImageReaderUtils.getFormat(data.vanillaJpegStream);
 
         // Make sure stream can be used again
-        SizeImageService sizer = new SamplingServiceSize();
+        ImageSizer sizer = new SamplingImageSizer();
         sizer.setInput(data.vanillaJpegStream)
                 .setOutputSize(250)
                 .size();

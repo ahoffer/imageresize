@@ -1,18 +1,13 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-
+import com.github.ahoffer.sizeimage.ImageSizer;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.github.ahoffer.sizeimage.SizeImageService;
 
 public class PreAllocatingSizerTest {
     SizeImageTestData data;
@@ -24,7 +19,7 @@ public class PreAllocatingSizerTest {
 
     @Test
     public void testHappyPath() throws IOException {
-        SizeImageService sizer = new PreAllocatingServiceSize();
+        ImageSizer sizer = new BasicImageSizer();
         sizer.setInput(data.jpeg2000Stream);
         sizer.setOutputSize(256);
         BufferedImage output = sizer.size();
@@ -33,7 +28,7 @@ public class PreAllocatingSizerTest {
 
     @Test(expected = Exception.class)
     public void testNullInputStream() throws IOException {
-        SizeImageService sizer = new PreAllocatingServiceSize();
+        ImageSizer sizer = new BasicImageSizer();
         sizer.setInput(null);
         sizer.setOutputSize(256);
         sizer.size();
@@ -41,14 +36,14 @@ public class PreAllocatingSizerTest {
 
     @Test(expected = Exception.class)
     public void testBadOutputSize() throws IOException {
-        SizeImageService sizer = new PreAllocatingServiceSize();
+        ImageSizer sizer = new BasicImageSizer();
         sizer.setOutputSize(0);
         sizer.size();
     }
 
     @Test(expected = Exception.class)
     public void testNoOutputSize() throws IOException {
-        SizeImageService sizer = new PreAllocatingServiceSize();
+        ImageSizer sizer = new BasicImageSizer();
         sizer.size();
     }
 
@@ -56,12 +51,12 @@ public class PreAllocatingSizerTest {
     public void testNewInstance() {
         Map<String, String> configuration = new HashMap<>();
         configuration.put("KEY", "VALUE");
-        SizeImageService sizer1 = new PreAllocatingServiceSize();
+        ImageSizer sizer1 = new BasicImageSizer();
         sizer1.setConfiguration(configuration);
-        SizeImageService sizer2 = sizer1.getNew();
+        ImageSizer sizer2 = sizer1.getNew();
         assertNotSame("The start() method should return a new instance", sizer1, sizer2);
         assertTrue("The start() method did not instantiate the correct class",
-                sizer2 instanceof PreAllocatingServiceSize);
+                sizer2 instanceof BasicImageSizer);
 
     }
 }
