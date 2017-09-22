@@ -9,7 +9,7 @@
     <modules>
         <module>feature</module>
         <module>bundle</module>
-        <module>bundle-test</module>
+        <module>test</module>
         <module>provider</module>
         <module>api</module>
     </modules>
@@ -25,13 +25,15 @@
         <jpeg2000.version>1.3.1_CODICE_2</jpeg2000.version>
         <maven-bundle-plugin.version>3.3.0</maven-bundle-plugin.version>
         <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
-        <karaf.version>4.1.2</karaf.version>
+        <dependency.karaf.version>4.1.2</dependency.karaf.version>
         <blueprint-maven-plugin.version>1.8.0</blueprint-maven-plugin.version>
         <commons-io.version>2.5</commons-io.version>
         <im4java.version>1.4.0</im4java.version>
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
         <junit.version>4.12</junit.version>
         <guava.version>23.0</guava.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <dependencies>
