@@ -12,14 +12,7 @@
     <packaging>bundle</packaging>
     <artifactId>sizeimage-bundle</artifactId>
     <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>standard</artifactId>
-            <version>${dependency.karaf.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-            <scope>test</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.github.jai-imageio</groupId>
             <artifactId>jai-imageio-core</artifactId>
@@ -52,7 +45,12 @@
             <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -66,7 +64,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            com.github.ahoffer.sizeimage.*,
+                            com.github.ahoffer.sizeimage.api,
+                            com.github.ahoffer.sizeimage.provider
                         </Export-Package>
                         <Embed-Dependency>
                             *;scope=!provided|test

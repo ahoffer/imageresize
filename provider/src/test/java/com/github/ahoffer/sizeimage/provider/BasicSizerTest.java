@@ -9,7 +9,8 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PreAllocatingSizerTest {
+public class BasicSizerTest {
+    public static final int PIXELS = 256;
     SizeImageTestData data;
 
     @Before
@@ -21,16 +22,16 @@ public class PreAllocatingSizerTest {
     public void testHappyPath() throws IOException {
         ImageSizer sizer = new BasicImageSizer();
         sizer.setInput(data.jpeg2000Stream);
-        sizer.setOutputSize(256);
+        sizer.setOutputSize(PIXELS);
         BufferedImage output = sizer.size();
-        assertEquals(256, output.getHeight());
+        assertEquals(PIXELS, output.getHeight());
     }
 
     @Test(expected = Exception.class)
     public void testNullInputStream() throws IOException {
         ImageSizer sizer = new BasicImageSizer();
         sizer.setInput(null);
-        sizer.setOutputSize(256);
+        sizer.setOutputSize(PIXELS);
         sizer.size();
     }
 

@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="imageSizeBean" class="com.github.ahoffer.sizeimage.bundle.ImageSizerFactory">
-        <property name="bundleContext" ref="blueprintBundleContext"/>
-    </bean>
+    <!--Rank providers on a scale from 0-100, with the basic or default provider ranked at 50-->
 
-    <service id="imageSizeService" auto-export="all-classes" ref="imageSizeBean"/>
+    <!--<bean id="imageSizeBean" class="com.github.ahoffer.sizeimage.bundle.ImageSizerFactory">-->
+    <!--<property name="bundleContext" ref="blueprintBundleContext"/>-->
+    <!--</bean>-->
 
-    <service id="subsampleSizer" auto-export="interfaces">
+    <!--<service id="imageSizeService" auto-export="all-classes" ref="imageSizeBean"/>-->
+
+
+    <service id="imageSizeService" auto-export="all-classes">
+        <bean class="com.github.ahoffer.sizeimage.bundle.ImageSizerFactory">
+            <property name="bundleContext" ref="blueprintBundleContext"/>
+        </bean>
+    </service>
+
+    <service id="subsampleSizer" auto-export="interfaces" ranking="70">
+        <service-properties>
+            <entry key="name" value="subsample"/>
+        </service-properties>
         <bean class="com.github.ahoffer.sizeimage.provider.SamplingImageSizer"/>
     </service>
 
-    <service id="magickSizer" auto-export="interfaces">
+    <service id="magickSizer" auto-export="interfaces" ranking="60">
         <bean class="com.github.ahoffer.sizeimage.provider.ImageMagickSizer"/>
     </service>
 
-    <service id="preallocatingSizer" auto-export="interfaces">
+    <service id="basicSizer" auto-export="interfaces" ranking="50">
         <bean class="com.github.ahoffer.sizeimage.provider.BasicImageSizer"/>
     </service>
 

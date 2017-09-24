@@ -28,7 +28,7 @@ public interface ImageSizer {
 
     /**
      * Create a new instance of the concrete implementor of the image sizer. For thread safety,
-     * create a new instance of sizer before using it. The reason is that the sizers can
+     * create a new instance of sizer before using test. The reason is that the sizers can
      * be registered as OSGi services, and OSGI creates a single bean shared by all threads.
      * <p>
      * TODO: I tried using scope=prototype in the blueprint, then using getServiceObjects(),

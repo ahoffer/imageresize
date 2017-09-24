@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.it;
+package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.bundle.ImageSizerFactory;
@@ -27,6 +27,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,11 +70,11 @@ public class TestBundle {
 
     @Test
     public void testGetProviders() {
-        List<ImageSizer> sizers = imageSizerFactory.getImageSizers();
+        List<ServiceReference<ImageSizer>> sizers = imageSizerFactory.getServiceReferences(null);
         assertEquals(sizers.size(), 3);
     }
 
-    @Test
+//    @Test
     public void testBasicSizer() {
         for (File inputFile : inputFiles) {
 //           runSizer(sizer, inputFile);
@@ -145,9 +146,7 @@ public class TestBundle {
                 CoreOptions.vmOption("-Xmx2g"),
                 // avoid integration tests stealing focus on OS X
                 CoreOptions.vmOption("-Djava.awt.headless=true"),
-                CoreOptions.vmOption("-Dfile.encoding=UTF8"),
-                CoreOptions.vmOption("-XX:+UnlockCommercialFeatures"),
-                CoreOptions.vmOption("-XX:+FlightRecorder")
+                CoreOptions.vmOption("-Dfile.encoding=UTF8")
         };
     }
 }
