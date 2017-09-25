@@ -1,6 +1,5 @@
-package com.github.ahoffer.sizeimage.bundle;
+package com.github.ahoffer.sizeimage;
 
-import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ImageSizerFactory {
-
 
     private static final Logger logger = LoggerFactory.getLogger(ImageSizerFactory.class);
 

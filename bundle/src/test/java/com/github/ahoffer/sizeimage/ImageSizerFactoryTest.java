@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.bundle;
+package com.github.ahoffer.sizeimage;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import org.osgi.framework.BundleContext;

@@ -3,7 +3,7 @@
 
     <!--Rank providers on a scale from 0-100, with the basic or default provider ranked at 50-->
 
-    <!--<bean id="imageSizeBean" class="com.github.ahoffer.sizeimage.bundle.ImageSizerFactory">-->
+    <!--<bean id="imageSizeBean" class="ImageSizerFactory">-->
     <!--<property name="bundleContext" ref="blueprintBundleContext"/>-->
     <!--</bean>-->
 
@@ -11,7 +11,7 @@
 
 
     <service id="imageSizeService" auto-export="all-classes">
-        <bean class="com.github.ahoffer.sizeimage.bundle.ImageSizerFactory">
+        <bean class="com.github.ahoffer.sizeimage.ImageSizerFactory">
             <property name="bundleContext" ref="blueprintBundleContext"/>
         </bean>
     </service>

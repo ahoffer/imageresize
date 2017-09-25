@@ -64,7 +64,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            com.github.ahoffer.sizeimage.api,
+                            com.github.ahoffer.sizeimage,
                             com.github.ahoffer.sizeimage.provider
                         </Export-Package>
                         <Embed-Dependency>

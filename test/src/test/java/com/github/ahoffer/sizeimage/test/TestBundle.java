@@ -1,7 +1,7 @@
 package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.bundle.ImageSizerFactory;
+import com.github.ahoffer.sizeimage.ImageSizerFactory;
 import static com.github.ahoffer.sizeimage.provider.ImageMagickSizer.OUTPUT_FORMAT;
 import static com.github.ahoffer.sizeimage.provider.ImageMagickSizer.PATH_TO_IMAGE_MAGICK_EXECUTABLES;
 import java.awt.image.BufferedImage;
