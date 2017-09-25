@@ -9,40 +9,34 @@ import org.junit.Test;
 
 public class SizeImageProvidersTest {
 
-    SizeImageTestData data;
+  SizeImageTestData data;
 
-    @Before
-    public void setup() {
-        data = new SizeImageTestData();
-    }
+  @Before
+  public void setup() {
+    data = new SizeImageTestData();
+  }
 
-    @Test
-    public void verifyJpeg2000ReaderIsRegistered() {
-        assertTrue(true);
-    }
+  @Test
+  public void verifyJpeg2000ReaderIsRegistered() {
+    assertTrue(true);
+  }
 
-    @Test
-    public void ioVerifyTestResources() throws IOException {
+  @Test
+  public void ioVerifyTestResources() throws IOException {
 
-        String actualFormatName1 = ImageReaderUtils.getReader(data.vanillaJpegStream)
-                .getFormatName();
-        assertEquals("Unexpected image format name", SizeImageTestData.JPEG, actualFormatName1);
-        String actualFormatName2 = ImageReaderUtils.getReader(data.jpeg2000Stream)
-                .getFormatName();
-        assertEquals("Unexpected image format name",
-                SizeImageTestData.JPEG_2000,
-                actualFormatName2);
-    }
+    String actualFormatName1 = ImageReaderUtils.getReader(data.vanillaJpegStream).getFormatName();
+    assertEquals("Unexpected image format name", SizeImageTestData.JPEG, actualFormatName1);
+    String actualFormatName2 = ImageReaderUtils.getReader(data.jpeg2000Stream).getFormatName();
+    assertEquals("Unexpected image format name", SizeImageTestData.JPEG_2000, actualFormatName2);
+  }
 
-    @Test
-    public void ioTestInputStreamSafety() throws IOException {
-        //Use stream once
-        ImageReaderUtils.getFormat(data.vanillaJpegStream);
+  @Test
+  public void ioTestInputStreamSafety() throws IOException {
+    // Use stream once
+    ImageReaderUtils.getFormat(data.vanillaJpegStream);
 
-        // Make sure stream can be used again
-        ImageSizer sizer = new SamplingImageSizer();
-        sizer.setInput(data.vanillaJpegStream)
-                .setOutputSize(250)
-                .size();
-    }
+    // Make sure stream can be used again
+    ImageSizer sizer = new SamplingImageSizer();
+    sizer.setInput(data.vanillaJpegStream).setOutputSize(250).size();
+  }
 }

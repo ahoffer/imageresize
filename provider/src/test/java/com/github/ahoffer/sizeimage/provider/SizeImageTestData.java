@@ -7,24 +7,23 @@ import javax.imageio.spi.IIORegistry;
 
 public class SizeImageTestData {
 
-    public static final String JPEG = "JPEG";
+  public static final String JPEG = "JPEG";
 
-    public static final String JPEG_2000 = "jpeg 2000";
+  public static final String JPEG_2000 = "jpeg 2000";
 
-    InputStream vanillaJpegStream;
+  InputStream vanillaJpegStream;
 
-    InputStream jpeg2000Stream;
+  InputStream jpeg2000Stream;
 
-    URL vanillaJpegUrl;
+  URL vanillaJpegUrl;
 
-    URL jpeg2000Url;
+  URL jpeg2000Url;
 
-    public SizeImageTestData() {
-        vanillaJpegUrl = getClass().getResource("/sample-jpeg.jpg");
-        jpeg2000Url = getClass().getResource("/sample-jpeg2000.jpg");
-        vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg.jpg");
-        jpeg2000Stream = getClass().getResourceAsStream("/sample-jpeg2000.jpg");
-        IIORegistry.getDefaultInstance()
-                .registerServiceProvider(J2KImageReaderSpi.class);
-    }
+  public SizeImageTestData() {
+    vanillaJpegUrl = getClass().getResource("/sample-jpeg.jpg");
+    jpeg2000Url = getClass().getResource("/sample-jpeg2000.jpg");
+    vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg.jpg");
+    jpeg2000Stream = getClass().getResourceAsStream("/sample-jpeg2000.jpg");
+    IIORegistry.getDefaultInstance().registerServiceProvider(J2KImageReaderSpi.class);
+  }
 }
