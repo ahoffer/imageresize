@@ -14,6 +14,8 @@ public interface ImageSizer {
 
   ImageSizer setInput(InputStream inputStream);
 
+  // TODO REPLACE SIZE WITH A WIDTH AND/OR HEIGHT METHOD. For now, always preserve aspect ratio. So
+  // TODO maybe just set width?
   int getOutputSize();
 
   ImageSizer setOutputSize(int pixels);
@@ -37,4 +39,13 @@ public interface ImageSizer {
    * @return instance of a concrete image sizer
    */
   ImageSizer getNew();
+
+  /**
+   * The name used to reference a concrete image sizer. The name is not intended to be configurable.
+   * A concrete implementation is intended to return a hard-coded string. Implementors are
+   * responsible for avoiding name collisions.
+   *
+   * @return name
+   */
+  String getName();
 }

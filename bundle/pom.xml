@@ -50,6 +50,11 @@
             <version>1.7.25</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>23.0-android</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

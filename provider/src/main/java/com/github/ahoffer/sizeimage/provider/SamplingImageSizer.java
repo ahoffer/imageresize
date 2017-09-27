@@ -19,4 +19,9 @@ public class SamplingImageSizer extends AbstractImageSizer {
   public boolean recommendedFor(String imageFormat) {
     return !(JPEG_2000_FORMAT_NAME.equalsIgnoreCase(imageFormat));
   }
+
+    @Override
+    public String getName() {
+        return "sampling";
+    }
 }

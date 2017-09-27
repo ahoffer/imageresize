@@ -35,7 +35,12 @@ public class ImageMagickSizer extends AbstractImageSizer {
     return getImageMagickExecutable().canExecute();
   }
 
-  public File getImageMagickExecutable2() {
+    @Override
+    public String getName() {
+        return "magick";
+    }
+
+    public File getImageMagickExecutableAlternativeMethod() {
     String result;
     ConvertCmd command = new ConvertCmd();
     try {

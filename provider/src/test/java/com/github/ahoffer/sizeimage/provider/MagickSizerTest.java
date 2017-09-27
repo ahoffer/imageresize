@@ -33,7 +33,7 @@ public class MagickSizerTest {
     configuration.put(PATH_TO_IMAGE_MAGICK_EXECUTABLES, TEST_PATH_TO_MAGICK_EXEC);
     magick.setConfiguration(configuration);
     assertTrue(magick.getImageMagickExecutable().canExecute());
-    assertTrue(magick.getImageMagickExecutable2().canExecute());
+    assertTrue(magick.getImageMagickExecutableAlternativeMethod().canExecute());
     assertTrue(magick.isAvailable());
   }
 
@@ -41,7 +41,7 @@ public class MagickSizerTest {
   public void testBadPath() {
     ImageMagickSizer magick = new ImageMagickSizer();
     assertFalse(magick.getImageMagickExecutable().canExecute());
-    assertFalse(magick.getImageMagickExecutable2().canExecute());
+    assertFalse(magick.getImageMagickExecutableAlternativeMethod().canExecute());
     assertFalse(magick.isAvailable());
   }
 

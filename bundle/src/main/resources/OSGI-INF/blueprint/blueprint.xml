@@ -11,24 +11,68 @@
 
 
     <service id="imageSizeService" auto-export="all-classes">
-        <bean class="com.github.ahoffer.sizeimage.ImageSizerFactory">
+        <bean class="com.github.ahoffer.sizeimage.provider.ImageSizerFactory">
             <property name="bundleContext" ref="blueprintBundleContext"/>
+            <property name="configuration">
+                <map>
+                    <entry key="*">
+                        <list>
+                            <ref component-id="sampling"/>
+                            <ref component-id="magick"/>
+                            <ref component-id="basic"/>
+                        </list>
+                    </entry>
+                    <entry key="image/jp2">
+                        <list>
+                            <ref component-id="magick"/>
+                            <ref component-id="sampling"/>
+                            <ref component-id="basic"/>
+                        </list>
+                    </entry>
+                    <entry key="image/jpx">
+                        <list>
+                            <ref component-id="magick"/>
+                            <ref component-id="sampling"/>
+                            <ref component-id="basic"/>
+                        </list>
+                    </entry>
+                    <entry key="image/jpm">
+                        <list>
+                            <ref component-id="magick"/>
+                            <ref component-id="sampling"/>
+                            <ref component-id="basic"/>
+                        </list>
+                    </entry>
+                </map>
+            </property>
         </bean>
     </service>
 
-    <service id="subsampleSizer" auto-export="interfaces" ranking="70">
-        <service-properties>
-            <entry key="name" value="subsample"/>
-        </service-properties>
-        <bean class="com.github.ahoffer.sizeimage.provider.SamplingImageSizer"/>
-    </service>
+    <!--As far as I can tell, scope protoype does not creat a new instance of the bean's class-->
+    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingImageSizer" scope="prototype"/>
+    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.ImageMagickSizer"/>
+    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicImageSizer"/>
 
-    <service id="magickSizer" auto-export="interfaces" ranking="60">
-        <bean class="com.github.ahoffer.sizeimage.provider.ImageMagickSizer"/>
-    </service>
 
-    <service id="basicSizer" auto-export="interfaces" ranking="50">
-        <bean class="com.github.ahoffer.sizeimage.provider.BasicImageSizer"/>
-    </service>
+    <!--Decided not to register the concrete ImageSizers as services. Leave them wholely as POJOs to reduce the number -->
+    <!--services floating around in the OSGi container.-->
+    <!--_____________________________________________________________________________________________________________-->
+    <!--<service id="samplingSizer" auto-export="interfaces" ranking="70" ref="sampling">-->
+    <!--<service-properties>-->
+    <!--<entry key="name" value="sampling"/>-->
+    <!--</service-properties>-->
+    <!--</service>-->
+
+    <!--<service id="magickSizer" auto-export="interfaces" ranking="60" ref="magick">-->
+    <!--<service-properties>-->
+    <!--<entry key="name" value="magick"/>-->
+    <!--</service-properties>-->
+    <!--</service>-->
+
+    <!--<service id="basicSizer" auto-export="interfaces" ranking="50" ref="baisc">-->
+    <!--<service-properties>-->
+    <!--<entry key="name" value="basic"/>-->
+    <!--</service-properties>-->
+    <!--</service>-->
 
 </blueprint>
