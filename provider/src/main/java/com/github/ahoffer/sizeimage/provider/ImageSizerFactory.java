@@ -2,9 +2,8 @@ package com.github.ahoffer.sizeimage.provider;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.imageio.spi.IIORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,28 +26,27 @@ public class ImageSizerFactory {
 
   @SuppressWarnings("unused")
   public List<ImageSizer> getRecommendedSizers(String mimeType) {
-    return configuration
-        .entrySet()
-        .stream()
-        .filter(entry -> !MATCH_ANY.equals(entry.getKey()))
-        .filter(entry -> entry.getKey().equalsIgnoreCase(mimeType))
-        .map(Map.Entry::getValue)
-        .findFirst()
-        .orElse(
-            getDefaultSizers()
-                .orElseThrow(
-                    () ->
-                        new RuntimeException(
-                            "No image sizers configured. Add '*' (wildcard configuration)")));
+    List<ImageSizer> list =
+        configuration
+            .entrySet()
+            .stream()
+            .filter(entry -> !MATCH_ANY.equals(entry.getKey()))
+            .filter(entry -> entry.getKey().equalsIgnoreCase(mimeType))
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .orElse(
+                getDefaultSizers()
+                    .orElseThrow(
+                        () ->
+                            new RuntimeException(
+                                "No image sizers configured. Add '*' (wildcard configuration)")));
+
+    return list.stream().map(ImageSizer::getNew).collect(Collectors.toList());
   }
 
   @SuppressWarnings("unused")
   public Optional<ImageSizer> getRecommendedSizer(String mimeType) {
-    return getRecommendedSizers(mimeType)
-        .stream()
-        .filter(sizer -> sizer.isAvailable())
-        .findFirst()
-        .map(ImageSizer::getNew);
+    return getRecommendedSizers(mimeType).stream().filter(ImageSizer::isAvailable).findFirst();
   }
 
   @SuppressWarnings("unused")
@@ -58,6 +56,6 @@ public class ImageSizerFactory {
 
   @SuppressWarnings("unused")
   public void setConfiguration(Map configuration) {
-    this.configuration = configuration;
+    this.configuration = Collections.unmodifiableMap(new LinkedHashMap(configuration));
   }
 }
