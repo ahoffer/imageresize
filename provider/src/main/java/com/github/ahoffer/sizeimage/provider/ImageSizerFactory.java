@@ -5,6 +5,7 @@ import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.imageio.spi.IIORegistry;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class ImageSizerFactory {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
   }
 
-  private Map<String, List<ImageSizer>> configuration;
+  private Map<String, List<ImageSizer>> configuration = new HashMap<>();
 
   @SuppressWarnings("unused")
   Optional<List<ImageSizer>> getDefaultSizers() {
@@ -25,7 +26,9 @@ public class ImageSizerFactory {
   }
 
   @SuppressWarnings("unused")
-  public List<ImageSizer> getRecommendedSizers(String mimeType) {
+  public List<ImageSizer> getRecommendedSizers(
+      String mimeType, boolean returnOnlyAvailableImageSizers) {
+    Validate.notNull(returnOnlyAvailableImageSizers);
     List<ImageSizer> list =
         configuration
             .entrySet()
@@ -41,12 +44,20 @@ public class ImageSizerFactory {
                             new RuntimeException(
                                 "No image sizers configured. Add '*' (wildcard configuration)")));
 
-    return list.stream().map(ImageSizer::getNew).collect(Collectors.toList());
+    return list.stream()
+        .filter(imageSizer -> returnOnlyAvailableImageSizers ? imageSizer.isAvailable() : true)
+        .map(ImageSizer::getNew)
+        .collect(Collectors.toList());
+  }
+
+  @SuppressWarnings("unused")
+  public List<ImageSizer> getRecommendedSizers(String mimeType) {
+    return getRecommendedSizers(mimeType, true);
   }
 
   @SuppressWarnings("unused")
   public Optional<ImageSizer> getRecommendedSizer(String mimeType) {
-    return getRecommendedSizers(mimeType).stream().filter(ImageSizer::isAvailable).findFirst();
+    return getRecommendedSizers(mimeType).stream().findFirst();
   }
 
   @SuppressWarnings("unused")
@@ -56,6 +67,7 @@ public class ImageSizerFactory {
 
   @SuppressWarnings("unused")
   public void setConfiguration(Map configuration) {
-    this.configuration = Collections.unmodifiableMap(new LinkedHashMap(configuration));
+    Map copy = Optional.ofNullable(configuration).map(x -> new HashMap(x)).orElseGet(HashMap::new);
+    this.configuration = Collections.unmodifiableMap(copy);
   }
 }
