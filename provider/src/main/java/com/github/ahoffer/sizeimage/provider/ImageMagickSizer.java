@@ -22,25 +22,14 @@ public class ImageMagickSizer extends AbstractImageSizer {
 
   public static final String NIX_EXEC_NAME = "convert";
 
-  public static final String INPUT_IMAGE_PATH = "inputImagePath";
-
   public static final String OUTPUT_FORMAT = "outputFormat";
-
-  public boolean recommendedFor(String imageFormat) {
-    return true;
-  }
 
   @Override
   public boolean isAvailable() {
     return getImageMagickExecutable().canExecute();
   }
 
-    @Override
-    public String getName() {
-        return "magick";
-    }
-
-    public File getImageMagickExecutableAlternativeMethod() {
+  public File getImageMagickExecutableAlternativeMethod() {
     String result;
     ConvertCmd command = new ConvertCmd();
     try {
@@ -51,7 +40,7 @@ public class ImageMagickSizer extends AbstractImageSizer {
     }
   }
 
-  File getImageMagickExecutable() {
+  public File getImageMagickExecutable() {
     String execName =
         configuration.getOrDefault(
             EXEC_NAME, SystemUtils.IS_OS_WINDOWS ? WINDOWS_EXEC_NAME : NIX_EXEC_NAME);

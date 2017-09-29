@@ -1,8 +1,9 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.provider.ImageMagickSizer;
 import static com.github.ahoffer.sizeimage.provider.ImageMagickSizer.*;
-import static com.github.ahoffer.sizeimage.provider.SizeImageTestData.JPEG;
+import static com.github.ahoffer.sizeimage.test.TestData.JPEG;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,11 +20,11 @@ public class MagickSizerTest {
   public static final String TEST_PATH_TO_MAGICK_EXEC =
       FilenameUtils.getFullPath("/opt/local/bin/");
 
-  SizeImageTestData data;
+  TestData data;
 
   @Before
   public void setup() {
-    data = new SizeImageTestData();
+    data = new TestData();
   }
 
   @Test
@@ -51,7 +52,7 @@ public class MagickSizerTest {
     Map<String, String> configuration = new HashMap<>();
     configuration.put(PATH_TO_IMAGE_MAGICK_EXECUTABLES, TEST_PATH_TO_MAGICK_EXEC);
     configuration.put(OUTPUT_FORMAT, JPEG);
-    configuration.put(INPUT_IMAGE_PATH, data.vanillaJpegUrl.getFile());
+    //    configuration.put(INPUT_IMAGE_PATH, data.vanillaJpegUrl.getFile());
     magick.setConfiguration(configuration);
     assertTrue("Could not find the Image Magick Executable", magick.isAvailable());
     magick.setOutputSize(256);
@@ -67,10 +68,5 @@ public class MagickSizerTest {
     configuration.put(EXEC_NAME, "notvalid");
     magick.setConfiguration(configuration);
     magick.size();
-  }
-
-  @Test
-  public void testSupportedFormats() {
-    assertTrue("ImageMacgic should support JPEG", new ImageMagickSizer().recommendedFor(JPEG));
   }
 }

@@ -22,8 +22,6 @@ public interface ImageSizer {
 
   BufferedImage size() throws IOException;
 
-  boolean recommendedFor(String imageFormat);
-
   default boolean isAvailable() {
     return true;
   }
@@ -33,19 +31,9 @@ public interface ImageSizer {
    * a new instance of sizer before using test. The reason is that the sizers can be registered as
    * OSGi services, and OSGI creates a single bean shared by all threads.
    *
-   * <p>TODO: I tried using scope=prototype in the blueprint, then using getServiceObjects(), TODO:
-   * but I still got the same instance.
-   *
    * @return instance of a concrete image sizer
    */
+  // TODO: I tried using scope=prototype in the blueprint, then using getServiceObjects(), but I
+  // still got the same instance.
   ImageSizer getNew();
-
-  /**
-   * The name used to reference a concrete image sizer. The name is not intended to be configurable.
-   * A concrete implementation is intended to return a hard-coded string. Implementors are
-   * responsible for avoiding name collisions.
-   *
-   * @return name
-   */
-  String getName();
 }

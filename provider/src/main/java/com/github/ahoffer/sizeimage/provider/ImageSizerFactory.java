@@ -5,7 +5,6 @@ import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.imageio.spi.IIORegistry;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

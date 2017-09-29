@@ -1,6 +1,8 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.provider.ImageReaderUtils;
+import com.github.ahoffer.sizeimage.provider.SamplingImageSizer;
 import java.io.IOException;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -9,11 +11,11 @@ import org.junit.Test;
 
 public class SizeImageProvidersTest {
 
-  SizeImageTestData data;
+  TestData data;
 
   @Before
   public void setup() {
-    data = new SizeImageTestData();
+    data = new TestData();
   }
 
   @Test
@@ -25,9 +27,9 @@ public class SizeImageProvidersTest {
   public void ioVerifyTestResources() throws IOException {
 
     String actualFormatName1 = ImageReaderUtils.getReader(data.vanillaJpegStream).getFormatName();
-    assertEquals("Unexpected image format name", SizeImageTestData.JPEG, actualFormatName1);
+    assertEquals("Unexpected image format name", TestData.JPEG, actualFormatName1);
     String actualFormatName2 = ImageReaderUtils.getReader(data.jpeg2000Stream).getFormatName();
-    assertEquals("Unexpected image format name", SizeImageTestData.JPEG_2000, actualFormatName2);
+    assertEquals("Unexpected image format name", TestData.JPEG_2000, actualFormatName2);
   }
 
   @Test

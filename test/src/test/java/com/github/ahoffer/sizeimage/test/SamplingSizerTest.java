@@ -1,7 +1,8 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import static com.github.ahoffer.sizeimage.provider.AbstractImageSizer.OUTPUT_SIZE_PIXELS;
+import com.github.ahoffer.sizeimage.provider.SamplingImageSizer;
 import static com.github.ahoffer.sizeimage.provider.SamplingImageSizer.SAMPLING_PERIOD;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -13,11 +14,11 @@ import org.junit.Test;
 
 public class SamplingSizerTest {
 
-  SizeImageTestData data;
+  TestData data;
 
   @Before
   public void setup() {
-    data = new SizeImageTestData();
+    data = new TestData();
   }
 
   @Test(expected = Exception.class)

@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <!--Rank providers on a scale from 0-100, with the basic or default provider ranked at 50-->
-
-    <!--<bean id="imageSizeBean" class="ImageSizerFactory">-->
-    <!--<property name="bundleContext" ref="blueprintBundleContext"/>-->
-    <!--</bean>-->
-
-    <!--<service id="imageSizeService" auto-export="all-classes" ref="imageSizeBean"/>-->
-
+    <!--As far as I can tell, scope protoype does not creat a new instance of the bean's class-->
+    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingImageSizer"/>
+    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.ImageMagickSizer">
+        <property name="configuration">
+            <map>
+                <entry key="pathToImageMagickExecutables" value="/opt/local/bin/"/>
+                <entry key="outputFormat" value="png"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicImageSizer"/>
 
     <service id="imageSizeService" auto-export="all-classes">
         <bean class="com.github.ahoffer.sizeimage.provider.ImageSizerFactory">
-            <property name="bundleContext" ref="blueprintBundleContext"/>
             <property name="configuration">
                 <map>
                     <entry key="*">
@@ -47,11 +49,6 @@
             </property>
         </bean>
     </service>
-
-    <!--As far as I can tell, scope protoype does not creat a new instance of the bean's class-->
-    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingImageSizer" scope="prototype"/>
-    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.ImageMagickSizer"/>
-    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicImageSizer"/>
 
 
     <!--Decided not to register the concrete ImageSizers as services. Leave them wholely as POJOs to reduce the number -->

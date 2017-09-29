@@ -1,6 +1,7 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.provider.BasicImageSizer;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,11 +12,11 @@ import org.junit.Test;
 
 public class BasicSizerTest {
   public static final int PIXELS = 256;
-  SizeImageTestData data;
+  TestData data;
 
   @Before
   public void setup() {
-    data = new SizeImageTestData();
+    data = new TestData();
   }
 
   @Test

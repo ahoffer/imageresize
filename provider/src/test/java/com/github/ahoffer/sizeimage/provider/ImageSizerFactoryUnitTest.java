@@ -13,12 +13,12 @@ import org.junit.Test;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-public class ImageSizerFactoryTest {
+public class ImageSizerFactoryUnitTest {
 
   public static final String EMPTY = "empty";
   public static final String SINGLE = "single";
   public static final String MULTIPLE = "multiple";
-  ImageSizerFactory factory;
+  private ImageSizerFactory factory;
   private ImageSizer imageSizer1;
   private ImageSizer imageSizer2;
   private ImageSizer imageSizer3;
@@ -98,13 +98,13 @@ public class ImageSizerFactoryTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void configurationIsNull1() {
+  public void configurationIsNull() {
     factory.setConfiguration(null);
     factory.getRecommendedSizer(MULTIPLE);
   }
 
   @Test
-  public void testNullMimeType1() {
+  public void testNullMimeType() {
     assertThat(factory.getRecommendedSizers(null), hasItem(instanceOf(ImageSizer.class)));
   }
 
@@ -116,17 +116,14 @@ public class ImageSizerFactoryTest {
   @Test
   public void testNullMimeTypeWithAvailability() {
     ImageSizer mockImageSizer;
-    boolean expectedToBeAvailable;
 
     mockImageSizer = mock(ImageSizer.class);
-    expectedToBeAvailable = true;
-    setReturnValueForIsAvailable(mockImageSizer, expectedToBeAvailable);
-    assertThat(factory.getRecommendedSizer(null).isPresent(), is(expectedToBeAvailable));
+    setReturnValueForIsAvailable(mockImageSizer, true);
+    assertThat(factory.getRecommendedSizer(null).isPresent(), is(true));
 
     mockImageSizer = mock(ImageSizer.class);
-    expectedToBeAvailable = false;
-    setReturnValueForIsAvailable(mockImageSizer, expectedToBeAvailable);
-    assertThat(factory.getRecommendedSizer(null).isPresent(), is(expectedToBeAvailable));
+    setReturnValueForIsAvailable(mockImageSizer, false);
+    assertThat(factory.getRecommendedSizer(null).isPresent(), is(false));
   }
 
   @Test(expected = RuntimeException.class)
