@@ -28,7 +28,7 @@ public class ImageSizerFactory {
   @SuppressWarnings("unused")
   public List<ImageSizer> getRecommendedSizers(
       String mimeType, boolean returnOnlyAvailableImageSizers) {
-    Validate.notNull(returnOnlyAvailableImageSizers);
+
     List<ImageSizer> list =
         configuration
             .entrySet()
@@ -45,8 +45,8 @@ public class ImageSizerFactory {
                                 "No image sizers configured. Add '*' (wildcard configuration)")));
 
     return list.stream()
-        .filter(imageSizer -> returnOnlyAvailableImageSizers ? imageSizer.isAvailable() : true)
         .map(ImageSizer::getNew)
+        .filter(imageSizer -> returnOnlyAvailableImageSizers ? imageSizer.isAvailable() : true)
         .collect(Collectors.toList());
   }
 

@@ -29,12 +29,21 @@ public class ImageSizerFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    imageSizer1 = mock(ImageSizer.class);
-    imageSizer2 = mock(ImageSizer.class);
-    imageSizer3 = mock(ImageSizer.class);
-    doReturn(mock(ImageSizer.class)).when(imageSizer1).getNew();
-    doReturn(mock(ImageSizer.class)).when(imageSizer2).getNew();
-    doReturn(mock(ImageSizer.class)).when(imageSizer3).getNew();
+    imageSizer1 = mock(SamplingImageSizer.class);
+    imageSizer2 = mock(ImageMagickSizer.class);
+    imageSizer3 = mock(BasicImageSizer.class);
+    SamplingImageSizer imageSizer11 = mock(SamplingImageSizer.class);
+    ImageMagickSizer imageSizer22 = mock(ImageMagickSizer.class);
+    BasicImageSizer imageSizer33 = mock(BasicImageSizer.class);
+    doReturn(true).when(imageSizer1).isAvailable();
+    doReturn(true).when(imageSizer11).isAvailable();
+    doReturn(true).when(imageSizer2).isAvailable();
+    doReturn(true).when(imageSizer22).isAvailable();
+    doReturn(true).when(imageSizer3).isAvailable();
+    doReturn(true).when(imageSizer33).isAvailable();
+    doReturn(imageSizer11).when(imageSizer1).getNew();
+    doReturn(imageSizer22).when(imageSizer2).getNew();
+    doReturn(imageSizer33).when(imageSizer3).getNew();
     factory = new ImageSizerFactory();
 
     Map<String, List<ImageSizer>> configuration = new HashMap<>();
@@ -66,7 +75,10 @@ public class ImageSizerFactoryTest {
   @Test
   public void testReturnOrder() throws Exception {
     List<ImageSizer> sizers = factory.getRecommendedSizers(MULTIPLE);
-    assertThat(sizers, contains(multiplesList));
+    assertThat(sizers, hasSize(multiplesList.size()));
+    assertThat(sizers.get(0), instanceOf(SamplingImageSizer.class));
+    assertThat(sizers.get(1), instanceOf(ImageMagickSizer.class));
+    assertThat(sizers.get(2), instanceOf(BasicImageSizer.class));
   }
 
   @Test
@@ -93,7 +105,7 @@ public class ImageSizerFactoryTest {
 
   @Test
   public void testNullMimeType1() {
-    assertThat(factory.getRecommendedSizers(null), contains(defaultList));
+    assertThat(factory.getRecommendedSizers(null), hasItem(instanceOf(ImageSizer.class)));
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -117,7 +129,7 @@ public class ImageSizerFactoryTest {
     assertThat(factory.getRecommendedSizer(null).isPresent(), is(expectedToBeAvailable));
   }
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void testBooleanFalseWithNoDefault() {
     factory.setConfiguration(null);
     factory.getRecommendedSizers(null, false);
@@ -127,20 +139,11 @@ public class ImageSizerFactoryTest {
   public void testBooleanFalseWithDefaults() {
     ImageSizer mockImageSizer = mock(ImageSizer.class);
     setReturnValueForIsAvailable(mockImageSizer, false);
-    assertThat(factory.getRecommendedSizers(MATCH_ANY, false), hasSize(1));
+    assertThat(
+        factory.getRecommendedSizers(MATCH_ANY, false), everyItem(instanceOf(ImageSizer.class)));
 
     setReturnValueForIsAvailable(mockImageSizer, false);
-    assertThat(factory.getRecommendedSizers(MATCH_ANY, false), empty());
-  }
-
-  @Test
-  public void testBooleanFalse() {
-    factory.getRecommendedSizers(MULTIPLE, false);
-  }
-
-  @Test
-  public void testBooleanTrue() {
-    factory.getRecommendedSizers(MULTIPLE);
+    assertThat(factory.getRecommendedSizers(MATCH_ANY, true), empty());
   }
 
   private void setReturnValueForIsAvailable(ImageSizer mockImageSizer, boolean returnValue) {
