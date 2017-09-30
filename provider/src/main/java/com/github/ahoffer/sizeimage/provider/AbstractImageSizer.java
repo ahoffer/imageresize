@@ -23,8 +23,8 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   private void validateExtents(int maxWidth, int maxHeight) {
-    Validate.inclusiveBetween(maxWidth, 1, Integer.MAX_VALUE);
-    Validate.inclusiveBetween(maxHeight, 1, Integer.MAX_VALUE);
+    Validate.inclusiveBetween(1, Integer.MAX_VALUE, maxWidth);
+    Validate.inclusiveBetween(1, Integer.MAX_VALUE, maxHeight);
   }
 
   public Map<String, String> getConfiguration() {
@@ -50,7 +50,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     try {
       return Integer.valueOf(intString);
     } catch (NumberFormatException e) {
-      throw new RuntimeException("Cannot read output size", e);
+      throw new RuntimeException("Cannot convert string to integer", e);
     }
   }
 
@@ -60,10 +60,13 @@ public abstract class AbstractImageSizer implements ImageSizer {
 
   public ImageSizer getNew() {
     try {
-      ImageSizer newInstance = getClass().newInstance();
+      // Is this really any better than clone? Honestly, no. It is not.
+      //      ImageSizer newInstance = getClass().newInstance();
+      ImageSizer newInstance = (ImageSizer) clone();
       newInstance.setConfiguration(configuration);
       return newInstance;
-    } catch (InstantiationException | IllegalAccessException e) {
+    } catch (CloneNotSupportedException e) {
+      // catch (InstantiationException | IllegalAccessException |
       throw new RuntimeException(e);
     }
   }
