@@ -13,6 +13,6 @@ public class SamplingImageSizer extends AbstractImageSizer {
     if (configuration.containsKey(SAMPLING_PERIOD)) {
       reader.samplePeriod(Integer.valueOf(configuration.get(SAMPLING_PERIOD)));
     }
-    return Thumbnails.of(reader.read()).height(getOutputSize()).asBufferedImage();
+    return Thumbnails.of(reader.read()).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
   }
 }

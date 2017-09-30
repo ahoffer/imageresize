@@ -16,6 +16,17 @@ public class ImageMagickSizer extends AbstractImageSizer {
 
   public static final String EXEC_NAME = "executableName";
 
+  /**
+   * JPEG compresses well, but is designed for large real world images, not small thumbnails. It
+   * also does not allow any form of transparency.
+   *
+   * <p>GIF works for simple small images, and compresses okay. It has a color limit of 256, but for
+   * small images this is rarely noticeable. It has limited ability to handle transparency (a pixel
+   * is either transparent or not)
+   *
+   * <p>PNG is the best format for thumbnails. It has a good compression and internal format styles.
+   * It is non-lossy, and can display many colors.
+   */
   public static final String DEFAULT_OUTPUT_FORMAT = "png";
 
   public static final String WINDOWS_EXEC_NAME = "convert.exe";
@@ -55,12 +66,16 @@ public class ImageMagickSizer extends AbstractImageSizer {
 
   public BufferedImage size() throws IOException {
 
+    // TODO if MIME type is JPEG, add this option "-define jpeg:size=200x200" and substitute a
+    // size that is twice the size of the desired thumbnail.
     validateBeforeResizing();
+
+    // TODO use -sample to improve memory usage
 
     IMOperation op = new IMOperation();
     ConvertCmd command = new ConvertCmd();
     Stream2BufferedImage outputConsumer = new Stream2BufferedImage();
-    op.thumbnail(getOutputSize());
+    op.thumbnail(getMaxWidth(), getMaxHeight());
 
     // Read from std in
     op.addImage("-");

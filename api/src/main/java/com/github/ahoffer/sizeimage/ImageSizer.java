@@ -14,11 +14,18 @@ public interface ImageSizer {
 
   ImageSizer setInput(InputStream inputStream);
 
-  // TODO REPLACE SIZE WITH A WIDTH AND/OR HEIGHT METHOD. For now, always preserve aspect ratio. So
-  // TODO maybe just set width?
-  int getOutputSize();
+  int getMaxWidth();
 
-  ImageSizer setOutputSize(int pixels);
+  int getMaxHeight();
+
+  /**
+   * Always preserve aspect ratio. The sized image should fit into a bounding box with dimensions
+   * size x size
+   *
+   * @return this object
+   */
+  @SuppressWarnings("unused")
+  ImageSizer setOutputSize(int maxWidth, int maxHeight);
 
   BufferedImage size() throws IOException;
 

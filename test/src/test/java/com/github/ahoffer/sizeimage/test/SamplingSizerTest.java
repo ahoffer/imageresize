@@ -1,7 +1,7 @@
 package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
-import static com.github.ahoffer.sizeimage.provider.AbstractImageSizer.OUTPUT_SIZE_PIXELS;
+import static com.github.ahoffer.sizeimage.provider.AbstractImageSizer.OUTPUT_SIZE;
 import com.github.ahoffer.sizeimage.provider.SamplingImageSizer;
 import static com.github.ahoffer.sizeimage.provider.SamplingImageSizer.SAMPLING_PERIOD;
 import java.awt.image.BufferedImage;
@@ -55,7 +55,7 @@ public class SamplingSizerTest {
   public void happyPathWithCustomSamplingPeriod() throws IOException {
     ImageSizer sizer = new SamplingImageSizer();
     Map<String, String> configuration = new HashMap<>();
-    configuration.put(OUTPUT_SIZE_PIXELS, "256");
+    configuration.put(OUTPUT_SIZE, "256");
     configuration.put(SAMPLING_PERIOD, "4");
     BufferedImage output =
         sizer.setInput(data.vanillaJpegStream).setConfiguration(configuration).size();

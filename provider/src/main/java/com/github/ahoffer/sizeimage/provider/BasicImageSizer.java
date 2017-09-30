@@ -8,6 +8,6 @@ public class BasicImageSizer extends AbstractImageSizer {
 
   public BufferedImage size() throws IOException {
     validateBeforeResizing();
-    return Thumbnails.of(inputStream).height(getOutputSize()).asBufferedImage();
+    return Thumbnails.of(inputStream).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
   }
 }

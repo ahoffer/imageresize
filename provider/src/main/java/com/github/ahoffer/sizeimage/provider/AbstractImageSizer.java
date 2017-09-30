@@ -9,13 +9,23 @@ import org.apache.commons.lang3.Validate;
 
 public abstract class AbstractImageSizer implements ImageSizer {
 
-  public static final String OUTPUT_SIZE_PIXELS = "outputSize";
-
-  public static final String JPEG_2000_FORMAT_NAME = "jpeg 2000";
+  public static final String MAX_WIDTH = "maxWidth";
+  public static final String MAX_HEIGHT = "maxHeight";
 
   protected Map<String, String> configuration = new HashMap<>();
-
   protected InputStream inputStream;
+
+  public ImageSizer setOutputSize(int maxWidth, int maxHeight) {
+    validateExtents(maxWidth, maxHeight);
+    configuration.put(MAX_WIDTH, Integer.toString(maxWidth));
+    configuration.put(MAX_HEIGHT, Integer.toString(maxHeight));
+    return this;
+  }
+
+  private void validateExtents(int maxWidth, int maxHeight) {
+    Validate.inclusiveBetween(maxWidth, 1, Integer.MAX_VALUE);
+    Validate.inclusiveBetween(maxHeight, 1, Integer.MAX_VALUE);
+  }
 
   public Map<String, String> getConfiguration() {
     return Collections.unmodifiableMap(configuration);
@@ -27,22 +37,25 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return this;
   }
 
-  public ImageSizer setOutputSize(int pixels) {
-    configuration.put(OUTPUT_SIZE_PIXELS, Integer.toString(pixels));
-    return this;
-  }
-
   public void validateBeforeResizing() {
+    validateExtents(getMaxWidth(), getMaxHeight());
     Validate.notNull(inputStream);
-    Validate.inclusiveBetween(1, Integer.MAX_VALUE, getOutputSize());
   }
 
-  public int getOutputSize() {
+  public int getMaxWidth() {
+    return getInteger(configuration.get(MAX_WIDTH));
+  }
+
+  private int getInteger(String intString) {
     try {
-      return Integer.valueOf(configuration.get(OUTPUT_SIZE_PIXELS));
+      return Integer.valueOf(intString);
     } catch (NumberFormatException e) {
-      throw new RuntimeException("Cannot read output dimensions for image size", e);
+      throw new RuntimeException("Cannot read output size", e);
     }
+  }
+
+  public int getMaxHeight() {
+    return getInteger(configuration.get(MAX_HEIGHT));
   }
 
   public ImageSizer getNew() {
