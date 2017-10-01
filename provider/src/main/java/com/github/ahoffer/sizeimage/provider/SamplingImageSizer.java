@@ -13,6 +13,12 @@ public class SamplingImageSizer extends AbstractImageSizer {
     if (configuration.containsKey(SAMPLING_PERIOD)) {
       reader.samplePeriod(Integer.valueOf(configuration.get(SAMPLING_PERIOD)));
     }
-    return Thumbnails.of(reader.read()).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+    BufferedImage output =
+        Thumbnails.of(reader.read()).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+    // TODO: The inputStream doesn't belong to the ImageSizer; it was passed in as a parameter.
+    // It doesn't feel right to close it on someone else's behalf.
+    // But I can drop the reference to it.
+    inputStream = null;
+    return output;
   }
 }

@@ -33,14 +33,14 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
-public class ImageSizerFactoryContainerTest {
+public class ContainerTest {
 
-  public static final String ARTIFACT_ID = "sizeimage-bundle";
-  public static final String GROUP_ID = "com.github.ahoffer";
-  private static final String INPUT_DIR = "/Users/aaronhoffer/data/small-image-set/";
-  private static String OUTPUTDIR = INPUT_DIR + "output/";
+  static final String ARTIFACT_ID = "sizeimage-bundle";
+  static final String GROUP_ID = "com.github.ahoffer";
+  static final String INPUT_DIR = "/Users/aaronhoffer/data/small-image-set/";
+  static String OUTPUTDIR = INPUT_DIR + "output/";
 
-  private static Logger LOGGER = LoggerFactory.getLogger(ImageSizerFactoryContainerTest.class);
+  static Logger LOGGER = LoggerFactory.getLogger(ContainerTest.class);
 
   @Inject protected ImageSizerFactory factory;
   List<File> inputFiles = new ArrayList<>();
@@ -86,7 +86,7 @@ public class ImageSizerFactoryContainerTest {
     String sizerName = sizer.getClass().getSimpleName();
     LOGGER.info(String.format("\tSelected %s", sizerName));
 
-    BufferedImage output = sizer.setOutputSize(256).setInput(inputStream).size();
+    BufferedImage output = sizer.setOutputSize(128, 128).setInput(inputStream).size();
     final long stop = System.nanoTime();
     java.io.File outputDirObject = new File(OUTPUTDIR);
     outputDirObject.mkdirs();

@@ -11,7 +11,7 @@
         </property>
     </bean>
 
-    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.ImageMagickSizer">
+    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
         <property name="configuration">
             <map>
                 <entry key="pathToImageMagickExecutables" value="/opt/local/bin/"/>

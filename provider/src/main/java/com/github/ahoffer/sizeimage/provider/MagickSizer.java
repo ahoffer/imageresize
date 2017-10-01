@@ -10,7 +10,7 @@ import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 import org.im4java.process.Pipe;
 
-public class ImageMagickSizer extends AbstractImageSizer {
+public class MagickSizer extends AbstractImageSizer {
 
   public static final String PATH_TO_IMAGE_MAGICK_EXECUTABLES = "pathToImageMagickExecutables";
 
@@ -94,7 +94,14 @@ public class ImageMagickSizer extends AbstractImageSizer {
     } catch (InterruptedException | IM4JavaException e) {
       throw new RuntimeException("Problem resizing image with ImageMagick", e);
     }
-    return outputConsumer.getImage();
+    BufferedImage output = outputConsumer.getImage();
+
+    // TODO: The inputStream doesn't belong to the ImageSizer; it was passed in as a parameter.
+    // It doesn't feel right to close it on someone else's behalf.
+    // But I can drop the reference to it.
+    inputStream = null;
+
+    return output;
   }
 
   public void validateBeforeResizing() {
