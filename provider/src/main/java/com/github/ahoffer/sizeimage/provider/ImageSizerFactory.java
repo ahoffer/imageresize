@@ -2,6 +2,7 @@ package com.github.ahoffer.sizeimage.provider;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.imageio.spi.IIORegistry;
@@ -22,6 +23,16 @@ public class ImageSizerFactory {
   @SuppressWarnings("unused")
   Optional<List<ImageSizer>> getDefaultSizers() {
     return Optional.ofNullable(configuration.get(MATCH_ANY));
+  }
+
+  @SuppressWarnings("unused")
+  public List<ImageSizer> getRecommendedSizers(
+      InputStream inputStream, boolean returnOnlyAvailableImageSizers) {
+    if (Objects.isNull(inputStream)) {
+      return getRecommendedSizers((String) null, returnOnlyAvailableImageSizers);
+    }
+    List<String> mimeTypes = ImageReaderUtils.getMimeTypes(inputStream);
+    return null;
   }
 
   @SuppressWarnings("unused")
@@ -58,6 +69,11 @@ public class ImageSizerFactory {
   public Optional<ImageSizer> getRecommendedSizer(String mimeType) {
     return getRecommendedSizers(mimeType).stream().findFirst();
   }
+
+  //  @SuppressWarnings("unused")
+  //    public Optional<ImageSizer> getRecommendedSizer(InputStream inputStream) {
+  //        return getRecommendedSizers(mimeType).stream().findFirst();
+  //    }
 
   @SuppressWarnings("unused")
   public Map<String, List<ImageSizer>> getConfiguration() {

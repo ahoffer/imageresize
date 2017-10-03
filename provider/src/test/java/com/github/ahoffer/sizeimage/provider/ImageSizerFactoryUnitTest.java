@@ -129,7 +129,7 @@ public class ImageSizerFactoryUnitTest {
   @Test(expected = RuntimeException.class)
   public void testBooleanFalseWithNoDefault() {
     factory.setConfiguration(null);
-    factory.getRecommendedSizers(null, false);
+    factory.getRecommendedSizers((String) null, false);
   }
 
   @Test

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.lang3.Validate;
 
 public abstract class AbstractImageSizer implements ImageSizer {
@@ -31,10 +32,12 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return Collections.unmodifiableMap(configuration);
   }
 
-  public ImageSizer setConfiguration(Map<String, String> configuration) {
+  public void setConfiguration(Map<String, String> configuration) {
     // Add or replace configuration items
-    this.configuration.putAll(configuration);
-    return this;
+    //    this.configuration.putAll(configuration);
+    Map copy = Optional.ofNullable(configuration).map(x -> new HashMap(x)).orElseGet(HashMap::new);
+    this.configuration = Collections.unmodifiableMap(copy);
+    //    return this;
   }
 
   public void validateBeforeResizing() {

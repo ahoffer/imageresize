@@ -62,7 +62,7 @@ public class ContainerTest {
 
   @Test
   public void runAllDefaultSizers() throws IOException {
-    List<ImageSizer> imageSizers = factory.getRecommendedSizers(null, false);
+    List<ImageSizer> imageSizers = factory.getRecommendedSizers((String) null, false);
     assertThat("Expect 3 image sizers", imageSizers, hasSize(3));
     for (ImageSizer imageSizer : imageSizers) {
       assertThat("Image sizer should be available", imageSizer.isAvailable(), is(true));

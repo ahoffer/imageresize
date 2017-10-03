@@ -1,16 +1,18 @@
 package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.AbstractImageSizer;
-import com.github.ahoffer.sizeimage.provider.BasicImageSizer;
-import com.github.ahoffer.sizeimage.provider.MagickSizer;
-import com.github.ahoffer.sizeimage.provider.SamplingImageSizer;
+import com.github.ahoffer.sizeimage.provider.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import static junit.framework.TestCase.fail;
 import org.apache.commons.io.FilenameUtils;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,5 +65,23 @@ public class IoTest {
     }
 
     fail("Should have thrown NPE");
+  }
+
+  @Test
+  public void testGetMimeTypes() {
+    List<String> mimeTypes = ImageReaderUtils.getMimeTypes(data.vanillaJpegStream);
+    assertThat(mimeTypes, hasItem(equalToIgnoringCase("image/jpeg")));
+
+    mimeTypes = ImageReaderUtils.getMimeTypes(data.jpeg2000Stream);
+    assertThat(mimeTypes, containsInAnyOrder("image/jp2", "image/jpeg2000"));
+  }
+
+  @Test
+  public void testPreservingInputStream() {
+    // Use the same stream twice
+    InputStream inputStream = data.vanillaJpegStream;
+    assertThat(
+        ImageReaderUtils.getMimeTypes(inputStream),
+        equalTo(ImageReaderUtils.getMimeTypes(inputStream)));
   }
 }

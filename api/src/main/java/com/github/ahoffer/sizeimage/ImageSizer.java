@@ -10,7 +10,7 @@ public interface ImageSizer {
   @SuppressWarnings("unused")
   Map<String, String> getConfiguration();
 
-  ImageSizer setConfiguration(Map<String, String> configuration);
+  void setConfiguration(Map<String, String> configuration);
 
   ImageSizer setInput(InputStream inputStream);
 
