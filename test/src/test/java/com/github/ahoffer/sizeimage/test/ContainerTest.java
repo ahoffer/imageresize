@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,11 +63,17 @@ public class ContainerTest {
   @Test
   public void runAllDefaultSizers() throws IOException {
     List<ImageSizer> imageSizers = factory.getRecommendedSizers((String) null, false);
-    assertThat("Expect 3 image sizers", imageSizers, hasSize(3));
+    assertThat("Expect 3 image sizers", imageSizers.size(), equalTo(3));
     for (ImageSizer imageSizer : imageSizers) {
       assertThat("Image sizer should be available", imageSizer.isAvailable(), is(true));
       runSizerForEveryImage(imageSizer);
     }
+  }
+
+  @Test
+  public void testGetSizersByImageStream() throws ClassNotFoundException {
+    InputStream vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg.jpg");
+    List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {

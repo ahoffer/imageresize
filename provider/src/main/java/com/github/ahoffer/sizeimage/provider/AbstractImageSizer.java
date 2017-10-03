@@ -33,11 +33,8 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   public void setConfiguration(Map<String, String> configuration) {
-    // Add or replace configuration items
-    //    this.configuration.putAll(configuration);
     Map copy = Optional.ofNullable(configuration).map(x -> new HashMap(x)).orElseGet(HashMap::new);
-    this.configuration = Collections.unmodifiableMap(copy);
-    //    return this;
+    this.configuration = copy;
   }
 
   public void validateBeforeResizing() {
@@ -63,13 +60,11 @@ public abstract class AbstractImageSizer implements ImageSizer {
 
   public ImageSizer getNew() {
     try {
-      // Is this really any better than clone? Honestly, no. It is not.
-      //      ImageSizer newInstance = getClass().newInstance();
-      ImageSizer newInstance = (ImageSizer) clone();
+      // This works in some situations where clone() does not
+      ImageSizer newInstance = getClass().newInstance();
       newInstance.setConfiguration(configuration);
       return newInstance;
-    } catch (CloneNotSupportedException e) {
-      // catch (InstantiationException | IllegalAccessException |
+    } catch (InstantiationException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }

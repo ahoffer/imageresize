@@ -2,7 +2,10 @@ package com.github.ahoffer.sizeimage.provider;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import static com.github.ahoffer.sizeimage.provider.ImageSizerFactory.MATCH_ANY;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -60,10 +63,9 @@ public class ImageSizerFactoryUnitTest {
 
   @Test
   public void testDefaultSizers() throws Exception {
-    Optional<List<ImageSizer>> sizers = factory.getDefaultSizers();
-    assertThat("Expected sizer to exist", sizers.isPresent(), is(true));
-    assertThat(sizers.get().size(), is(1));
-    assertThat(sizers.get(), contains(defaultList.get(0)));
+    List<ImageSizer> sizers = factory.getDefaultSizers();
+    assertThat(sizers.size(), is(1));
+    assertThat(sizers, contains(defaultList.get(0)));
   }
 
   @Test
@@ -97,15 +99,15 @@ public class ImageSizerFactoryUnitTest {
     assertThat(sizers.get(0), not(singletonList.get(0)));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void configurationIsNull() {
     factory.setConfiguration(null);
-    factory.getRecommendedSizer(MULTIPLE);
+    assertThat(factory.getRecommendedSizer(MULTIPLE).isPresent(), is(false));
   }
 
   @Test
   public void testNullMimeType() {
-    assertThat(factory.getRecommendedSizers(null), hasItem(instanceOf(ImageSizer.class)));
+    assertThat(factory.getRecommendedSizers((String) null), hasItem(instanceOf(ImageSizer.class)));
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -119,17 +121,18 @@ public class ImageSizerFactoryUnitTest {
 
     mockImageSizer = mock(ImageSizer.class);
     setReturnValueForIsAvailable(mockImageSizer, true);
-    assertThat(factory.getRecommendedSizer(null).isPresent(), is(true));
+    assertThat(factory.getRecommendedSizer((String) null).isPresent(), is(true));
 
     mockImageSizer = mock(ImageSizer.class);
     setReturnValueForIsAvailable(mockImageSizer, false);
-    assertThat(factory.getRecommendedSizer(null).isPresent(), is(false));
+    assertThat(factory.getRecommendedSizer((String) null).isPresent(), is(false));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testBooleanFalseWithNoDefault() {
     factory.setConfiguration(null);
-    factory.getRecommendedSizers((String) null, false);
+    List<ImageSizer> list = factory.getRecommendedSizers((String) null, false);
+    assertThat(list, empty());
   }
 
   @Test

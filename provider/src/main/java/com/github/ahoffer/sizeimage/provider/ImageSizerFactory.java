@@ -21,8 +21,12 @@ public class ImageSizerFactory {
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
 
   @SuppressWarnings("unused")
-  Optional<List<ImageSizer>> getDefaultSizers() {
-    return Optional.ofNullable(configuration.get(MATCH_ANY));
+  List<ImageSizer> getDefaultSizers() {
+    List<ImageSizer> defaultObjects = configuration.get(MATCH_ANY);
+    if (Objects.isNull(defaultObjects) || defaultObjects.isEmpty()) {
+      return Collections.EMPTY_LIST;
+    }
+    return defaultObjects;
   }
 
   @SuppressWarnings("unused")
@@ -32,7 +36,20 @@ public class ImageSizerFactory {
       return getRecommendedSizers((String) null, returnOnlyAvailableImageSizers);
     }
     List<String> mimeTypes = ImageReaderUtils.getMimeTypes(inputStream);
-    return null;
+    for (String mimeType : mimeTypes) {
+
+      List<ImageSizer> list = getRecommendedSizers(mimeType);
+      if (!list.isEmpty()) {
+        return list;
+      }
+    }
+    LOGGER.debug("No MIME types for the input stream");
+    return getDefaultSizers();
+  }
+
+  @SuppressWarnings("unused")
+  public List<ImageSizer> getRecommendedSizers(InputStream inputStream) {
+    return getRecommendedSizers(inputStream, true);
   }
 
   @SuppressWarnings("unused")
@@ -47,12 +64,7 @@ public class ImageSizerFactory {
             .filter(entry -> entry.getKey().equalsIgnoreCase(mimeType))
             .map(Map.Entry::getValue)
             .findFirst()
-            .orElse(
-                getDefaultSizers()
-                    .orElseThrow(
-                        () ->
-                            new RuntimeException(
-                                "No image sizers configured. Add '*' (wildcard configuration)")));
+            .orElse(getDefaultSizers());
 
     return list.stream()
         .map(ImageSizer::getNew)
@@ -70,10 +82,10 @@ public class ImageSizerFactory {
     return getRecommendedSizers(mimeType).stream().findFirst();
   }
 
-  //  @SuppressWarnings("unused")
-  //    public Optional<ImageSizer> getRecommendedSizer(InputStream inputStream) {
-  //        return getRecommendedSizers(mimeType).stream().findFirst();
-  //    }
+  @SuppressWarnings("unused")
+  public Optional<ImageSizer> getRecommendedSizer(InputStream inputStream) {
+    return getRecommendedSizers(inputStream).stream().findFirst();
+  }
 
   @SuppressWarnings("unused")
   public Map<String, List<ImageSizer>> getConfiguration() {
