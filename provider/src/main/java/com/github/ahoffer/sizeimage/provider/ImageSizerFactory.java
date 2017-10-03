@@ -1,11 +1,9 @@
 package com.github.ahoffer.sizeimage.provider;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.imageio.spi.IIORegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +12,8 @@ public class ImageSizerFactory {
   public static final String MATCH_ANY = "*";
   private static final Logger LOGGER = LoggerFactory.getLogger(ImageSizerFactory.class);
 
-  static {
-    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
-  }
-
+  private int defaultMaxWidth;
+  private int defaultMaxHeight;
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
 
   @SuppressWarnings("unused")
@@ -96,5 +92,21 @@ public class ImageSizerFactory {
   public void setConfiguration(Map configuration) {
     Map copy = Optional.ofNullable(configuration).map(x -> new HashMap(x)).orElseGet(HashMap::new);
     this.configuration = Collections.unmodifiableMap(copy);
+  }
+
+  public int getDefaultMaxWidth() {
+    return defaultMaxWidth;
+  }
+
+  public void setDefaultMaxWidth(int defaultMaxWidth) {
+    this.defaultMaxWidth = defaultMaxWidth;
+  }
+
+  public int getDefaultMaxHeight() {
+    return defaultMaxHeight;
+  }
+
+  public void setDefaultMaxHeight(int defaultMaxHeight) {
+    this.defaultMaxHeight = defaultMaxHeight;
   }
 }

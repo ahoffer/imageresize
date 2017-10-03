@@ -2,6 +2,7 @@ package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.ImageSizerFactory;
+import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
 import javax.inject.Inject;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -34,6 +36,10 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
 public class ContainerTest {
+
+    static {
+        IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
+    }
 
   static final String ARTIFACT_ID = "sizeimage-bundle";
   static final String GROUP_ID = "com.github.ahoffer";
@@ -74,6 +80,7 @@ public class ContainerTest {
   public void testGetSizersByImageStream() throws ClassNotFoundException {
     InputStream vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg.jpg");
     List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
+    // TODO Add assertion.
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {

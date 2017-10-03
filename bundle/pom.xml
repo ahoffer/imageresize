@@ -12,16 +12,23 @@
     <packaging>bundle</packaging>
     <artifactId>sizeimage-bundle</artifactId>
     <dependencies>
+
+        <!--Embed this for JP2K support in the application-->
         <dependency>
             <groupId>com.github.jai-imageio</groupId>
             <artifactId>jai-imageio-core</artifactId>
             <version>${jai-imageio-core.version}</version>
         </dependency>
+
+        <!--Embed this for JP2K support in the application-->
         <dependency>
             <groupId>com.github.jai-imageio</groupId>
             <artifactId>jai-imageio-jpeg2000</artifactId>
             <version>${jpeg2000.version}</version>
         </dependency>
+
+
+        <!--The API and service providers-->
         <dependency>
             <groupId>com.github.ahoffer</groupId>
             <artifactId>sizeimage-api</artifactId>
@@ -32,6 +39,8 @@
             <artifactId>sizeimage-provider</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -69,7 +78,8 @@
                     <instructions>
                         <Export-Package>
                             com.github.ahoffer.sizeimage,
-                            com.github.ahoffer.sizeimage.provider
+                            com.github.ahoffer.sizeimage.provider,
+                            com.github.jaiimageio.*
                         </Export-Package>
                         <Embed-Dependency>
                             *;scope=!provided|test

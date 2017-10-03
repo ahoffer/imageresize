@@ -22,12 +22,6 @@
     </repositories>
     <dependencies>
         <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-core</artifactId>
-            <version>${jai-imageio-core.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.im4java</groupId>
             <artifactId>im4java</artifactId>
             <version>${im4java.version}</version>
@@ -41,11 +35,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons-io.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-jpeg2000</artifactId>
-            <version>1.3.1_CODICE_2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -65,12 +54,5 @@
             <version>1.0.0.1</version>
             <scope>test</scope>
         </dependency>
-
-        <!--<dependency>-->
-        <!--<groupId>org.hamcrest</groupId>-->
-        <!--<artifactId>hamcrest-core</artifactId>-->
-        <!--<version>1.3</version>-->
-        <!--<scope>test</scope>-->
-        <!--</dependency>-->
     </dependencies>
 </project>
