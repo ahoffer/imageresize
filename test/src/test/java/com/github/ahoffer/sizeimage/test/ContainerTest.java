@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.inject.Inject;
+import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.*;
 import org.hamcrest.MatcherAssert;
 import static org.junit.Assert.assertThat;
@@ -79,7 +80,7 @@ public class ContainerTest {
 
   @Test
   public void testGetSizersByJpegStream() throws ClassNotFoundException {
-    InputStream vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg.jpg");
+    InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg.jpg");
     List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
     assertThat("Expect 3 image sizers", list.size(), equalTo(3));
     assertThat(
@@ -94,7 +95,7 @@ public class ContainerTest {
 
   @Test
   public void testGetSizersByJp2Stream() throws ClassNotFoundException {
-    InputStream vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg2000.jpg");
+    InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg2000.jpg");
     List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
     assertThat("Expect 3 image sizers", list.size(), equalTo(3));
     assertThat(
@@ -121,30 +122,22 @@ public class ContainerTest {
     factory.setMaxHeight(int2);
   }
 
-  void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {
-    for (File inputFile : inputFiles) {
-      runSizer(imageSizer, inputFile);
-    }
+  @Test
+  public void testConvenienceMethod() {
+    Optional<BufferedImage> output = factory.size(getResourceAsStream("/sample-jpeg.jpg"));
+    assertThat(output.isPresent(), is(true));
+    assertThat(output.get().getWidth(), equalTo(factory.getMaxWidth()));
   }
 
-  void runSizer(ImageSizer sizer, File input) throws IOException {
-
-    InputStream inputStream = new BufferedInputStream(new FileInputStream(input));
-    final long start = System.nanoTime();
-    LOGGER.info(
-        String.format(
-            "Starting file %s of size %.2f MB...", input.getName(), input.length() / 1e6));
-    String sizerName = sizer.getClass().getSimpleName();
-    LOGGER.info(String.format("\tSelected %s", sizerName));
-
-    BufferedImage output = sizer.setOutputSize(128, 128).setInput(inputStream).size();
-    final long stop = System.nanoTime();
-    java.io.File outputDirObject = new File(OUTPUTDIR);
-    outputDirObject.mkdirs();
-    java.io.File outputFile = new File(outputDirObject, sizerName + "-" + input.getName() + ".png");
-    ImageIO.write(output, "png", outputFile);
-    LOGGER.info(
-        String.format("\tCreated %s thumbnail in %.2f s", input.getName(), (stop - start) / 1.0e9));
+  private InputStream getResourceAsStream(String filename) {
+    InputStream unresetableStream = getClass().getResourceAsStream(filename);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    try {
+      org.apache.commons.io.IOUtils.copy(unresetableStream, outputStream);
+    } catch (IOException e) {
+      fail("Could not get test resource");
+    }
+    return new ByteArrayInputStream(outputStream.toByteArray());
   }
 
   @org.ops4j.pax.exam.Configuration
@@ -177,11 +170,38 @@ public class ContainerTest {
       KarafDistributionOption.features(karafStandardRepo, "scr"),
       KarafDistributionOption.logLevel(LogLevelOption.LogLevel.INFO),
       mavenBundle("com.google.guava", "guava").versionAsInProject().start(),
+      mavenBundle("commons-io", "commons-io").versionAsInProject(),
       mavenBundle(GROUP_ID, ARTIFACT_ID).versionAsInProject().start(),
       vmOption("-Xmx4g"),
       // Avoid focus on OS X
       vmOption("-Djava.awt.headless=true"),
       vmOption("-Dfile.encoding=UTF8")
     };
+  }
+
+  void runSizer(ImageSizer sizer, File input) throws IOException {
+
+    InputStream inputStream = new BufferedInputStream(new FileInputStream(input));
+    final long start = System.nanoTime();
+    LOGGER.info(
+        String.format(
+            "Starting file %s of size %.2f MB...", input.getName(), input.length() / 1e6));
+    String sizerName = sizer.getClass().getSimpleName();
+    LOGGER.info(String.format("\tSelected %s", sizerName));
+
+    BufferedImage output = sizer.setOutputSize(128, 128).setInput(inputStream).size();
+    final long stop = System.nanoTime();
+    java.io.File outputDirObject = new File(OUTPUTDIR);
+    outputDirObject.mkdirs();
+    java.io.File outputFile = new File(outputDirObject, sizerName + "-" + input.getName() + ".png");
+    ImageIO.write(output, "png", outputFile);
+    LOGGER.info(
+        String.format("\tCreated %s thumbnail in %.2f s", input.getName(), (stop - start) / 1.0e9));
+  }
+
+  void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {
+    for (File inputFile : inputFiles) {
+      runSizer(imageSizer, inputFile);
+    }
   }
 }

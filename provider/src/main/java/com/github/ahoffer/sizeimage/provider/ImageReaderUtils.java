@@ -32,6 +32,9 @@ public class ImageReaderUtils {
     try {
       if (markSupported) {
         inputStream.mark(READLIMIT);
+      } else {
+        LOGGER.debug(
+            "Input stream does not support marking. Input stream state cannot be preserved.");
       }
 
       reader = getReader(inputStream);
@@ -48,7 +51,7 @@ public class ImageReaderUtils {
         try {
           inputStream.reset();
         } catch (IOException e) {
-          e.printStackTrace();
+          LOGGER.debug("Could not reset input stream", e);
         }
       }
     }

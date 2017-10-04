@@ -1,6 +1,8 @@
 package com.github.ahoffer.sizeimage.provider;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -119,5 +121,18 @@ public class ImageSizerFactory {
 
   public void setMaxHeight(int defaultMaxHeight) {
     this.maxHeight = defaultMaxHeight;
+  }
+
+  public Optional<BufferedImage> size(InputStream inputStream) {
+    return getRecommendedSizer(inputStream)
+        .map(
+            sizer -> {
+              try {
+                return sizer.setInput(inputStream).size();
+              } catch (IOException e) {
+                LOGGER.debug("Could not resize image", e);
+                return null;
+              }
+            });
   }
 }
