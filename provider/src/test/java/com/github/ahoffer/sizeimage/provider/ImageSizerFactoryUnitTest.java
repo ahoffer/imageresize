@@ -2,10 +2,7 @@ package com.github.ahoffer.sizeimage.provider;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import static com.github.ahoffer.sizeimage.provider.ImageSizerFactory.MATCH_ANY;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;

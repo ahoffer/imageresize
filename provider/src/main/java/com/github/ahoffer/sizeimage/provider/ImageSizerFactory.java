@@ -12,8 +12,8 @@ public class ImageSizerFactory {
   public static final String MATCH_ANY = "*";
   private static final Logger LOGGER = LoggerFactory.getLogger(ImageSizerFactory.class);
 
-  private int defaultMaxWidth;
-  private int defaultMaxHeight;
+  private int maxWidth;
+  private int maxHeight;
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
 
   @SuppressWarnings("unused")
@@ -52,7 +52,7 @@ public class ImageSizerFactory {
   public List<ImageSizer> getRecommendedSizers(
       String mimeType, boolean returnOnlyAvailableImageSizers) {
 
-    List<ImageSizer> list =
+    List<ImageSizer> sizerList =
         configuration
             .entrySet()
             .stream()
@@ -62,10 +62,21 @@ public class ImageSizerFactory {
             .findFirst()
             .orElse(getDefaultSizers());
 
-    return list.stream()
-        .map(ImageSizer::getNew)
-        .filter(imageSizer -> returnOnlyAvailableImageSizers ? imageSizer.isAvailable() : true)
-        .collect(Collectors.toList());
+    List<ImageSizer> availableList =
+        sizerList
+            .stream()
+            .map(ImageSizer::getNew)
+            .filter(imageSizer -> returnOnlyAvailableImageSizers ? imageSizer.isAvailable() : true)
+            .collect(Collectors.toList());
+
+    // Set configuration
+    for (ImageSizer each : availableList) {
+      if (getMaxWidth() > 0 && getMaxHeight() > 0) {
+        each.setOutputSize(getMaxWidth(), getMaxHeight());
+      }
+    }
+
+    return availableList;
   }
 
   @SuppressWarnings("unused")
@@ -94,19 +105,19 @@ public class ImageSizerFactory {
     this.configuration = Collections.unmodifiableMap(copy);
   }
 
-  public int getDefaultMaxWidth() {
-    return defaultMaxWidth;
+  public int getMaxWidth() {
+    return maxWidth;
   }
 
-  public void setDefaultMaxWidth(int defaultMaxWidth) {
-    this.defaultMaxWidth = defaultMaxWidth;
+  public void setMaxWidth(int defaultMaxWidth) {
+    this.maxWidth = defaultMaxWidth;
   }
 
-  public int getDefaultMaxHeight() {
-    return defaultMaxHeight;
+  public int getMaxHeight() {
+    return maxHeight;
   }
 
-  public void setDefaultMaxHeight(int defaultMaxHeight) {
-    this.defaultMaxHeight = defaultMaxHeight;
+  public void setMaxHeight(int defaultMaxHeight) {
+    this.maxHeight = defaultMaxHeight;
   }
 }

@@ -1,7 +1,10 @@
 package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.provider.BasicImageSizer;
 import com.github.ahoffer.sizeimage.provider.ImageSizerFactory;
+import com.github.ahoffer.sizeimage.provider.MagickSizer;
+import com.github.ahoffer.sizeimage.provider.SamplingImageSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -10,12 +13,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.inject.Inject;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
+import org.hamcrest.MatcherAssert;
 import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,16 +41,15 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerSuite.class)
 public class ContainerTest {
 
-    static {
-        IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
-    }
-
   static final String ARTIFACT_ID = "sizeimage-bundle";
   static final String GROUP_ID = "com.github.ahoffer";
   static final String INPUT_DIR = "/Users/aaronhoffer/data/small-image-set/";
   static String OUTPUTDIR = INPUT_DIR + "output/";
-
   static Logger LOGGER = LoggerFactory.getLogger(ContainerTest.class);
+
+  static {
+    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
+  }
 
   @Inject protected ImageSizerFactory factory;
   List<File> inputFiles = new ArrayList<>();
@@ -66,21 +69,56 @@ public class ContainerTest {
             .collect(Collectors.toList());
   }
 
-  @Test
+  //  @Test
   public void runAllDefaultSizers() throws IOException {
     List<ImageSizer> imageSizers = factory.getRecommendedSizers((String) null, false);
-    assertThat("Expect 3 image sizers", imageSizers.size(), equalTo(3));
     for (ImageSizer imageSizer : imageSizers) {
-      assertThat("Image sizer should be available", imageSizer.isAvailable(), is(true));
       runSizerForEveryImage(imageSizer);
     }
   }
 
   @Test
-  public void testGetSizersByImageStream() throws ClassNotFoundException {
+  public void testGetSizersByJpegStream() throws ClassNotFoundException {
     InputStream vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg.jpg");
     List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
-    // TODO Add assertion.
+    assertThat("Expect 3 image sizers", list.size(), equalTo(3));
+    assertThat(
+        "Expected first image sizer to be sampler",
+        list.get(0),
+        instanceOf(SamplingImageSizer.class));
+    assertThat(
+        "Expected second image sizer to be magick", list.get(1), instanceOf(MagickSizer.class));
+    assertThat(
+        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicImageSizer.class));
+  }
+
+  @Test
+  public void testGetSizersByJp2Stream() throws ClassNotFoundException {
+    InputStream vanillaJpegStream = getClass().getResourceAsStream("/sample-jpeg2000.jpg");
+    List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
+    assertThat("Expect 3 image sizers", list.size(), equalTo(3));
+    assertThat(
+        "Expected first image sizer to be magick", list.get(0), instanceOf(MagickSizer.class));
+    assertThat(
+        "Expected second image sizer to be sampling",
+        list.get(1),
+        instanceOf(SamplingImageSizer.class));
+    assertThat(
+        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicImageSizer.class));
+  }
+
+  @Test
+  public void testDefaultExtents() {
+    int int1 = factory.getMaxWidth();
+    int int2 = factory.getMaxHeight();
+    factory.setMaxWidth(1);
+    factory.setMaxHeight(2);
+    Optional<ImageSizer> optionalSizer = factory.getRecommendedSizer((String) null);
+    MatcherAssert.assertThat(optionalSizer.isPresent(), is(true));
+    MatcherAssert.assertThat(optionalSizer.get().getMaxWidth(), is(1));
+    MatcherAssert.assertThat(optionalSizer.get().getMaxHeight(), is(2));
+    factory.setMaxWidth(int1);
+    factory.setMaxHeight(int2);
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {
