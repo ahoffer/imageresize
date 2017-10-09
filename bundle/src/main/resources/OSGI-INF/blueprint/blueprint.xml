@@ -2,7 +2,7 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <!--As far as I can tell, scope protoype does not creat a new instance of the bean's class-->
-    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingImageSizer"/>
+    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingSizer"/>
 
     <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
         <property name="configuration">
@@ -12,7 +12,7 @@
             </map>
         </property>
     </bean>
-    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicImageSizer"/>
+    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
 
     <service id="imageSizeService" auto-export="all-classes">
         <bean class="com.github.ahoffer.sizeimage.provider.ImageSizerFactory">

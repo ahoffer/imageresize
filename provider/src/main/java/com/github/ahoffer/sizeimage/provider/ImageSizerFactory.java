@@ -19,7 +19,7 @@ public class ImageSizerFactory {
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
 
   @SuppressWarnings("unused")
-  List<ImageSizer> getDefaultSizers() {
+  List<ImageSizer> getWildcardSizers() {
     List<ImageSizer> defaultObjects = configuration.get(MATCH_ANY);
     if (Objects.isNull(defaultObjects) || defaultObjects.isEmpty()) {
       return Collections.EMPTY_LIST;
@@ -42,7 +42,7 @@ public class ImageSizerFactory {
       }
     }
     LOGGER.debug("No MIME types for the input stream");
-    return getDefaultSizers();
+    return getWildcardSizers();
   }
 
   @SuppressWarnings("unused")
@@ -62,23 +62,33 @@ public class ImageSizerFactory {
             .filter(entry -> entry.getKey().equalsIgnoreCase(mimeType))
             .map(Map.Entry::getValue)
             .findFirst()
-            .orElse(getDefaultSizers());
+            .orElse(getWildcardSizers());
 
-    List<ImageSizer> availableList =
-        sizerList
-            .stream()
-            .map(ImageSizer::getNew)
-            .filter(imageSizer -> returnOnlyAvailableImageSizers ? imageSizer.isAvailable() : true)
-            .collect(Collectors.toList());
+    List<ImageSizer> availableList = getAvailableOnly(sizerList);
+
+    List<ImageSizer> returnList;
+    if (availableList.isEmpty()) {
+      returnList = availableList;
+    } else {
+      returnList = getAvailableOnly(getWildcardSizers());
+    }
 
     // Set configuration
-    for (ImageSizer each : availableList) {
+    for (ImageSizer each : returnList) {
       if (getMaxWidth() > 0 && getMaxHeight() > 0) {
         each.setOutputSize(getMaxWidth(), getMaxHeight());
       }
     }
 
     return availableList;
+  }
+
+  private List<ImageSizer> getAvailableOnly(List<ImageSizer> sizerList) {
+    return sizerList
+        .stream()
+        .map(ImageSizer::getNew)
+        .filter(ImageSizer::isAvailable)
+        .collect(Collectors.toList());
   }
 
   @SuppressWarnings("unused")
@@ -111,8 +121,9 @@ public class ImageSizerFactory {
     return maxWidth;
   }
 
-  public void setMaxWidth(int defaultMaxWidth) {
-    this.maxWidth = defaultMaxWidth;
+  public void setOutputSize(int maxWidth, int maxHeight) {
+    this.maxWidth = maxWidth;
+    this.maxHeight = maxHeight;
   }
 
   public int getMaxHeight() {

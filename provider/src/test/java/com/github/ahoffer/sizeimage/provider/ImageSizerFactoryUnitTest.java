@@ -29,12 +29,12 @@ public class ImageSizerFactoryUnitTest {
 
   @Before
   public void setUp() throws Exception {
-    imageSizer1 = mock(SamplingImageSizer.class);
+    imageSizer1 = mock(SamplingSizer.class);
     imageSizer2 = mock(MagickSizer.class);
-    imageSizer3 = mock(BasicImageSizer.class);
-    SamplingImageSizer imageSizer11 = mock(SamplingImageSizer.class);
+    imageSizer3 = mock(BasicSizer.class);
+    SamplingSizer imageSizer11 = mock(SamplingSizer.class);
     MagickSizer imageSizer22 = mock(MagickSizer.class);
-    BasicImageSizer imageSizer33 = mock(BasicImageSizer.class);
+    BasicSizer imageSizer33 = mock(BasicSizer.class);
     doReturn(true).when(imageSizer1).isAvailable();
     doReturn(true).when(imageSizer11).isAvailable();
     doReturn(true).when(imageSizer2).isAvailable();
@@ -60,7 +60,7 @@ public class ImageSizerFactoryUnitTest {
 
   @Test
   public void testDefaultSizers() throws Exception {
-    List<ImageSizer> sizers = factory.getDefaultSizers();
+    List<ImageSizer> sizers = factory.getWildcardSizers();
     assertThat(sizers.size(), is(1));
     assertThat(sizers, contains(defaultList.get(0)));
   }
@@ -75,9 +75,9 @@ public class ImageSizerFactoryUnitTest {
   public void testReturnOrder() throws Exception {
     List<ImageSizer> sizers = factory.getRecommendedSizers(MULTIPLE);
     assertThat(sizers, hasSize(multiplesList.size()));
-    assertThat(sizers.get(0), instanceOf(SamplingImageSizer.class));
+    assertThat(sizers.get(0), instanceOf(SamplingSizer.class));
     assertThat(sizers.get(1), instanceOf(MagickSizer.class));
-    assertThat(sizers.get(2), instanceOf(BasicImageSizer.class));
+    assertThat(sizers.get(2), instanceOf(BasicSizer.class));
   }
 
   @Test

@@ -8,7 +8,7 @@ import java.io.InputStream;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 
-public class SampledImageReader {
+public class SamplingImageReader {
   // TODO: Maybe change some of these fields to Optional value holders.
   protected int samplePeriod;
 
@@ -20,31 +20,31 @@ public class SampledImageReader {
 
   private int subsamplingHint = 512;
 
-  public static SampledImageReader of(InputStream source) throws IOException {
-    SampledImageReader object = new SampledImageReader();
+  public static SamplingImageReader of(InputStream source) throws IOException {
+    SamplingImageReader object = new SamplingImageReader();
     object.source = source;
     object.reader = ImageReaderUtils.getReader(source);
     return object;
   }
 
-  public static SampledImageReader of(File sourceFile) throws IOException {
-    SampledImageReader object = new SampledImageReader();
+  public static SamplingImageReader of(File sourceFile) throws IOException {
+    SamplingImageReader object = new SamplingImageReader();
     object.source = new FileInputStream(sourceFile);
     object.reader = ImageReaderUtils.getReader(new FileInputStream(sourceFile));
     return object;
   }
 
-  public SampledImageReader subsamplingHint(int hint) {
+  public SamplingImageReader subsamplingHint(int hint) {
     subsamplingHint = hint;
     return this;
   }
 
-  public SampledImageReader imageIndex(int index) {
+  public SamplingImageReader imageIndex(int index) {
     imageIndex = index;
     return this;
   }
 
-  public SampledImageReader samplePeriod(int period) {
+  public SamplingImageReader samplePeriod(int period) {
     samplePeriod = period;
     return this;
   }

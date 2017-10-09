@@ -51,7 +51,7 @@ public class ProviderUnitTest {
     configuration.put("key", "value");
 
     // Cannot use an abstract class for this test.
-    BasicImageSizer realSizer = new BasicImageSizer();
+    BasicSizer realSizer = new BasicSizer();
     realSizer.setConfiguration(configuration);
     realSizer.setInput(new BufferedInputStream(null));
 

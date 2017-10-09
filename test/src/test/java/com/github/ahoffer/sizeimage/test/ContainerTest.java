@@ -1,10 +1,10 @@
 package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.BasicImageSizer;
+import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.ImageSizerFactory;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
-import com.github.ahoffer.sizeimage.provider.SamplingImageSizer;
+import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -86,11 +86,11 @@ public class ContainerTest {
     assertThat(
         "Expected first image sizer to be sampler",
         list.get(0),
-        instanceOf(SamplingImageSizer.class));
+        instanceOf(SamplingSizer.class));
     assertThat(
         "Expected second image sizer to be magick", list.get(1), instanceOf(MagickSizer.class));
     assertThat(
-        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicImageSizer.class));
+        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
   }
 
   @Test
@@ -103,9 +103,9 @@ public class ContainerTest {
     assertThat(
         "Expected second image sizer to be sampling",
         list.get(1),
-        instanceOf(SamplingImageSizer.class));
+        instanceOf(SamplingSizer.class));
     assertThat(
-        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicImageSizer.class));
+        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
   }
 
   @Test

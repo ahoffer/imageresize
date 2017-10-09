@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.imageio.spi.IIORegistry;
 import static junit.framework.TestCase.fail;
 import org.apache.commons.io.FilenameUtils;
@@ -39,12 +38,12 @@ public class IoTest {
 
     @Test
     public void testBasicSizer() throws IOException {
-        doSize(new BasicImageSizer());
+        doSize(new BasicSizer());
     }
 
     @Test
     public void testSamplingSizer() throws Exception {
-        doSize(new SamplingImageSizer());
+        doSize(new SamplingSizer());
     }
 
     @Test
