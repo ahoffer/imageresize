@@ -105,11 +105,12 @@ The ImageSizerFactory creates a new instances from the prototypes.
 #### Sample ImageSizerFactory Configuration
 
 Sample configuration
-| MIME Type | Sizers | 
-| --------- | ------ |
-| image/tga | MagicSizer |
+
+| MIME Type  | Sizers | 
+| ---------  | ------ |
+| image/tga  | MagicSizer |
 | image/jpeg | Magic Sizer, SamplingSizer |
-| * | SamplingSizer, MagicSizer, BasicSizer | 
+| *          | SamplingSizer, MagicSizer, BasicSizer | 
 
 The configuration above has three rules.
 * It associates the MIME type for a TGA image,`image/tga`, with a `MagicSizer`.
@@ -118,12 +119,13 @@ followed by a `SamplingSizer`
 * It associates the wildcard, `*` with:`SamplingSizer`, `MagicSizer`, and `BasicSizer`.
 
 Here is the definition of the sample configuration in Java:
+
 ```java
 Map<String, List<ImageSizer>> configuration = new HashMap<>();
-configuration.put("image/tga", 
-    Arrays.asList(new MagickSizer()));
 configurations.put("image/jpeg", 
     Arrays.asList(new SamplingSizer()));
+configuration.put("image/tga", 
+    Arrays.asList(new MagickSizer()));
 configuration.put("*", 
     Arrays.asList(new SamplingSizer(),
         new MagickSizer(),
@@ -138,32 +140,41 @@ either accept the MIME type (as a String), or an input stream of an image.
 
 How do the factory methods behave with the sample configuration? 
 Before answering that question, let's assume that the ImageMagick library is not installed
- on the machine, so `MagicSizer` is not actually available, even though it appears in the 
- configuration.
+on the machine, so `MagicSizer` is not actually available, even though it appears in the 
+configuration.
 
 Here is how the ImageSizerFactory behaves with the sample configuration:
-
 
  | Method                 | Input               | Output                                      |
  | ---------------------- | ------------        | ------------------------------------------- |
  | `getRecommendedSizers` | "image\jpeg"        | List with one item, `SamplingSizer`, as configured.
- | `getRecommendedSizers` | "image\tga"         | List of size 2: {`SamplingSizer`, `BasicSizer`}. The factory successfully matches the input to `MagicSizer`, but `MagicSizer` is unavailable and is filtered out of the results. The factory uses the wildcard sizers (`*` in the configuration) are used  |
- | `getRecommendedSizers` | "image\tga", false  | List with one item, `MagickSizer`. The input `false` not to filter out unavailable results. |
- | `getRecommendedSizers` | "image\foo"         | List of size 2: {`SamplingSizer`, `BasicSizer`}. The MIME type "image\foo" is not configured, so the wildcard sizers are used. The `MagicSizer` is filtered out because it is not available |
+ | `getRecommendedSizers` | "image\tga"         | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
+                                                  The factory successfully matches the input to `MagicSizer`, 
+                                                  but `MagicSizer` is unavailable and is filtered out of the results. 
+                                                  The factory uses the wildcard sizers (`*` in the configuration) |
+ | `getRecommendedSizers` | "image\tga", false  | List with one item, `MagickSizer`. 
+                                                  The input `false` means "do not to filter out unavailable results". |
+ | `getRecommendedSizers` | "image\foo"         | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
+                                                  The MIME type "image\foo" is not configured, so the wildcard 
+                                                  sizers are used. The `MagicSizer` is filtered out because 
+                                                  it is not available |
  | `getRecommendedSizers` | InputStream of JPEG image | List with one item, `SamplingSizer`. 
  | `getRecommendedSizers` | InputStream of TGA image  | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
- | `getRecommendedSizers` | `null`              | List of size 2: {`SamplingSizer`, `BasicSizer`}. The wildcard sizers are selected, but `ImageMagick` is filtered out because it is not available |
+ | `getRecommendedSizers` | `null`              | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
+                                                  The wildcard sizers are selected, but `ImageMagick` 
+                                                 is filtered out because it is not available. |
 
  
  | Method                 | Input               | Output |
  | ---------------------- | ------------        | -------- |
- | `getRecommendedSizer`  | "image\jpeg"        | `Optional` containing instance of `SamplingSizer` |
- | `getRecommendedSizer`  | "image\foo"         | `Optional` containing instance of `SamplingSizer` |
+ | `getRecommendedSizer`  | "image\jpeg"        | `Optional` containing instance of `SamplingSizer`, as configured |
+ | `getRecommendedSizer`  | "image\foo"         | `Optional` containing instance of `SamplingSizer` because it is the 
+                                                   first sizer in the list of wildcard sizers |
 
 
 ### Facade API
- It also has a facade method, `size`
- 
+ It also has a facade method, `size`. Assuming the `maxWidth` and `maxHeight` are set, 
+ factory will find the best sizer and perfrom the resize.
  
 #### JPEG 2000
 The JPEG 2000 decoder that is freely available for Java is slow, and the 
@@ -175,7 +186,6 @@ The best option free and open JPEG 200 decoder is to use the
 ImageMagick is often packaged with the OpenJPEG 
 library and will use it to process JPEG 2000 images. It is at least an order of
 magnitude faster than the Java JAI module for JPEG 2000.
-
 
 #### TODO
 1. Write readme
