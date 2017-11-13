@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 
 public abstract class AbstractImageSizer implements ImageSizer {
@@ -33,7 +34,10 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   public void setConfiguration(Map<String, String> configuration) {
-    Map copy = Optional.ofNullable(configuration).map(x -> new HashMap(x)).orElseGet(HashMap::new);
+    final Map copy =
+        Optional.ofNullable(configuration)
+            .map((Function<Map<String, String>, HashMap>) HashMap::new)
+            .orElseGet(HashMap::new);
     this.configuration = copy;
   }
 

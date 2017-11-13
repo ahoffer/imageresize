@@ -2,7 +2,7 @@ package com.github.ahoffer.sizeimage.test;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
-import com.github.ahoffer.sizeimage.provider.ImageSizerFactory;
+import com.github.ahoffer.sizeimage.provider.BeLittle;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
@@ -52,7 +52,7 @@ public class ContainerTest {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
   }
 
-  @Inject protected ImageSizerFactory factory;
+  @Inject protected BeLittle factory;
   List<File> inputFiles = new ArrayList<>();
 
   public static String karafVersion() {
@@ -72,7 +72,7 @@ public class ContainerTest {
 
   //  @Test
   public void runAllDefaultSizers() throws IOException {
-    List<ImageSizer> imageSizers = factory.getRecommendedSizers((String) null, false);
+    List<ImageSizer> imageSizers = factory.getSizersFor((String) null, false, true);
     for (ImageSizer imageSizer : imageSizers) {
       runSizerForEveryImage(imageSizer);
     }
@@ -81,7 +81,7 @@ public class ContainerTest {
   @Test
   public void testGetSizersByJpegStream() throws ClassNotFoundException {
     InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg.jpg");
-    List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
+    List<ImageSizer> list = factory.getSizerFor(vanillaJpegStream);
     assertThat("Expect 3 image sizers", list.size(), equalTo(3));
     assertThat(
         "Expected first image sizer to be sampler",
@@ -96,7 +96,7 @@ public class ContainerTest {
   @Test
   public void testGetSizersByJp2Stream() throws ClassNotFoundException {
     InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg2000.jpg");
-    List<ImageSizer> list = factory.getRecommendedSizers(vanillaJpegStream);
+    List<ImageSizer> list = factory.getSizerFor(vanillaJpegStream);
     assertThat("Expect 3 image sizers", list.size(), equalTo(3));
     assertThat(
         "Expected first image sizer to be magick", list.get(0), instanceOf(MagickSizer.class));
@@ -114,7 +114,7 @@ public class ContainerTest {
     int int2 = factory.getMaxHeight();
     factory.setMaxWidth(1);
     factory.setMaxHeight(2);
-    Optional<ImageSizer> optionalSizer = factory.getRecommendedSizer((String) null);
+    Optional<ImageSizer> optionalSizer = factory.getSizerFor((String) null);
     MatcherAssert.assertThat(optionalSizer.isPresent(), is(true));
     MatcherAssert.assertThat(optionalSizer.get().getMaxWidth(), is(1));
     MatcherAssert.assertThat(optionalSizer.get().getMaxHeight(), is(2));
@@ -185,11 +185,11 @@ public class ContainerTest {
     final long start = System.nanoTime();
     LOGGER.info(
         String.format(
-            "Starting file %s of size %.2f MB...", input.getName(), input.length() / 1e6));
+            "Starting file %s of generate %.2f MB...", input.getName(), input.length() / 1e6));
     String sizerName = sizer.getClass().getSimpleName();
     LOGGER.info(String.format("\tSelected %s", sizerName));
 
-    BufferedImage output = sizer.setOutputSize(128, 128).setInput(inputStream).size();
+    BufferedImage output = sizer.setOutputSize(128, 128).setInput(inputStream).generate();
     final long stop = System.nanoTime();
     java.io.File outputDirObject = new File(OUTPUTDIR);
     outputDirObject.mkdirs();

@@ -1,10 +1,11 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static javax.imageio.ImageIO.createImageInputStream;
+import static javax.imageio.ImageIO.getImageReaders;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import static javax.imageio.ImageIO.createImageInputStream;
-import static javax.imageio.ImageIO.getImageReaders;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.lang3.Validate;

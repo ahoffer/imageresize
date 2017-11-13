@@ -59,7 +59,7 @@ public class IoTest {
     private void doSize(ImageSizer sizer) throws IOException {
         sizer.setInput(data.vanillaJpegStream);
         sizer.setOutputSize(PIXELS, PIXELS);
-        BufferedImage output = sizer.size();
+        BufferedImage output = sizer.generate();
         assertThat(output.getWidth(), equalTo(PIXELS));
         assertThat(output.getHeight(), org.hamcrest.Matchers.lessThanOrEqualTo(PIXELS));
 

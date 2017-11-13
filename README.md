@@ -9,7 +9,7 @@ method declarations:
 or GIF.
 * Methods to get and set a configuration. The configuration can be used by 
 implementors of `ImageSize`.
-* A method to set the desired size of the output image.
+* A method to set the desired generate of the output image.
 * A method to initiate the sizing operation and return a `BufferedImage`
 
 
@@ -89,13 +89,13 @@ The ImageSizerFactory creates a new instances from the prototypes.
   * `setConfiguration` 
   * `getConfiguration`
 
-* Set size of output image, in pixels
+* Set generate of output image, in pixels
   * `setOutputSize(int maxWidth, int maxHeight)
   * If present, the image sizer will set the values for width and height on image sizers 
   before returning them to the caller. 
   * This functionality exists because when generating thumbnails, one usually expects all 
-  thubmnails to be the same size. This method provides a convenient way to set the values
-  in a single place, instead of configuring output size for multiple sizers.
+  thubmnails to be the same generate. This method provides a convenient way to set the values
+  in a single place, instead of configuring output generate for multiple sizers.
 
 * Sizer of output image, in pixels
   * `setMaxHeight`
@@ -148,19 +148,19 @@ Here is how the ImageSizerFactory behaves with the sample configuration:
  | Method                 | Input               | Output                                      |
  | ---------------------- | ------------        | ------------------------------------------- |
  | `getRecommendedSizers` | "image\jpeg"        | List with one item, `SamplingSizer`, as configured.
- | `getRecommendedSizers` | "image\tga"         | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
+ | `getRecommendedSizers` | "image\tga"         | List of generate 2: {`SamplingSizer`, `BasicSizer`}. 
                                                   The factory successfully matches the input to `MagicSizer`, 
                                                   but `MagicSizer` is unavailable and is filtered out of the results. 
                                                   The factory uses the wildcard sizers (`*` in the configuration) |
  | `getRecommendedSizers` | "image\tga", false  | List with one item, `MagickSizer`. 
                                                   The input `false` means "do not to filter out unavailable results". |
- | `getRecommendedSizers` | "image\foo"         | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
+ | `getRecommendedSizers` | "image\foo"         | List of generate 2: {`SamplingSizer`, `BasicSizer`}. 
                                                   The MIME type "image\foo" is not configured, so the wildcard 
                                                   sizers are used. The `MagicSizer` is filtered out because 
                                                   it is not available |
  | `getRecommendedSizers` | InputStream of JPEG image | List with one item, `SamplingSizer`. 
- | `getRecommendedSizers` | InputStream of TGA image  | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
- | `getRecommendedSizers` | `null`              | List of size 2: {`SamplingSizer`, `BasicSizer`}. 
+ | `getRecommendedSizers` | InputStream of TGA image  | List of generate 2: {`SamplingSizer`, `BasicSizer`}. 
+ | `getRecommendedSizers` | `null`              | List of generate 2: {`SamplingSizer`, `BasicSizer`}. 
                                                   The wildcard sizers are selected, but `ImageMagick` 
                                                  is filtered out because it is not available. |
 
@@ -173,7 +173,7 @@ Here is how the ImageSizerFactory behaves with the sample configuration:
 
 
 ### Facade API
- It also has a facade method, `size`. Assuming the `maxWidth` and `maxHeight` are set, 
+ It also has a facade method, `generate`. Assuming the `maxWidth` and `maxHeight` are set, 
  factory will find the best sizer and perfrom the resize.
  
 #### JPEG 2000
@@ -191,6 +191,8 @@ magnitude faster than the Java JAI module for JPEG 2000.
 1. Write readme
     1.1. Suggest new `ImageSizers` for OpenJPEG
 2  Write a sizer for that geo image library Derek is using
-2. Create Karaf feature.
+3. Turn Factory and Image mime type guess into interfaces. Use instances of implementors 
+   so we can inject them with blueprint.
+3. Create Karaf feature.
 
 

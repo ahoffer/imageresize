@@ -6,7 +6,7 @@ import net.coobird.thumbnailator.Thumbnails;
 
 public class BasicSizer extends AbstractImageSizer {
 
-  public BufferedImage size() throws IOException {
+  public BufferedImage generate() throws IOException {
     validateBeforeResizing();
     BufferedImage output =
         Thumbnails.of(inputStream).size(getMaxWidth(), getMaxHeight()).asBufferedImage();

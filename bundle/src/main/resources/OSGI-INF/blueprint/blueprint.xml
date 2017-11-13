@@ -15,7 +15,7 @@
     <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
 
     <service id="imageSizeService" auto-export="all-classes">
-        <bean class="com.github.ahoffer.sizeimage.provider.ImageSizerFactory">
+        <bean class="com.github.ahoffer.sizeimage.provider.BeLittle">
             <property name="maxWidth" value="256"/>
             <property name="maxHeight" value="256"/>
             <property name="configuration">

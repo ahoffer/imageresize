@@ -1,24 +1,33 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import com.github.ahoffer.sizeimage.ImageSizer;
-import static com.github.ahoffer.sizeimage.provider.ImageSizerFactory.MATCH_ANY;
-import java.util.*;
-import static org.hamcrest.CoreMatchers.*;
+import static com.github.ahoffer.sizeimage.provider.BeLittle.MATCH_ANY;
+import static org.hamcrest.CoreMatchers.everyItem;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import org.junit.Before;
-import org.junit.Test;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-public class ImageSizerFactoryUnitTest {
+import com.github.ahoffer.sizeimage.ImageSizer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+public class BeLittleUnitTest {
 
   public static final String EMPTY = "empty";
   public static final String SINGLE = "single";
   public static final String MULTIPLE = "multiple";
-  private ImageSizerFactory factory;
+  private BeLittle beLittle;
   private ImageSizer imageSizer1;
   private ImageSizer imageSizer2;
   private ImageSizer imageSizer3;
@@ -29,7 +38,8 @@ public class ImageSizerFactoryUnitTest {
 
   @Before
   public void setUp() throws Exception {
-    imageSizer1 = mock(SamplingSizer.class);
+    beLittle = new BeLittle();
+    imageSizer1 = Mockito.mock(SamplingSizer.class);
     imageSizer2 = mock(MagickSizer.class);
     imageSizer3 = mock(BasicSizer.class);
     SamplingSizer imageSizer11 = mock(SamplingSizer.class);
@@ -44,7 +54,6 @@ public class ImageSizerFactoryUnitTest {
     doReturn(imageSizer11).when(imageSizer1).getNew();
     doReturn(imageSizer22).when(imageSizer2).getNew();
     doReturn(imageSizer33).when(imageSizer3).getNew();
-    factory = new ImageSizerFactory();
 
     Map<String, List<ImageSizer>> configuration = new HashMap<>();
     defaultList = Arrays.asList(imageSizer1);
@@ -55,25 +64,25 @@ public class ImageSizerFactoryUnitTest {
     configuration.put(SINGLE, singletonList);
     multiplesList = Arrays.asList(imageSizer1, imageSizer2, imageSizer3);
     configuration.put(MULTIPLE, multiplesList);
-    factory.setConfiguration(configuration);
+    beLittle.setConfiguration(configuration);
   }
 
   @Test
   public void testDefaultSizers() throws Exception {
-    List<ImageSizer> sizers = factory.getWildcardSizers();
+    List<ImageSizer> sizers = beLittle.getWildcardSizers();
     assertThat(sizers.size(), is(1));
     assertThat(sizers, contains(defaultList.get(0)));
   }
 
   @Test
   public void testConfigurationForEmptyList() {
-    List<ImageSizer> sizers = factory.getRecommendedSizers("empty");
+    List<ImageSizer> sizers = beLittle.getSizerFor("empty");
     assertThat("Expected empty list", sizers, empty());
   }
 
   @Test
   public void testReturnOrder() throws Exception {
-    List<ImageSizer> sizers = factory.getRecommendedSizers(MULTIPLE);
+    List<ImageSizer> sizers = beLittle.getSizerFor(MULTIPLE);
     assertThat(sizers, hasSize(multiplesList.size()));
     assertThat(sizers.get(0), instanceOf(SamplingSizer.class));
     assertThat(sizers.get(1), instanceOf(MagickSizer.class));
@@ -83,14 +92,12 @@ public class ImageSizerFactoryUnitTest {
   @Test
   public void testInitializaiton() {
     assertThat(
-        "Configuration should be empty map",
-        new ImageSizerFactory().getConfiguration().isEmpty(),
-        is(true));
+        "Configuration should be empty map", new BeLittle().getConfiguration().isEmpty(), is(true));
   }
 
   @Test
   public void testPrototypeBehavior() {
-    List<ImageSizer> sizers = factory.getRecommendedSizers(SINGLE);
+    List<ImageSizer> sizers = beLittle.getSizerFor(SINGLE);
     assertThat(sizers, not(empty()));
     assertThat("Wrong kind of object", sizers.get(0), instanceOf(ImageSizer.class));
     assertThat(sizers.get(0), not(singletonList.get(0)));
@@ -98,18 +105,18 @@ public class ImageSizerFactoryUnitTest {
 
   @Test
   public void configurationIsNull() {
-    factory.setConfiguration(null);
-    assertThat(factory.getRecommendedSizer(MULTIPLE).isPresent(), is(false));
+    beLittle.setConfiguration(null);
+    assertThat(beLittle.getSizerFor(MULTIPLE).isPresent(), is(false));
   }
 
   @Test
   public void testNullMimeType() {
-    assertThat(factory.getRecommendedSizers((String) null), hasItem(instanceOf(ImageSizer.class)));
+    assertThat(beLittle.getSizerFor((String) null), hasItem(instanceOf(ImageSizer.class)));
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testUnmodifiableList() {
-    factory.getConfiguration().get(MATCH_ANY).add(imageSizer2);
+    beLittle.getConfiguration().get(MATCH_ANY).add(imageSizer2);
   }
 
   @Test
@@ -118,17 +125,17 @@ public class ImageSizerFactoryUnitTest {
 
     mockImageSizer = mock(ImageSizer.class);
     setReturnValueForIsAvailable(mockImageSizer, true);
-    assertThat(factory.getRecommendedSizer((String) null).isPresent(), is(true));
+    assertThat(beLittle.getSizerFor((String) null).isPresent(), is(true));
 
     mockImageSizer = mock(ImageSizer.class);
     setReturnValueForIsAvailable(mockImageSizer, false);
-    assertThat(factory.getRecommendedSizer((String) null).isPresent(), is(false));
+    assertThat(beLittle.getSizerFor((String) null).isPresent(), is(false));
   }
 
   @Test
   public void testBooleanFalseWithNoDefault() {
-    factory.setConfiguration(null);
-    List<ImageSizer> list = factory.getRecommendedSizers((String) null, false);
+    beLittle.setConfiguration(null);
+    List<ImageSizer> list = beLittle.getSizersFor((String) null, false, true);
     assertThat(list, empty());
   }
 
@@ -137,10 +144,10 @@ public class ImageSizerFactoryUnitTest {
     ImageSizer mockImageSizer = mock(ImageSizer.class);
     setReturnValueForIsAvailable(mockImageSizer, false);
     assertThat(
-        factory.getRecommendedSizers(MATCH_ANY, false), everyItem(instanceOf(ImageSizer.class)));
+        beLittle.getSizersFor(MATCH_ANY, false, true), everyItem(instanceOf(ImageSizer.class)));
 
     setReturnValueForIsAvailable(mockImageSizer, false);
-    assertThat(factory.getRecommendedSizers(MATCH_ANY, true), empty());
+    assertThat(beLittle.getSizersFor(MATCH_ANY, true, true), empty());
   }
 
   private void setReturnValueForIsAvailable(ImageSizer mockImageSizer, boolean returnValue) {
@@ -153,6 +160,6 @@ public class ImageSizerFactoryUnitTest {
     doReturn(clone).when(mockImageSizer).getNew();
     HashMap configuration = new HashMap();
     configuration.put(MATCH_ANY, Arrays.asList(mockImageSizer));
-    factory.setConfiguration(configuration);
+    beLittle.setConfiguration(configuration);
   }
 }

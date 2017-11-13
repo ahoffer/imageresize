@@ -64,10 +64,10 @@ public class MagickSizer extends AbstractImageSizer {
     return exec;
   }
 
-  public BufferedImage size() throws IOException {
+  public BufferedImage generate() throws IOException {
 
-    // TODO if MIME type is JPEG, add this option "-define jpeg:size=200x200" and substitute a
-    // size that is twice the size of the desired thumbnail.
+    // TODO if MIME type is JPEG, add this option "-define jpeg:generate=200x200" and substitute a
+    // generate that is twice the generate of the desired thumbnail.
     validateBeforeResizing();
 
     // TODO use -sample to improve memory usage
@@ -110,7 +110,7 @@ public class MagickSizer extends AbstractImageSizer {
 
     if (!isAvailable()) {
       throw new RuntimeException(
-          "Cannot size image. ImageMagick executable not found. "
+          "Cannot generate image. ImageMagick executable not found. "
               + "Check executable path. \n "
               + "Process does not inherit a PATH environment variable");
     }

@@ -1,13 +1,14 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ public class ProviderUnitTest {
     sizer =
         new AbstractImageSizer() {
           @Override
-          public BufferedImage size() throws IOException {
+          public BufferedImage generate() throws IOException {
             return null;
           }
         };

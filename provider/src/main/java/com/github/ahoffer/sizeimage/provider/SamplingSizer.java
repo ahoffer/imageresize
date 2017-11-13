@@ -8,7 +8,7 @@ public class SamplingSizer extends AbstractImageSizer {
 
   public static final String SAMPLING_PERIOD = "samplePeriod";
 
-  public BufferedImage size() throws IOException {
+  public BufferedImage generate() throws IOException {
     SamplingImageReader reader = SamplingImageReader.of(inputStream);
     if (configuration.containsKey(SAMPLING_PERIOD)) {
       reader.samplePeriod(Integer.valueOf(configuration.get(SAMPLING_PERIOD)));

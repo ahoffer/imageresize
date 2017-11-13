@@ -1,33 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <artifactId>sizeimage-parent</artifactId>
-        <groupId>com.github.ahoffer</groupId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>sizeimage-api</artifactId>
-    <packaging>jar</packaging>
-    <dependencies>
-        <dependency>
-            <groupId>net.coobird</groupId>
-            <artifactId>thumbnailator</artifactId>
-            <version>0.4.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.6</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <parent>
+    <artifactId>sizeimage-parent</artifactId>
+    <groupId>com.github.ahoffer</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>sizeimage-api</artifactId>
+  <packaging>jar</packaging>
 </project>
