@@ -176,9 +176,9 @@ public class ContainerTest {
     InputStream inputStream = new BufferedInputStream(new FileInputStream(input));
     final long start = System.nanoTime();
     LOGGER.info(
-        String.format("Starting %s size %.2f MB...", input.getName(), input.length() / 1e6));
+        String.format("\nStarting %s size %.2f MB...", input.getName(), input.length() / 1e6));
     String sizerName = sizer.getClass().getSimpleName();
-    LOGGER.info(String.format("\tSelected %s", sizerName));
+    LOGGER.info(String.format("Selected %s", sizerName));
 
     BufferedImage output = sizer.setInput(inputStream).generate();
     final long stop = System.nanoTime();
@@ -186,7 +186,7 @@ public class ContainerTest {
     outputDirObject.mkdirs();
     java.io.File outputFile = new File(outputDirObject, sizerName + "-" + input.getName() + ".png");
     ImageIO.write(output, "png", outputFile);
-    LOGGER.info(String.format("\tCreated thumbnail in %.2f s", (stop - start) / 1.0e9));
+    LOGGER.info(String.format("Created thumbnail in %.2f s", (stop - start) / 1.0e9));
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {
