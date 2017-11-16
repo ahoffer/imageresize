@@ -15,9 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,13 +116,21 @@ public class BeLittle {
     return maxWidth;
   }
 
-  public synchronized void setOutputSize(int maxWidth, int maxHeight) {
+  public void setMaxWidth(int maxWidth) {
     this.maxWidth = maxWidth;
-    this.maxHeight = maxHeight;
+  }
+
+  public synchronized void setOutputSize(int maxWidth, int maxHeight) {
+    setMaxWidth(maxWidth);
+    setMaxHeight(maxHeight);
   }
 
   public int getMaxHeight() {
     return maxHeight;
+  }
+
+  public void setMaxHeight(int maxHeight) {
+    this.maxHeight = maxHeight;
   }
 
   /**

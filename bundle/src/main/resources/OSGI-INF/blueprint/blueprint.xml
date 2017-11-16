@@ -1,78 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <!--As far as I can tell, scope protoype does not creat a new instance of the bean's class-->
-    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingSizer"/>
+  <!--As far as I can tell, scope protoype does not create a new instance of the bean's class-->
+  <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingSizer"/>
 
-    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
-        <property name="configuration">
-            <map>
-                <entry key="pathToImageMagickExecutables" value="/opt/local/bin/"/>
-                <entry key="outputFormat" value="png"/>
-            </map>
-        </property>
+  <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
+    <property name="configuration">
+      <map>
+        <entry key="pathToImageMagickExecutables" value="/opt/local/bin/"/>
+        <entry key="outputFormat" value="png"/>
+      </map>
+    </property>
+  </bean>
+  <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
+
+  <service id="belittle" auto-export="all-classes">
+    <bean class="com.github.ahoffer.sizeimage.provider.BeLittle">
+      <property name="maxWidth" value="128"/>
+      <property name="maxHeight" value="128"/>
+      <property name="configuration">
+        <map>
+          <entry key="*">
+            <list>
+              <ref component-id="sampling"/>
+              <ref component-id="magick"/>
+              <ref component-id="basic"/>
+            </list>
+          </entry>
+          <entry key="image/jp2">
+            <list>
+              <ref component-id="magick"/>
+              <ref component-id="sampling"/>
+              <ref component-id="basic"/>
+            </list>
+          </entry>
+          <entry key="image/jpx">
+            <list>
+              <ref component-id="magick"/>
+              <ref component-id="sampling"/>
+              <ref component-id="basic"/>
+            </list>
+          </entry>
+          <entry key="image/jpm">
+            <list>
+              <ref component-id="magick"/>
+              <ref component-id="sampling"/>
+              <ref component-id="basic"/>
+            </list>
+          </entry>
+        </map>
+      </property>
     </bean>
-    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
-
-    <service id="imageSizeService" auto-export="all-classes">
-        <bean class="com.github.ahoffer.sizeimage.provider.BeLittle">
-            <property name="maxWidth" value="256"/>
-            <property name="maxHeight" value="256"/>
-            <property name="configuration">
-                <map>
-                    <entry key="*">
-                        <list>
-                            <ref component-id="sampling"/>
-                            <ref component-id="magick"/>
-                            <ref component-id="basic"/>
-                        </list>
-                    </entry>
-                    <entry key="image/jp2">
-                        <list>
-                            <ref component-id="magick"/>
-                            <ref component-id="sampling"/>
-                            <ref component-id="basic"/>
-                        </list>
-                    </entry>
-                    <entry key="image/jpx">
-                        <list>
-                            <ref component-id="magick"/>
-                            <ref component-id="sampling"/>
-                            <ref component-id="basic"/>
-                        </list>
-                    </entry>
-                    <entry key="image/jpm">
-                        <list>
-                            <ref component-id="magick"/>
-                            <ref component-id="sampling"/>
-                            <ref component-id="basic"/>
-                        </list>
-                    </entry>
-                </map>
-            </property>
-        </bean>
-    </service>
+  </service>
 
 
-    <!--Decided not to register the concrete ImageSizers as services. Leave them wholely as POJOs to reduce the number -->
-    <!--services floating around in the OSGi container.-->
-    <!--_____________________________________________________________________________________________________________-->
-    <!--<service id="samplingSizer" auto-export="interfaces" ranking="70" ref="sampling">-->
-    <!--<service-properties>-->
-    <!--<entry key="name" value="sampling"/>-->
-    <!--</service-properties>-->
-    <!--</service>-->
+  <!--Decided not to register the concrete ImageSizers as services. Leave them wholely as POJOs to reduce the number -->
+  <!--services floating around in the OSGi container.-->
+  <!--_____________________________________________________________________________________________________________-->
+  <!--<service id="samplingSizer" auto-export="interfaces" ranking="70" ref="sampling">-->
+  <!--<service-properties>-->
+  <!--<entry key="name" value="sampling"/>-->
+  <!--</service-properties>-->
+  <!--</service>-->
 
-    <!--<service id="magickSizer" auto-export="interfaces" ranking="60" ref="magick">-->
-    <!--<service-properties>-->
-    <!--<entry key="name" value="magick"/>-->
-    <!--</service-properties>-->
-    <!--</service>-->
+  <!--<service id="magickSizer" auto-export="interfaces" ranking="60" ref="magick">-->
+  <!--<service-properties>-->
+  <!--<entry key="name" value="magick"/>-->
+  <!--</service-properties>-->
+  <!--</service>-->
 
-    <!--<service id="basicSizer" auto-export="interfaces" ranking="50" ref="baisc">-->
-    <!--<service-properties>-->
-    <!--<entry key="name" value="basic"/>-->
-    <!--</service-properties>-->
-    <!--</service>-->
+  <!--<service id="basicSizer" auto-export="interfaces" ranking="50" ref="baisc">-->
+  <!--<service-properties>-->
+  <!--<entry key="name" value="basic"/>-->
+  <!--</service-properties>-->
+  <!--</service>-->
 
 </blueprint>

@@ -1,106 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>com.github.ahoffer</groupId>
-        <artifactId>sizeimage</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>com.github.ahoffer</groupId>
+    <artifactId>sizeimage</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
 
-    <packaging>bundle</packaging>
-    <artifactId>bundle</artifactId>
-    <dependencies>
+  <packaging>bundle</packaging>
+  <artifactId>bundle</artifactId>
+  <dependencies>
 
-        <!--Embed this for JP2K support in the application-->
-        <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-core</artifactId>
-            <version>${jai-imageio-core.version}</version>
-        </dependency>
+    <!--Embed this for JP2K support in the application-->
+    <dependency>
+      <groupId>com.github.jai-imageio</groupId>
+      <artifactId>jai-imageio-core</artifactId>
+      <version>${jai-imageio-core.version}</version>
+    </dependency>
 
-        <!--Embed this for JP2K support in the application-->
-        <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-jpeg2000</artifactId>
-            <version>${jpeg2000.version}</version>
-        </dependency>
-
-
-        <!--The API and service ImageSizerCollection-->
-        <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>provider</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+    <!--Embed this for JP2K support in the application-->
+    <dependency>
+      <groupId>com.github.jai-imageio</groupId>
+      <artifactId>jai-imageio-jpeg2000</artifactId>
+      <version>${jpeg2000.version}</version>
+    </dependency>
 
 
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>${org.osgi.core.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito-core.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>23.0-android</version>
-        </dependency>
-    </dependencies>
-    <build>
-        <plugins>
+    <!--The API and service ImageSizerCollection-->
+    <dependency>
+      <groupId>com.github.ahoffer</groupId>
+      <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ahoffer</groupId>
+      <artifactId>provider</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
-            <!--Create bundle-->
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.3.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            com.github.ahoffer.sizeimage,
-                            com.github.ahoffer.sizeimage.provider,
-                            com.github.jaiimageio.*
-                        </Export-Package>
-                        <Embed-Dependency>
-                            *;scope=!provided|test
-                        </Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
-                        <Import-Package>
-                            !sun.security.action,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
-    <!--Additional Repos-->
-    <repositories>
-        <repository>
-            <id>codice</id>
-            <name>Codice Repository</name>
-            <url>https://artifacts.codice.org/content/groups/public/</url>
-        </repository>
-    </repositories>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>${org.osgi.core.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito-core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>23.0-android</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+
+      <!--Create bundle-->
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>3.3.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              com.github.ahoffer.sizeimage.*,
+              com.github.jaiimageio.*
+            </Export-Package>
+            <Embed-Dependency>
+              *;scope=!provided|test
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Import-Package>
+              !sun.security.action,
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!--Additional Repos-->
+  <repositories>
+    <repository>
+      <id>codice</id>
+      <name>Codice Repository</name>
+      <url>https://artifacts.codice.org/content/groups/public/</url>
+    </repository>
+  </repositories>
 </project>

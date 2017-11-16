@@ -38,7 +38,7 @@ public class BeLittleHelper {
       if (markSupported) {
         inputStream.mark(readLimit);
       } else {
-        LOGGER.debug(
+        LOGGER.info(
             "Input stream does not support marking. Input stream state cannot be preserved.");
       }
 

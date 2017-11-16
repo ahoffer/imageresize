@@ -1,6 +1,5 @@
 package com.github.ahoffer.sizeimage.test;
 
-import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -19,19 +18,11 @@ import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.inject.Inject;
@@ -57,8 +48,7 @@ public class ContainerTest {
 
   static final String ARTIFACT_ID = "bundle";
   static final String GROUP_ID = "com.github.ahoffer";
-  static final String INPUT_DIR = "/Users/aaronhoffer/data/small-image-set/";
-  static String OUTPUTDIR = INPUT_DIR + "output/";
+  static String OUTPUTDIR = TestData.INPUT_DIR + "output/";
   static Logger LOGGER = LoggerFactory.getLogger(ContainerTest.class);
 
   static {
@@ -67,7 +57,7 @@ public class ContainerTest {
 
   @Inject protected BeLittle belittler;
 
-  List<File> inputFiles = new ArrayList<>();
+  TestData data;
 
   public static String karafVersion() {
     return "4.1.2";
@@ -75,76 +65,69 @@ public class ContainerTest {
 
   @Before
   public void setup() throws IOException {
-    inputFiles =
-        Files.list(Paths.get(INPUT_DIR))
-            .map(Path::toFile)
-            .filter(File::isFile)
-            .filter(file -> !file.getName().equals(".DS_Store"))
-            .collect(Collectors.toList());
+    data = new TestData();
   }
 
-  //  @Test
-  public void runAllSizers() throws IOException {
+  @Test
+  public void runAllAvailableSizers() throws IOException {
     ImageSizerCollection imageSizers = belittler.getSizersFor((String) null);
-    for (ImageSizer imageSizer : imageSizers.getAll()) {
+    for (ImageSizer imageSizer : imageSizers.getAvailable()) {
       runSizerForEveryImage(imageSizer);
     }
   }
 
   @Test
   public void testGetSizersByJpegStream() throws ClassNotFoundException {
-    InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg.jpg");
-    ImageSizerCollection sizers = belittler.getSizersFor(vanillaJpegStream);
+    ImageSizerCollection sizers = belittler.getSizersFor(data.vanillaJpegStream);
     assertThat("Unexpected different number of unique sizers", sizers.getAll(), hasSize(3));
+    assertThat("Unexpected number of unique, available sizers", sizers.getAvailable(), hasSize(3));
     assertThat(
-        "Unexpected number of unique, available sizers", sizers.getAvailable(), hasSize(3));
+        "Expected second image sizer to be magick",
+        sizers.getRecommendations().get(1),
+        instanceOf(MagickSizer.class));
     assertThat(
-        "Expected second image sizer to be magick", list.get(1), instanceOf(MagickSizer.class));
-    assertThat("Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
+        "Expected third image sizer to be basic",
+        sizers.getRecommendations().get(2),
+        instanceOf(BasicSizer.class));
   }
 
   @Test
   public void testGetSizersByJp2Stream() throws ClassNotFoundException {
-    InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg2000.jpg");
-    List<ImageSizer> list = belittler.getSizerFor(vanillaJpegStream);
-    assertThat("Expect 3 image sizers", list.size(), equalTo(3));
+    ImageSizerCollection sizers = belittler.getSizersFor(data.jpeg2000Stream);
+    assertThat("Expect 3 image sizers", sizers.getRecommendations(), hasSize(3));
     assertThat(
-        "Expected first image sizer to be magick", list.get(0), instanceOf(MagickSizer.class));
+        "Expected first image sizer to be magick",
+        sizers.getRecommendations().get(0),
+        instanceOf(MagickSizer.class));
     assertThat(
-        "Expected second image sizer to be sampling", list.get(1), instanceOf(SamplingSizer.class));
-    assertThat("Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
+        "Expected second image sizer to be sampling",
+        sizers.getRecommendations().get(1),
+        instanceOf(SamplingSizer.class));
+    assertThat(
+        "Expected third image sizer to be basic",
+        sizers.getRecommendations().get(2),
+        instanceOf(BasicSizer.class));
   }
 
   @Test
   public void testDefaultExtents() {
-    int int1 = belittler.getMaxWidth();
-    int int2 = belittler.getMaxHeight();
-    belittler.setMaxWidth(1);
-    belittler.setMaxHeight(2);
-    Optional<ImageSizer> optionalSizer = belittler.getSizerFor((String) null);
-    MatcherAssert.assertThat(optionalSizer.isPresent(), is(true));
-    MatcherAssert.assertThat(optionalSizer.get().getMaxWidth(), is(1));
-    MatcherAssert.assertThat(optionalSizer.get().getMaxHeight(), is(2));
-    belittler.setMaxWidth(int1);
-    belittler.setMaxHeight(int2);
+    int originalWidth = belittler.getMaxWidth();
+    int originalHeight = belittler.getMaxHeight();
+    int testWidth = 11;
+    int testHeight = 12;
+    belittler.setOutputSize(testWidth, testHeight);
+    ImageSizerCollection sizers = belittler.getSizersFor("");
+    MatcherAssert.assertThat(sizers.getRecommended().isPresent(), is(true));
+    MatcherAssert.assertThat(sizers.getRecommended().get().getMaxWidth(), is(testWidth));
+    MatcherAssert.assertThat(sizers.getRecommended().get().getMaxHeight(), is(testHeight));
+    belittler.setOutputSize(originalWidth, originalHeight);
   }
 
   @Test
   public void testConvenienceMethod() {
-    Optional<BufferedImage> output = belittler.size(getResourceAsStream("/sample-jpeg.jpg"));
+    Optional<BufferedImage> output = belittler.generate(data.jpeg2000Stream);
     assertThat(output.isPresent(), is(true));
     assertThat(output.get().getWidth(), equalTo(belittler.getMaxWidth()));
-  }
-
-  private InputStream getResourceAsStream(String filename) {
-    InputStream unresetableStream = getClass().getResourceAsStream(filename);
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    try {
-      org.apache.commons.io.IOUtils.copy(unresetableStream, outputStream);
-    } catch (IOException e) {
-      fail("Could not get test resource");
-    }
-    return new ByteArrayInputStream(outputStream.toByteArray());
   }
 
   @org.ops4j.pax.exam.Configuration
@@ -177,6 +160,8 @@ public class ContainerTest {
       KarafDistributionOption.features(karafStandardRepo, "scr"),
       KarafDistributionOption.logLevel(LogLevelOption.LogLevel.INFO),
       mavenBundle("com.google.guava", "guava").versionAsInProject().start(),
+      mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.hamcrest")
+          .versionAsInProject(),
       mavenBundle("commons-io", "commons-io").versionAsInProject(),
       mavenBundle(GROUP_ID, ARTIFACT_ID).versionAsInProject().start(),
       vmOption("-Xmx4g"),
@@ -191,23 +176,21 @@ public class ContainerTest {
     InputStream inputStream = new BufferedInputStream(new FileInputStream(input));
     final long start = System.nanoTime();
     LOGGER.info(
-        String.format(
-            "Starting file %s of generate %.2f MB...", input.getName(), input.length() / 1e6));
+        String.format("Starting %s size %.2f MB...", input.getName(), input.length() / 1e6));
     String sizerName = sizer.getClass().getSimpleName();
     LOGGER.info(String.format("\tSelected %s", sizerName));
 
-    BufferedImage output = sizer.setOutputSize(128, 128).setInput(inputStream).generate();
+    BufferedImage output = sizer.setInput(inputStream).generate();
     final long stop = System.nanoTime();
     java.io.File outputDirObject = new File(OUTPUTDIR);
     outputDirObject.mkdirs();
     java.io.File outputFile = new File(outputDirObject, sizerName + "-" + input.getName() + ".png");
     ImageIO.write(output, "png", outputFile);
-    LOGGER.info(
-        String.format("\tCreated %s thumbnail in %.2f s", input.getName(), (stop - start) / 1.0e9));
+    LOGGER.info(String.format("\tCreated thumbnail in %.2f s", (stop - start) / 1.0e9));
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {
-    for (File inputFile : inputFiles) {
+    for (File inputFile : data.inputFiles) {
       runSizer(imageSizer, inputFile);
     }
   }
