@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -33,16 +34,16 @@ public class BeLittle {
   private int maxHeight;
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
 
-  public ImageSizerResults getSizersFor(String inputMimeType) {
-    ImageSizerResults coll = new ImageSizerResults();
+  public ImageSizerCollection getSizersFor(String inputMimeType) {
+    ImageSizerCollection coll = new ImageSizerCollection();
 
-    List<ImageSizer> all =
+    Set<ImageSizer> all =
         configuration
             .values()
             .stream()
             .flatMap(Collection::stream)
             .map(this::copyAndInitialize)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     List<ImageSizer> available =
         all.stream()
             .filter(ImageSizer::isAvailable)
@@ -85,8 +86,8 @@ public class BeLittle {
   }
 
   @SuppressWarnings("unused")
-  public ImageSizerResults getSizersFor(InputStream inputStream) {
-    Optional<String> mimeType = ImageReaderUtils.getMimeTypes(inputStream).stream().findFirst();
+  public ImageSizerCollection getSizersFor(InputStream inputStream) {
+    Optional<String> mimeType = new BeLittleHelper().getMimeTypes(inputStream).stream().findFirst();
     return getSizersFor(mimeType.orElse(getUnknownMimeType()));
   }
 
@@ -95,7 +96,7 @@ public class BeLittle {
   }
 
   @SuppressWarnings("unused")
-  public Map<String, List<ImageSizer>> getConfiguration() {
+  public synchronized Map<String, List<ImageSizer>> getConfiguration() {
     return configuration;
   }
 
@@ -129,7 +130,7 @@ public class BeLittle {
    */
   public synchronized Optional<BufferedImage> generate(InputStream inputStream) {
 
-    ImageSizerResults sizers = getSizersFor(inputStream);
+    ImageSizerCollection sizers = getSizersFor(inputStream);
     ImageSizer sizer =
         sizers
             .getRecommendations()
@@ -139,8 +140,9 @@ public class BeLittle {
 
     if (Objects.isNull(sizer)) {
       LOGGER.info("No suitable image sizer");
+      return Optional.empty();
     }
-      try {
+    try {
       return Optional.ofNullable(sizer.setInput(inputStream).generate());
 
     } catch (IOException e) {
@@ -152,17 +154,17 @@ public class BeLittle {
   /**
    * Encapsulate information about what resizing techniques are (or are not) currently available.
    */
-  public class ImageSizerResults {
+  public class ImageSizerCollection {
     private Optional<ImageSizer> recommended;
     private List<ImageSizer> recommendations;
     private List<ImageSizer> wildcards;
-    private List<ImageSizer> all;
+    private Set<ImageSizer> all;
     private List<ImageSizer> available;
 
-    public ImageSizerResults() {
+    public ImageSizerCollection() {
       recommendations = Collections.emptyList();
       wildcards = Collections.emptyList();
-      all = Collections.emptyList();
+      all = Collections.emptySet();
       available = Collections.emptyList();
       recommended = Optional.empty();
     }
@@ -191,11 +193,11 @@ public class BeLittle {
       this.wildcards = wildcards;
     }
 
-    public List<ImageSizer> getAll() {
+    public Set<ImageSizer> getAll() {
       return all;
     }
 
-    protected void setAll(List<ImageSizer> all) {
+    protected void setAll(Set<ImageSizer> all) {
       this.all = all;
     }
 

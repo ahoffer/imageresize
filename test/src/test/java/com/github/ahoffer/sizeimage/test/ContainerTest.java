@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerSuite.class)
 public class ContainerTest {
 
-  static final String ARTIFACT_ID = "sizeimage-bundle";
+  static final String ARTIFACT_ID = "bundle";
   static final String GROUP_ID = "com.github.ahoffer";
   static final String INPUT_DIR = "/Users/aaronhoffer/data/small-image-set/";
   static String OUTPUTDIR = INPUT_DIR + "output/";

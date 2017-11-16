@@ -15,9 +15,7 @@ public class SamplingSizer extends AbstractImageSizer {
     }
     BufferedImage output =
         Thumbnails.of(reader.read()).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
-    // TODO: The inputStream doesn't belong to the ImageSizer; it was passed in as a parameter.
-    // It doesn't feel right to close it on someone else's behalf.
-    // But I can drop the reference to it.
+    inputStream.close();
     inputStream = null;
     return output;
   }

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
@@ -43,7 +44,9 @@ public abstract class AbstractImageSizer implements ImageSizer {
 
   public void validateBeforeResizing() {
     validateExtents(getMaxWidth(), getMaxHeight());
-    Validate.notNull(inputStream);
+    if (Objects.isNull(inputStream)) {
+      throw new IllegalArgumentException("Input stream cannot be null");
+    }
   }
 
   public int getMaxWidth() {
@@ -51,11 +54,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   private int getInteger(String intString) {
-    try {
-      return Integer.valueOf(intString);
-    } catch (NumberFormatException e) {
-      throw new RuntimeException("Cannot convert string to integer", e);
-    }
+    return Integer.valueOf(intString);
   }
 
   public int getMaxHeight() {
@@ -69,12 +68,19 @@ public abstract class AbstractImageSizer implements ImageSizer {
       newInstance.setConfiguration(configuration);
       return newInstance;
     } catch (InstantiationException | IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new CopyObjectException(e);
     }
   }
 
   public ImageSizer setInput(InputStream inputStream) {
     this.inputStream = inputStream;
     return this;
+  }
+
+  public class CopyObjectException extends RuntimeException {
+
+    CopyObjectException(Throwable cause) {
+      super(cause);
+    }
   }
 }

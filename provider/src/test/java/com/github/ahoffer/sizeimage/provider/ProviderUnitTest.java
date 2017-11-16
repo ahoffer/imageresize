@@ -1,12 +1,14 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -14,17 +16,11 @@ import org.junit.Test;
 
 public class ProviderUnitTest {
 
-  AbstractImageSizer sizer;
+  BasicSizer sizer;
 
   @Before
   public void setup() {
-    sizer =
-        new AbstractImageSizer() {
-          @Override
-          public BufferedImage generate() throws IOException {
-            return null;
-          }
-        };
+    sizer = new BasicSizer();
   }
 
   @Test
@@ -49,22 +45,23 @@ public class ProviderUnitTest {
   @Test
   public void testCloning() {
     HashMap configuration = new HashMap();
-    configuration.put("key", "value");
+    int testInt = 42;
+    String key = "key";
+    String value = "value";
+    configuration.put(key, value);
 
-    // Cannot use an abstract class for this test.
-    BasicSizer realSizer = new BasicSizer();
-    realSizer.setConfiguration(configuration);
-    realSizer.setInput(new BufferedInputStream(null));
-
-    /* TODO The method under test, "getNew" throws a CloneNotSupportedException because JUnit changes "this" to point to the unit test. */
-    //    AbstractImageSizer sizerClone = (AbstractImageSizer) sizer.getNew();
-    //    assertThat(sizerClone.getConfiguration().isEmpty(), equalTo(false));
-    //    assertThat(sizerClone.inputStream, nullValue());
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testCloningAbstractOrInterface() {
-    sizer.getNew();
+    BasicSizer original = new BasicSizer();
+    original.setConfiguration(configuration);
+    BufferedInputStream inputStream = new BufferedInputStream(null);
+    original.setInput(inputStream);
+    original.setOutputSize(testInt, testInt);
+    assertThat(original.inputStream, notNullValue());
+    assertThat(original.getConfiguration(), notNullValue());
+    BasicSizer copy = (BasicSizer) original.getNew();
+    assertThat(copy.inputStream, nullValue());
+    assertThat(copy.getConfiguration(), hasEntry(key, value));
+    assertThat(copy.getMaxHeight(), is(testInt));
+    assertThat(copy.getMaxWidth(), is(testInt));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -80,9 +77,17 @@ public class ProviderUnitTest {
     sizer.getMaxHeight();
   }
 
-  @Test(expected = NullPointerException.class)
-  public void testValidateInputStream() {
-    sizer.setOutputSize(1, 1);
+  @Test(expected = IllegalArgumentException.class)
+  public void testValidateExtentsSetter() {
+    sizer.setOutputSize(0, 1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testValidatingExtentsConfiguration() {
+    HashMap<String, String> config = new HashMap<>();
+    config.put(AbstractImageSizer.MAX_HEIGHT, "1");
+    config.put(AbstractImageSizer.MAX_WIDTH, "");
+    sizer.setConfiguration(config);
     sizer.validateBeforeResizing();
   }
 }

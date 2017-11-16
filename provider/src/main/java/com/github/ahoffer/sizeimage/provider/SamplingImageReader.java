@@ -9,7 +9,6 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 
 public class SamplingImageReader {
-  // TODO: Maybe change some of these fields to Optional value holders.
   protected int samplePeriod;
 
   int imageIndex;
@@ -18,19 +17,19 @@ public class SamplingImageReader {
 
   InputStream source;
 
-  private int subsamplingHint = 512;
+  int subsamplingHint = 512;
 
   public static SamplingImageReader of(InputStream source) throws IOException {
     SamplingImageReader object = new SamplingImageReader();
     object.source = source;
-    object.reader = ImageReaderUtils.getReader(source);
+    object.reader = new BeLittleHelper().getReader(source);
     return object;
   }
 
   public static SamplingImageReader of(File sourceFile) throws IOException {
     SamplingImageReader object = new SamplingImageReader();
     object.source = new FileInputStream(sourceFile);
-    object.reader = ImageReaderUtils.getReader(new FileInputStream(sourceFile));
+    object.reader = new BeLittleHelper().getReader(new FileInputStream(sourceFile));
     return object;
   }
 

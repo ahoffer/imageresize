@@ -75,10 +75,10 @@ public class IoTest {
 
     @Test
     public void testGetMimeTypes() {
-        List<String> mimeTypes = ImageReaderUtils.getMimeTypes(data.vanillaJpegStream);
+        List<String> mimeTypes = new BeLittleHelper().getMimeTypes(data.vanillaJpegStream);
         assertThat(mimeTypes, hasItem(equalToIgnoringCase("image/jpeg")));
 
-        mimeTypes = ImageReaderUtils.getMimeTypes(data.jpeg2000Stream);
+        mimeTypes = new BeLittleHelper().getMimeTypes(data.jpeg2000Stream);
         assertThat(mimeTypes, containsInAnyOrder("image/jp2", "image/jpeg2000"));
     }
 
@@ -87,7 +87,7 @@ public class IoTest {
         // Use the same stream twice
         InputStream inputStream = data.vanillaJpegStream;
         assertThat(
-                ImageReaderUtils.getMimeTypes(inputStream),
-                equalTo(ImageReaderUtils.getMimeTypes(inputStream)));
+                new BeLittleHelper().getMimeTypes(inputStream),
+                equalTo(new BeLittleHelper().getMimeTypes(inputStream)));
     }
 }
