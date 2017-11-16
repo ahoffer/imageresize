@@ -12,6 +12,25 @@ import org.apache.commons.lang3.Validate;
 
 public abstract class AbstractImageSizer implements ImageSizer {
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    AbstractImageSizer that = (AbstractImageSizer) o;
+
+    return configuration.equals(that.configuration);
+  }
+
+  @Override
+  public int hashCode() {
+    return configuration.hashCode();
+  }
+
   public static final String MAX_WIDTH = "maxWidth";
   public static final String MAX_HEIGHT = "maxHeight";
 

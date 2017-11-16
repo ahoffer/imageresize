@@ -1,13 +1,30 @@
 package com.github.ahoffer.sizeimage.test;
 
+import static junit.framework.TestCase.fail;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.vmOption;
+import static org.ops4j.pax.exam.CoreOptions.when;
+
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle;
+import com.github.ahoffer.sizeimage.provider.BeLittle.ImageSizerCollection;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,15 +35,11 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.inject.Inject;
-import static junit.framework.TestCase.fail;
-import static org.hamcrest.CoreMatchers.*;
 import org.hamcrest.MatcherAssert;
-import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.CoreOptions;
-import static org.ops4j.pax.exam.CoreOptions.*;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
@@ -52,11 +65,11 @@ public class ContainerTest {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
   }
 
-  @Inject protected BeLittle factory;
+  @Inject protected BeLittle belittler;
+
   List<File> inputFiles = new ArrayList<>();
 
   public static String karafVersion() {
-    // return new ConfigurationManager().getProperty("pax.exam.karaf.version");
     return "4.1.2";
   }
 
@@ -71,9 +84,9 @@ public class ContainerTest {
   }
 
   //  @Test
-  public void runAllDefaultSizers() throws IOException {
-    List<ImageSizer> imageSizers = factory.getSizersFor((String) null, false, true);
-    for (ImageSizer imageSizer : imageSizers) {
+  public void runAllSizers() throws IOException {
+    ImageSizerCollection imageSizers = belittler.getSizersFor((String) null);
+    for (ImageSizer imageSizer : imageSizers.getAll()) {
       runSizerForEveryImage(imageSizer);
     }
   }
@@ -81,52 +94,46 @@ public class ContainerTest {
   @Test
   public void testGetSizersByJpegStream() throws ClassNotFoundException {
     InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg.jpg");
-    List<ImageSizer> list = factory.getSizerFor(vanillaJpegStream);
-    assertThat("Expect 3 image sizers", list.size(), equalTo(3));
+    ImageSizerCollection sizers = belittler.getSizersFor(vanillaJpegStream);
+    assertThat("Unexpected different number of unique sizers", sizers.getAll(), hasSize(3));
     assertThat(
-        "Expected first image sizer to be sampler",
-        list.get(0),
-        instanceOf(SamplingSizer.class));
+        "Unexpected number of unique, available sizers", sizers.getAvailable(), hasSize(3));
     assertThat(
         "Expected second image sizer to be magick", list.get(1), instanceOf(MagickSizer.class));
-    assertThat(
-        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
+    assertThat("Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
   }
 
   @Test
   public void testGetSizersByJp2Stream() throws ClassNotFoundException {
     InputStream vanillaJpegStream = getResourceAsStream("/sample-jpeg2000.jpg");
-    List<ImageSizer> list = factory.getSizerFor(vanillaJpegStream);
+    List<ImageSizer> list = belittler.getSizerFor(vanillaJpegStream);
     assertThat("Expect 3 image sizers", list.size(), equalTo(3));
     assertThat(
         "Expected first image sizer to be magick", list.get(0), instanceOf(MagickSizer.class));
     assertThat(
-        "Expected second image sizer to be sampling",
-        list.get(1),
-        instanceOf(SamplingSizer.class));
-    assertThat(
-        "Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
+        "Expected second image sizer to be sampling", list.get(1), instanceOf(SamplingSizer.class));
+    assertThat("Expected third image sizer to be basic", list.get(2), instanceOf(BasicSizer.class));
   }
 
   @Test
   public void testDefaultExtents() {
-    int int1 = factory.getMaxWidth();
-    int int2 = factory.getMaxHeight();
-    factory.setMaxWidth(1);
-    factory.setMaxHeight(2);
-    Optional<ImageSizer> optionalSizer = factory.getSizerFor((String) null);
+    int int1 = belittler.getMaxWidth();
+    int int2 = belittler.getMaxHeight();
+    belittler.setMaxWidth(1);
+    belittler.setMaxHeight(2);
+    Optional<ImageSizer> optionalSizer = belittler.getSizerFor((String) null);
     MatcherAssert.assertThat(optionalSizer.isPresent(), is(true));
     MatcherAssert.assertThat(optionalSizer.get().getMaxWidth(), is(1));
     MatcherAssert.assertThat(optionalSizer.get().getMaxHeight(), is(2));
-    factory.setMaxWidth(int1);
-    factory.setMaxHeight(int2);
+    belittler.setMaxWidth(int1);
+    belittler.setMaxHeight(int2);
   }
 
   @Test
   public void testConvenienceMethod() {
-    Optional<BufferedImage> output = factory.size(getResourceAsStream("/sample-jpeg.jpg"));
+    Optional<BufferedImage> output = belittler.size(getResourceAsStream("/sample-jpeg.jpg"));
     assertThat(output.isPresent(), is(true));
-    assertThat(output.get().getWidth(), equalTo(factory.getMaxWidth()));
+    assertThat(output.get().getWidth(), equalTo(belittler.getMaxWidth()));
   }
 
   private InputStream getResourceAsStream(String filename) {

@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 
+import com.github.ahoffer.sizeimage.ImageSizer;
 import java.io.BufferedInputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,9 +36,9 @@ public class ProviderUnitTest {
   @Test
   public void testImmutableConfiguration() {
     HashMap configuration = new HashMap();
+    configuration.put("key", "bad");
     configuration.put("key", "value");
     sizer.setConfiguration(configuration);
-    configuration.put("key", "bad");
     Map<String, String> actualConfig = sizer.getConfiguration();
     assertThat(actualConfig.get("key"), not(equalTo("bad")));
   }
@@ -89,5 +90,38 @@ public class ProviderUnitTest {
     config.put(AbstractImageSizer.MAX_WIDTH, "");
     sizer.setConfiguration(config);
     sizer.validateBeforeResizing();
+  }
+
+  @Test
+  public void testEqualityAndHashCode() {
+    HashMap configurationOne = new HashMap();
+    configurationOne.put("key", "value");
+    ImageSizer sizerOne = new BasicSizer();
+    sizerOne.setConfiguration(configurationOne);
+
+    HashMap configurationTwo = new HashMap();
+    configurationTwo.put("key", "value");
+    ImageSizer sizerTwo = new BasicSizer();
+    sizerTwo.setConfiguration(configurationTwo);
+
+    // Test Equality
+    assertThat("Object should be equal", sizerOne, equalTo(sizerTwo));
+    assertThat(
+        "Object should have same hash code", sizerOne.hashCode(), equalTo(sizerTwo.hashCode()));
+    assertThat("Cloned objects should be equal", sizerOne, equalTo(sizerOne.getNew()));
+    assertThat(
+        "Cloned objects should have same hash code",
+        sizerOne.hashCode(),
+        equalTo(sizerOne.getNew().hashCode()));
+
+    // Test Inequality
+    HashMap configurationThree = new HashMap();
+    configurationThree.put("key", "otherValue");
+    sizerTwo.setConfiguration(configurationThree);
+    assertThat("Object should NOT be equal", sizerOne, not(equalTo(sizerTwo)));
+    assertThat(
+        "Object should NOT have same hash code",
+        sizerOne.hashCode(),
+        not(equalTo(sizerTwo.hashCode())));
   }
 }

@@ -15,7 +15,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +46,13 @@ public class BeLittle {
             .flatMap(Collection::stream)
             .map(this::copyAndInitialize)
             .collect(Collectors.toSet());
+
     List<ImageSizer> available =
         all.stream()
             .filter(ImageSizer::isAvailable)
             .map(this::copyAndInitialize)
             .collect(Collectors.toList());
+
     List<ImageSizer> wildcard =
         configuration
             .getOrDefault(MATCH_ANY, (List<ImageSizer>) EMPTY_LIST)
@@ -57,9 +61,10 @@ public class BeLittle {
             .map(this::copyAndInitialize)
             .collect(Collectors.toList());
 
+    // Recommend any sizers configure for the input MIME type. If none, use the wildcard sizers.
     List<ImageSizer> recommendations =
         configuration
-            .getOrDefault(inputMimeType, (List<ImageSizer>) EMPTY_LIST)
+            .getOrDefault(inputMimeType, wildcard)
             .stream()
             .filter(ImageSizer::isAvailable)
             .map(this::copyAndInitialize)
@@ -160,12 +165,14 @@ public class BeLittle {
     private List<ImageSizer> wildcards;
     private Set<ImageSizer> all;
     private List<ImageSizer> available;
+    private List<ImageSizer> matching;
 
     public ImageSizerCollection() {
       recommendations = Collections.emptyList();
       wildcards = Collections.emptyList();
       all = Collections.emptySet();
       available = Collections.emptyList();
+      matching = Collections.emptyList();
       recommended = Optional.empty();
     }
 
@@ -207,6 +214,14 @@ public class BeLittle {
 
     protected void setAvailable(List<ImageSizer> available) {
       this.available = available;
+    }
+
+    public List<ImageSizer> getMatching() {
+      return matching;
+    }
+
+    void setMatching(List<ImageSizer> matching) {
+      this.matching = matching;
     }
   }
 }

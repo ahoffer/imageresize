@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -65,7 +64,6 @@ public class BeLittleUnitTest {
     wildcardList = Arrays.asList(wildcardSizer);
     configuration.put(MATCH_ANY, wildcardList);
     singletonList = Arrays.asList(otherSizer);
-    configuration.put(SINGLE, singletonList);
     multiplesList = Arrays.asList(basicSizer, unavailableSizer, duplicatedInstance, otherSizer);
     configuration.put(MANY, multiplesList);
     return configuration;
@@ -87,10 +85,13 @@ public class BeLittleUnitTest {
     Set<ImageSizer> sizers = coll.getAll();
 
     assertThat(
-        "Duplicate instances should be filtered out, but unavailable instance should not. "
-            + "Also, order does not matter",
+        "Order does not matter",
         sizers,
         containsInAnyOrder(basicSizer, unavailableSizer, wildcardSizer, otherSizer));
+    assertThat(
+        "Duplicate instances should be filtered out, but unavailable instance should not",
+        coll.getAll(),
+        hasSize(4));
   }
 
   @Test
@@ -119,12 +120,16 @@ public class BeLittleUnitTest {
   @Test
   public void testWildcards() {
     ImageSizerCollection coll = belittle.getSizersFor((String) null);
-    assertThat(
-        "Null or unknown MIME type should have no recommendations",
-        coll.getRecommendations(),
-        empty());
     assertThat("Unexpected number of sizers", coll.getWildcards(), hasSize(wildcardList.size()));
+    assertThat(
+        "Null or unknown MIME type should return wildcard sizers",
+        coll.getRecommendations(),
+        hasSize(wildcardList.size()));
     assertThat("Wrong sizer", coll.getWildcards(), hasItem(wildcardSizer));
+    assertThat(
+        "Null or unknown MIME type should return wildcard sizers",
+        coll.getRecommendations(),
+        hasItem(wildcardSizer));
   }
 
   @Test(expected = UnsupportedOperationException.class)
