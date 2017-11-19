@@ -9,7 +9,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +20,12 @@ public class ImageReaderShortcuts {
   private static final Logger LOGGER = LoggerFactory.getLogger(BeLittle.class);
 
   public ImageReader getDatalessReader(Object source) throws IOException {
-    Iterator<ImageReader> iter = getImageReaders(createImageInputStream(source));
+    ImageInputStream imageStream = ImageIO.createImageInputStream(source);
+    Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
     Validate.isTrue(
-        iter.hasNext(),
+        readers.hasNext(),
         "Could not find an image reader. Missing JAI reader for image type or stream already closed");
-    return iter.next();
+    return readers.next();
   }
 
   // TODO Hide the exception by returning an optional?
