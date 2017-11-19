@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BeLittleUnitTest {
 
-  public static final String SINGLE = "single";
   public static final String MANY = "many";
   public static final String NONE = "none";
   private BeLittle belittle;
@@ -32,7 +32,6 @@ public class BeLittleUnitTest {
   private ImageSizer unavailableSizer;
   private ImageSizer duplicatedInstance;
   private List<ImageSizer> wildcardList;
-  private List<ImageSizer> singletonList;
   private List<ImageSizer> multiplesList;
 
   @Before
@@ -63,14 +62,15 @@ public class BeLittleUnitTest {
     Map<String, List<ImageSizer>> configuration = new HashMap<>();
     wildcardList = Arrays.asList(wildcardSizer);
     configuration.put(MATCH_ANY, wildcardList);
-    singletonList = Arrays.asList(otherSizer);
+    List<ImageSizer> singletonList = Arrays.asList(otherSizer);
     multiplesList = Arrays.asList(basicSizer, unavailableSizer, duplicatedInstance, otherSizer);
     configuration.put(MANY, multiplesList);
     return configuration;
   }
 
+  @Ignore
   @Test
-  public void testReccomendations() throws Exception {
+  public void testRecomendations() throws Exception {
 
     List<ImageSizer> sizers = belittle.getSizersFor(MANY).getRecommendations();
     // (This does not work because of mocks) --> assertThat(sizers, contains(multiplesList));

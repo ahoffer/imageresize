@@ -3,6 +3,7 @@ package com.github.ahoffer.sizeimage.provider;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import org.apache.commons.lang3.SystemUtils;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
@@ -40,6 +41,8 @@ public class MagickSizer extends AbstractImageSizer {
     return getImageMagickExecutable().canExecute();
   }
 
+  // Not sure which way of getting the executable is better.
+  @SuppressWarnings("unused")
   public File getImageMagickExecutableAlternativeMethod() {
     String result;
     ConvertCmd command = new ConvertCmd();
@@ -64,12 +67,21 @@ public class MagickSizer extends AbstractImageSizer {
     return exec;
   }
 
-  public BufferedImage generate() throws IOException {
-
-    // TODO if MIME type is JPEG, add this option "-define jpeg:generate=200x200" and substitute a
-    // generate that is twice the generate of the desired thumbnail.
+  public Optional<BufferedImage> generate() {
     validateBeforeResizing();
+    BufferedImage output;
+    try {
+      output = getOutputImage();
+    } catch (IOException e) {
+      output = null;
+    }
+    inputStream=null;
+    return Optional.ofNullable(output);
+  }
 
+  BufferedImage getOutputImage() throws IOException {
+    // TODO if MIME type is JPEG, add this option "-define jpeg:generate=200x200" and substitute a
+    // size that is twice the size of the desired thumbnail.
     // TODO use -sample to improve memory usage
 
     IMOperation op = new IMOperation();
@@ -94,14 +106,7 @@ public class MagickSizer extends AbstractImageSizer {
     } catch (InterruptedException | IM4JavaException e) {
       throw new RuntimeException("Problem resizing image with ImageMagick", e);
     }
-    BufferedImage output = outputConsumer.getImage();
-
-    // TODO: The inputStream doesn't belong to the ImageSizer; it was passed in as a parameter.
-    // It doesn't feel right to close it on someone else's behalf.
-    // But I can drop the reference to it.
-    inputStream = null;
-
-    return output;
+    return outputConsumer.getImage();
   }
 
   public void validateBeforeResizing() {

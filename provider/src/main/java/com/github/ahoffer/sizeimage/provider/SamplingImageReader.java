@@ -9,33 +9,26 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 
 public class SamplingImageReader {
+
   protected int samplePeriod;
-
   int imageIndex;
-
   ImageReader reader;
-
   InputStream source;
-
-  int subsamplingHint = 512;
+  static ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
 
   public static SamplingImageReader of(InputStream source) throws IOException {
     SamplingImageReader object = new SamplingImageReader();
     object.source = source;
-    object.reader = new BeLittleHelper().getReader(source);
+    object.reader = shortcuts.getReader(source);
     return object;
   }
 
+  @SuppressWarnings("unused")
   public static SamplingImageReader of(File sourceFile) throws IOException {
     SamplingImageReader object = new SamplingImageReader();
     object.source = new FileInputStream(sourceFile);
-    object.reader = new BeLittleHelper().getReader(new FileInputStream(sourceFile));
+    object.reader = shortcuts.getReader(new FileInputStream(sourceFile));
     return object;
-  }
-
-  public SamplingImageReader subsamplingHint(int hint) {
-    subsamplingHint = hint;
-    return this;
   }
 
   public SamplingImageReader imageIndex(int index) {
@@ -49,19 +42,17 @@ public class SamplingImageReader {
   }
 
   public int computeSamplingPeriod() {
-    if (samplePeriod == 0) {
-      try {
-        int longestDimensionSize =
-            Math.max(reader.getWidth(imageIndex), reader.getHeight(imageIndex));
-        samplePeriod =
-            (int) (Math.round(Math.ceil(longestDimensionSize / (double) subsamplingHint)));
-
-      } catch (IOException e) {
-        // Give up. Do not sub-sample the image.
-        samplePeriod = 1;
-      }
+    int period;
+    int sourceWidth = 0;
+    int sourceHeight = 0;
+    try {
+      sourceWidth = reader.getWidth(imageIndex);
+      sourceHeight = reader.getHeight(imageIndex);
+      period = new ComputeResizeFactor().setWidthHeight(sourceWidth, sourceHeight).compute();
+    } catch (IOException e) {
+      period = 1;
     }
-    return samplePeriod;
+    return period;
   }
 
   public BufferedImage read() throws IOException {
@@ -70,8 +61,9 @@ public class SamplingImageReader {
     int rowOffset = 0;
     // Use the same sampling period for both rows and columns to preserve images's
     // aspect ratio.
-    int columnSamplingPeriod = computeSamplingPeriod();
-    int rowSamplingPeriod = computeSamplingPeriod();
+    int period = computeSamplingPeriod();
+    int columnSamplingPeriod = period;
+    int rowSamplingPeriod = period;
     ImageReadParam imageParam = reader.getDefaultReadParam();
     try {
       imageParam.setSourceSubsampling(

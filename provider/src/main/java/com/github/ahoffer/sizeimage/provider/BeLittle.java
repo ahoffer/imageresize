@@ -5,14 +5,13 @@ import static java.util.Collections.unmodifiableMap;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -29,10 +28,14 @@ public class BeLittle {
 
   public static final String MATCH_ANY = "*";
   public static final String UNKNOWN_MIME_TYPE = "application/octet-stream";
+
+  @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(BeLittle.class);
+
   private int maxWidth;
   private int maxHeight;
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
+  private ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
 
   public ImageSizerCollection getSizersFor(String inputMimeType) {
     ImageSizerCollection coll = new ImageSizerCollection();
@@ -59,18 +62,24 @@ public class BeLittle {
             .map(this::copyAndInitialize)
             .collect(Collectors.toList());
 
-    // Recommend any sizers configure for the input MIME type. If none, use the wildcard sizers.
-    List<ImageSizer> recommendations =
+    List<ImageSizer> matching =
         configuration
-            .getOrDefault(inputMimeType, wildcard)
+            .getOrDefault(inputMimeType, (List<ImageSizer>) EMPTY_LIST)
             .stream()
-            .filter(ImageSizer::isAvailable)
             .map(this::copyAndInitialize)
             .collect(Collectors.toList());
+
+    // Recommend any sizers configured for the input MIME type. If none, use the wildcard sizers.
+    List<ImageSizer> recommendations = new ArrayList<>();
+    recommendations.addAll(matching);
+    recommendations.addAll(wildcard);
+    recommendations =
+        recommendations.stream().map(this::copyAndInitialize).collect(Collectors.toList());
 
     coll.setAll(all);
     coll.setAvailable(available);
     coll.setWildcards(wildcard);
+    coll.setMatching(matching);
     coll.setRecommendations(recommendations);
     coll.setRecommended(recommendations.stream().findFirst().map(this::copyAndInitialize));
     return coll;
@@ -90,7 +99,7 @@ public class BeLittle {
 
   @SuppressWarnings("unused")
   public ImageSizerCollection getSizersFor(InputStream inputStream) {
-    Optional<String> mimeType = new BeLittleHelper().getMimeTypes(inputStream).stream().findFirst();
+    Optional<String> mimeType = shortcuts.getMimeTypes(inputStream).stream().findFirst();
     return getSizersFor(mimeType.orElse(getUnknownMimeType()));
   }
 
@@ -112,11 +121,11 @@ public class BeLittle {
     this.configuration = unmodifiableMap(copy);
   }
 
-  public int getMaxWidth() {
+  public synchronized int getMaxWidth() {
     return maxWidth;
   }
 
-  public void setMaxWidth(int maxWidth) {
+  public synchronized void setMaxWidth(int maxWidth) {
     this.maxWidth = maxWidth;
   }
 
@@ -125,11 +134,11 @@ public class BeLittle {
     setMaxHeight(maxHeight);
   }
 
-  public int getMaxHeight() {
+  public synchronized int getMaxHeight() {
     return maxHeight;
   }
 
-  public void setMaxHeight(int maxHeight) {
+  public synchronized void setMaxHeight(int maxHeight) {
     this.maxHeight = maxHeight;
   }
 
@@ -140,30 +149,14 @@ public class BeLittle {
    * @return
    */
   public synchronized Optional<BufferedImage> generate(InputStream inputStream) {
-
     ImageSizerCollection sizers = getSizersFor(inputStream);
-    ImageSizer sizer =
-        sizers
-            .getRecommendations()
-            .stream()
-            .findFirst()
-            .orElse(sizers.getWildcards().stream().findFirst().orElse(null));
-
-    if (Objects.isNull(sizer)) {
-      LOGGER.info("No suitable image sizer");
-      return Optional.empty();
-    }
-    try {
-      return Optional.ofNullable(sizer.setInput(inputStream).generate());
-
-    } catch (IOException e) {
-      LOGGER.info("Could not resize image", e);
-      return Optional.empty();
-    }
+    Optional<ImageSizer> sizer = sizers.getRecommended();
+    return sizer.flatMap(s -> s.setInput(inputStream).generate());
   }
 
   /**
-   * Encapsulate information about what resizing techniques are (or are not) currently available.
+   * Encapsulate information about what resizing techniques are (or are not) available and
+   * recommended.
    */
   public class ImageSizerCollection {
     private Optional<ImageSizer> recommended;

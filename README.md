@@ -196,3 +196,24 @@ magnitude faster than the Java JAI module for JPEG 2000.
 3. Create Karaf feature.
 
 
+#### More about JPEG 2000
+
+quality-layers= set the maximum number of quality layers to decode.
+a quality layer is defined by compression ration. A layer with a value of 20 is 
+compressed to 1/20 of its original size. A value of 1 is lossless. 
+The default is a single lossless quality layer.
+
+reduce-factor=	set the number of highest resolution levels to be discarded.
+decode rate= measured in bit per pixel. Try 0.1.
+
+Diego Santa Cruz, Touradj Ebrahimi, and Charilaos Christopoulos
+Dr. Dobb's Journal, April 01, 2001
+Typical images contain most of their energy in the low frequencies, and thus the 
+decomposition is generally repeated on the LL subband only, which is referred to
+as a "dyadic decomposition." Figure 2 illustrates a 2D DWT with two levels. 
+The LL 2 subband will look like a downscaled version of the original image. 
+At the decoder the process is reverted, and by reconstructing only some of the
+decomposition levels, a lower resolution version of the image can be obtained. 
+Each of these resolutions is called a "resolution level." Typically, 
+five decomposition levels are used, which results in six resolution levels, 
+all related by a factor of two.

@@ -54,11 +54,11 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   public void setConfiguration(Map<String, String> configuration) {
-    final Map copy =
-        Optional.ofNullable(configuration)
-            .map((Function<Map<String, String>, HashMap>) HashMap::new)
-            .orElseGet(HashMap::new);
-    this.configuration = copy;
+    this.configuration =
+        (Map)
+            Optional.ofNullable(configuration)
+                .map((Function<Map<String, String>, HashMap>) HashMap::new)
+                .orElseGet(HashMap::new);
   }
 
   public void validateBeforeResizing() {

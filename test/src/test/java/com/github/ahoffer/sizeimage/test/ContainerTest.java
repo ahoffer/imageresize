@@ -94,7 +94,7 @@ public class ContainerTest {
   @Test
   public void testGetSizersByJp2Stream() throws ClassNotFoundException {
     ImageSizerCollection sizers = belittler.getSizersFor(data.jpeg2000Stream);
-    assertThat("Expect 3 image sizers", sizers.getRecommendations(), hasSize(3));
+    assertThat("Expect 6 image sizers", sizers.getRecommendations(), hasSize(6));
     assertThat(
         "Expected first image sizer to be magick",
         sizers.getRecommendations().get(0),
@@ -165,7 +165,7 @@ public class ContainerTest {
       mavenBundle("commons-io", "commons-io").versionAsInProject(),
       mavenBundle(GROUP_ID, ARTIFACT_ID).versionAsInProject().start(),
       vmOption("-Xmx4g"),
-      // Avoid focus on OS X
+      // Improve cross-platform compatibility
       vmOption("-Djava.awt.headless=true"),
       vmOption("-Dfile.encoding=UTF8")
     };
@@ -174,19 +174,20 @@ public class ContainerTest {
   void runSizer(ImageSizer sizer, File input) throws IOException {
 
     InputStream inputStream = new BufferedInputStream(new FileInputStream(input));
+    StringBuilder builder = new StringBuilder();
     final long start = System.nanoTime();
-    LOGGER.info(
-        String.format("\nStarting %s size %.2f MB...", input.getName(), input.length() / 1e6));
     String sizerName = sizer.getClass().getSimpleName();
-    LOGGER.info(String.format("Selected %s", sizerName));
+    builder.append(
+        String.format("\n%s\t%s\t%.2f MB", sizerName, input.getName(), input.length() / 1e6));
 
-    BufferedImage output = sizer.setInput(inputStream).generate();
+    Optional<BufferedImage> output = sizer.setInput(inputStream).generate();
     final long stop = System.nanoTime();
+    builder.append(String.format("\tTime=%.2f s", (stop - start) / 1.0e9));
+    LOGGER.info(builder.toString());
     java.io.File outputDirObject = new File(OUTPUTDIR);
     outputDirObject.mkdirs();
     java.io.File outputFile = new File(outputDirObject, sizerName + "-" + input.getName() + ".png");
-    ImageIO.write(output, "png", outputFile);
-    LOGGER.info(String.format("Created thumbnail in %.2f s", (stop - start) / 1.0e9));
+    ImageIO.write(output.get(), "png", outputFile);
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {
