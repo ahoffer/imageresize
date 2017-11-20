@@ -75,7 +75,7 @@ public class MagickSizer extends AbstractImageSizer {
     } catch (IOException e) {
       output = null;
     }
-    inputStream=null;
+    inputStream = null;
     return Optional.ofNullable(output);
   }
 

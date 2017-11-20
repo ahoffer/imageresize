@@ -12,6 +12,7 @@
     <module>test</module>
     <module>provider</module>
     <module>api</module>
+    <module>benchmark</module>
   </modules>
 
   <dependencies>

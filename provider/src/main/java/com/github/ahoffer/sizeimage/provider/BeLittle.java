@@ -3,8 +3,9 @@ package com.github.ahoffer.sizeimage.provider;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.unmodifiableMap;
 
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,7 +99,7 @@ public class BeLittle {
   }
 
   @SuppressWarnings("unused")
-  public ImageSizerCollection getSizersFor(InputStream inputStream) {
+  public ImageSizerCollection getSizersFor(InputStream inputStream) throws StreamResetException {
     Optional<String> mimeType = shortcuts.getMimeTypes(inputStream).stream().findFirst();
     return getSizersFor(mimeType.orElse(getUnknownMimeType()));
   }
@@ -148,11 +149,14 @@ public class BeLittle {
    * @param inputStream
    * @return
    */
-  public synchronized Optional<BufferedImage> generate(InputStream inputStream) {
+  public synchronized BeLittlingResult generate(InputStream inputStream)
+      throws StreamResetException {
     ImageSizerCollection sizers = getSizersFor(inputStream);
     Optional<ImageSizer> sizer = sizers.getRecommended();
     return sizer.flatMap(s -> s.setInput(inputStream).generate());
   }
+
+  public static class StreamResetException extends IOException {}
 
   /**
    * Encapsulate information about what resizing techniques are (or are not) available and

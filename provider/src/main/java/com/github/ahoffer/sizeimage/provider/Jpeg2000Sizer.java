@@ -39,6 +39,7 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
     } finally {
       cleanup();
     }
+
     return Optional.ofNullable(outputImage);
   }
 
@@ -49,6 +50,7 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
       } catch (IOException e) {
         // There is nothing that can be done about it
       }
+      inputStream = null;
     }
     if (Objects.nonNull(reader)) {
       reader.dispose();

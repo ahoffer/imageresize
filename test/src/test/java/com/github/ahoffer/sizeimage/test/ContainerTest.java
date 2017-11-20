@@ -13,6 +13,7 @@ import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle;
 import com.github.ahoffer.sizeimage.provider.BeLittle.ImageSizerCollection;
+import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
@@ -77,10 +78,11 @@ public class ContainerTest {
   }
 
   @Test
-  public void testGetSizersByJpegStream() throws ClassNotFoundException {
+  public void testGetSizersByJpegStream() throws StreamResetException {
     ImageSizerCollection sizers = belittler.getSizersFor(data.vanillaJpegStream);
-    assertThat("Unexpected different number of unique sizers", sizers.getAll(), hasSize(3));
-    assertThat("Unexpected number of unique, available sizers", sizers.getAvailable(), hasSize(3));
+    int expectedNumberOfSizers = 4;
+    assertThat("Unexpected different number of unique sizers", sizers.getAll(), hasSize(expectedNumberOfSizers));
+    assertThat("Unexpected number of unique, available sizers", sizers.getAvailable(), hasSize(expectedNumberOfSizers));
     assertThat(
         "Expected second image sizer to be magick",
         sizers.getRecommendations().get(1),
@@ -92,9 +94,9 @@ public class ContainerTest {
   }
 
   @Test
-  public void testGetSizersByJp2Stream() throws ClassNotFoundException {
+  public void testGetSizersByJp2Stream() throws StreamResetException {
     ImageSizerCollection sizers = belittler.getSizersFor(data.jpeg2000Stream);
-    assertThat("Expect 6 image sizers", sizers.getRecommendations(), hasSize(6));
+    assertThat("Expect 6 image sizers", sizers.getRecommendations(), hasSize(5));
     assertThat(
         "Expected first image sizer to be magick",
         sizers.getRecommendations().get(0),
@@ -124,7 +126,7 @@ public class ContainerTest {
   }
 
   @Test
-  public void testConvenienceMethod() {
+  public void testConvenienceMethod() throws StreamResetException {
     Optional<BufferedImage> output = belittler.generate(data.jpeg2000Stream);
     assertThat(output.isPresent(), is(true));
     assertThat(output.get().getWidth(), equalTo(belittler.getMaxWidth()));

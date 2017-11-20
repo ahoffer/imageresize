@@ -10,7 +10,9 @@ import static org.junit.Assert.assertThat;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.AbstractImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
+import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
 import com.github.ahoffer.sizeimage.provider.ImageReaderShortcuts;
+import com.github.ahoffer.sizeimage.provider.Jpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
@@ -29,13 +31,13 @@ import javax.imageio.spi.IIORegistry;
 import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class IoTest {
 
   public static final String TEST_PATH_TO_MAGICK_EXEC =
       FilenameUtils.getFullPath("/opt/local/bin/");
-  public static final int PIXELS = 128;
 
   static {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
@@ -60,6 +62,16 @@ public class IoTest {
   }
 
   @Test
+  public void testJpeg2000ResolutionSizer() throws IOException {
+    doSize(new Jpeg2000Sizer(), data.jpeg2000Stream);
+  }
+
+  @Test(expected= IllegalArgumentException.class)
+  public void testWrongImageTypeForJpeg2000Sizer() throws IOException {
+    doSize(new Jpeg2000Sizer(), data.vanillaJpegStream);
+  }
+
+  @Test
   public void testMagickSizer() throws IOException {
     ImageSizer sizer = new MagickSizer();
     HashMap configuration = new HashMap();
@@ -69,12 +81,12 @@ public class IoTest {
     doSize(sizer, data.vanillaJpegStream);
   }
 
-  private void doSize(ImageSizer sizer, InputStream inputStream) throws IOException {
+  private void doSize(ImageSizer sizer, InputStream inputStream) {
     sizer.setInput(inputStream);
-    sizer.setOutputSize(PIXELS, PIXELS);
+    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS);
     Optional<BufferedImage> output = sizer.generate();
-    assertThat(output.get().getWidth(), equalTo(PIXELS));
-    assertThat(output.get().getHeight(), org.hamcrest.Matchers.lessThanOrEqualTo(PIXELS));
+    assertThat(output.get().getWidth(), equalTo(TestData.PIXELS));
+    assertThat(output.get().getHeight(), org.hamcrest.Matchers.lessThanOrEqualTo(TestData.PIXELS));
 
     // Test the reference to the input stream is gone.
     try {
@@ -87,7 +99,7 @@ public class IoTest {
   }
 
   @Test
-  public void testGetMimeTypes() {
+  public void testGetMimeTypes() throws StreamResetException {
     List<String> mimeTypes = shortcuts.getMimeTypes(data.vanillaJpegStream);
     assertThat(mimeTypes, hasItem(equalToIgnoringCase("image/jpeg")));
 
@@ -96,23 +108,12 @@ public class IoTest {
   }
 
   @Test
-  public void testPreservingInputStream() {
+  public void testPreservingInputStream() throws StreamResetException {
     // Use the same stream twice
     InputStream inputStream = data.vanillaJpegStream;
-    assertThat(shortcuts.getMimeTypes(inputStream), equalTo(shortcuts.getMimeTypes(inputStream)));
-  }
-
-  @Test
-  public void experiment() throws IOException {
-    ImageInputStream input =
-        ImageIO.createImageInputStream(
-            new File("/Users/aaronhoffer/data/sample-images/gettysburg.jp2"));
-    ImageReader reader = new J2KImageReaderSpi().createReaderInstance(null);
-    reader.setInput(input);
-    J2KImageReadParam param = (J2KImageReadParam) reader.getDefaultReadParam();
-    param.setResolution(10);
-    BufferedImage image = reader.read(0, param);
-    image.getHeight();
+    List<String> mimeTypesFirstTime = shortcuts.getMimeTypes(inputStream);
+    List<String> mimeTypesSecondTime = shortcuts.getMimeTypes(inputStream);
+    assertThat(mimeTypesFirstTime, equalTo(mimeTypesSecondTime));
   }
 
   @Test
@@ -125,5 +126,19 @@ public class IoTest {
     BufferedImage image = reader.read(0);
     int height = image.getHeight();
     BufferedImage image2 = reader.read(0);
+  }
+
+  @Ignore
+  @Test
+  public void experiment() throws IOException {
+    ImageInputStream input =
+        ImageIO.createImageInputStream(
+            new File("/Users/aaronhoffer/data/sample-images/gettysburg.jp2"));
+    ImageReader reader = new J2KImageReaderSpi().createReaderInstance(null);
+    reader.setInput(input);
+    J2KImageReadParam param = (J2KImageReadParam) reader.getDefaultReadParam();
+    param.setResolution(10);
+    BufferedImage image = reader.read(0, param);
+    image.getHeight();
   }
 }

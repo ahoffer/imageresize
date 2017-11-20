@@ -1,0 +1,1 @@
+Future home of a Karaf features file.

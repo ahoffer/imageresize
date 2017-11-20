@@ -34,13 +34,15 @@
       <artifactId>api</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <!--Actual image sizers-->
     <dependency>
       <groupId>com.github.ahoffer</groupId>
       <artifactId>provider</artifactId>
       <version>${project.version}</version>
     </dependency>
 
-
+    <!--Provided -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -48,21 +50,18 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>${mockito-core.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.25</version>
       <scope>provided</scope>
     </dependency>
+
+    <!--Test-->
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>23.0-android</version>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito-core.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>

@@ -18,9 +18,7 @@ import org.apache.commons.io.IOUtils;
 
 public class TestData {
 
-  public static final String JPEG = "JPEG";
-
-  public static final String JPEG_2000 = "jpeg 2000";
+  public static final int PIXELS = 128;
   static final String INPUT_DIR = "/Users/aaronhoffer/data/small-image-set/";
   InputStream vanillaJpegStream;
   InputStream jpeg2000Stream;

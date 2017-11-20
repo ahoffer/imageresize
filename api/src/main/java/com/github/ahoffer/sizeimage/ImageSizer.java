@@ -1,9 +1,7 @@
 package com.github.ahoffer.sizeimage;
 
-import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * The ImageSizer interface is central to this library. Implementers of the interface can use any
@@ -75,7 +73,7 @@ public interface ImageSizer {
    *
    * @return resized image
    */
-  Optional<BufferedImage> generate();
+  BeLittlingResult generate();
 
   /**
    * Return true is the image sizer is ready and able generate images. Image sizers have
