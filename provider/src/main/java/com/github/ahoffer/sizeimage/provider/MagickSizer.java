@@ -68,7 +68,7 @@ public class MagickSizer extends AbstractImageSizer {
   }
 
   public Optional<BufferedImage> generate() {
-    validateBeforeResizing();
+    endorse();
     BufferedImage output;
     try {
       output = getOutputImage();
@@ -109,9 +109,9 @@ public class MagickSizer extends AbstractImageSizer {
     return outputConsumer.getImage();
   }
 
-  public void validateBeforeResizing() {
+  public void endorse() {
 
-    super.validateBeforeResizing();
+    super.endorse();
 
     if (!isAvailable()) {
       throw new RuntimeException(

@@ -1,23 +1,22 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Optional;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class BasicSizer extends AbstractImageSizer {
 
-  public Optional<BufferedImage> generate() {
-    validateBeforeResizing();
-    BufferedImage output;
-    try {
-      output = getOutputImage();
-      inputStream.close();
-    } catch (IOException e) {
-      output = null;
+  public BeLittlingResult generate() {
+    BufferedImage output = null;
+    if (endorse()) {
+      try {
+        output = getOutputImage();
+      } catch (IOException e) {
+        addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR));
+      }
     }
-    inputStream = null;
-    return Optional.ofNullable(output);
+    return new BeLittlingResultImpl(output, messages);
   }
 
   BufferedImage getOutputImage() throws IOException {

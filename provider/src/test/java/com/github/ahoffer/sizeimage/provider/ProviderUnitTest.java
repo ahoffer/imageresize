@@ -89,7 +89,7 @@ public class ProviderUnitTest {
     config.put(AbstractImageSizer.MAX_HEIGHT, "1");
     config.put(AbstractImageSizer.MAX_WIDTH, "");
     sizer.setConfiguration(config);
-    sizer.validateBeforeResizing();
+    sizer.endorse();
   }
 
   @Test

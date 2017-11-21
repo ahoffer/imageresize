@@ -27,16 +27,16 @@ import org.slf4j.LoggerFactory;
  */
 public class BeLittle {
 
-  public static final String MATCH_ANY = "*";
-  public static final String UNKNOWN_MIME_TYPE = "application/octet-stream";
-
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(BeLittle.class);
 
+  String MATCH_ANY = "*";
+  String UNKNOWN_MIME_TYPE = "application/octet-stream";
   private int maxWidth;
   private int maxHeight;
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
   private ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
+  private MessageFactory messageFactory = new MessageFactory();
 
   public ImageSizerCollection getSizersFor(String inputMimeType) {
     ImageSizerCollection coll = new ImageSizerCollection();
@@ -151,9 +151,13 @@ public class BeLittle {
    */
   public synchronized BeLittlingResult generate(InputStream inputStream)
       throws StreamResetException {
-    ImageSizerCollection sizers = getSizersFor(inputStream);
-    Optional<ImageSizer> sizer = sizers.getRecommended();
-    return sizer.flatMap(s -> s.setInput(inputStream).generate());
+    Optional<ImageSizer> sizer = getSizersFor(inputStream).getRecommended();
+    if (sizer.isPresent()) {
+      return sizer.get().setInput(inputStream).generate();
+    } else {
+      return new BeLittlingResultImpl(
+          null, Collections.singletonList(messageFactory.make(MessageConstants.NO_SIZER)));
+    }
   }
 
   public static class StreamResetException extends IOException {}

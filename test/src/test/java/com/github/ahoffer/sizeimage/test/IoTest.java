@@ -90,7 +90,7 @@ public class IoTest {
 
     // Test the reference to the input stream is gone.
     try {
-      ((AbstractImageSizer) sizer).validateBeforeResizing();
+      ((AbstractImageSizer) sizer).endorse();
     } catch (IllegalArgumentException e) {
       return;
     }

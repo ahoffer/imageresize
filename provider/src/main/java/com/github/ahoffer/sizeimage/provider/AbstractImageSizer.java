@@ -1,16 +1,29 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_HEIGHT;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_WIDTH;
+
+import com.github.ahoffer.sizeimage.BeLittlingMessage;
+import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import org.apache.commons.lang3.Validate;
 
 public abstract class AbstractImageSizer implements ImageSizer {
+
+  public static final String MAX_WIDTH = "maxWidth";
+  public static final String MAX_HEIGHT = "maxHeight";
+  protected Map<String, String> configuration = new HashMap<>();
+  protected InputStream inputStream;
+  protected List<BeLittlingMessage> messages = new LinkedList<>();
+  protected MessageFactory messageFactory = new MessageFactory();
 
   @Override
   public boolean equals(Object o) {
@@ -26,27 +39,20 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return configuration.equals(that.configuration);
   }
 
+  protected void cleanup() {
+    inputStream = null;
+    messages = Collections.EMPTY_LIST;
+  }
+
   @Override
   public int hashCode() {
     return configuration.hashCode();
   }
 
-  public static final String MAX_WIDTH = "maxWidth";
-  public static final String MAX_HEIGHT = "maxHeight";
-
-  protected Map<String, String> configuration = new HashMap<>();
-  protected InputStream inputStream;
-
   public ImageSizer setOutputSize(int maxWidth, int maxHeight) {
-    validateExtents(maxWidth, maxHeight);
     configuration.put(MAX_WIDTH, Integer.toString(maxWidth));
     configuration.put(MAX_HEIGHT, Integer.toString(maxHeight));
     return this;
-  }
-
-  private void validateExtents(int maxWidth, int maxHeight) {
-    Validate.inclusiveBetween(1, Integer.MAX_VALUE, maxWidth);
-    Validate.inclusiveBetween(1, Integer.MAX_VALUE, maxHeight);
   }
 
   public Map<String, String> getConfiguration() {
@@ -61,11 +67,27 @@ public abstract class AbstractImageSizer implements ImageSizer {
                 .orElseGet(HashMap::new);
   }
 
-  public void validateBeforeResizing() {
-    validateExtents(getMaxWidth(), getMaxHeight());
-    if (Objects.isNull(inputStream)) {
-      throw new IllegalArgumentException("Input stream cannot be null");
+  protected void addMessage(BeLittlingMessage message) {
+    messages.add(message);
+  }
+
+  protected boolean canProceedToGenerateImage() {
+    return messages.stream().anyMatch(message -> message.getSeverity() == BeLittlingSeverity.ERROR);
+  }
+
+  protected boolean endorse() {
+    // TODO: Create a rule class to encapsulate the rules. It accepts a sizer and can call
+    // TODO: the sizer's addMessage method. Probably use visitor pattern.
+    if (getMaxWidth() < 1) {
+      addMessage(messageFactory.make(BAD_WIDTH, getMaxWidth()));
     }
+    if (getMaxHeight() < 1) {
+      addMessage(messageFactory.make(BAD_HEIGHT, getMaxHeight()));
+    }
+    if (Objects.isNull(inputStream)) {
+      addMessage(messageFactory.make(MessageConstants.MISSING_INPUT_STREAM));
+    }
+    return canProceedToGenerateImage();
   }
 
   public int getMaxWidth() {

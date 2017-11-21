@@ -29,7 +29,7 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
 
   public Optional<BufferedImage> generate() {
     BufferedImage outputImage;
-    validateBeforeResizing();
+    endorse();
     try {
       BufferedImage decodedImage = getDecodedImage();
       outputImage =
