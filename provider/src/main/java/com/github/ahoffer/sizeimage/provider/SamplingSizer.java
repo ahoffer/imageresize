@@ -1,22 +1,30 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERIOD;
+
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Optional;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class SamplingSizer extends AbstractImageSizer {
 
   public static final String SAMPLING_PERIOD = "resizeFactor";
 
-  public Optional<BufferedImage> generate() {
-    BufferedImage outputImage;
-    try {
-      outputImage = getOutputImage();
-    } catch (IOException e) {
-      outputImage = null;
+  public BeLittlingResult generate() {
+    BufferedImage output = null;
+    stampNameOnResults();
+    if (endorse()) {
+      try {
+        output = getOutputImage();
+      } catch (IOException e) {
+        addMessage(messageFactory.make(RESIZE_ERROR, e));
+      } finally {
+        cleanup();
+      }
     }
-    return Optional.ofNullable(outputImage);
+    return new BeLittlingResultImpl(output, messages);
   }
 
   BufferedImage getOutputImage() throws IOException {
@@ -26,8 +34,7 @@ public class SamplingSizer extends AbstractImageSizer {
     }
     BufferedImage output =
         Thumbnails.of(reader.read()).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
-    inputStream.close();
-    inputStream = null;
+    addMessage(messageFactory.make(SAMPLE_PERIOD, reader.getSamplingPeriod()));
     return output;
   }
 }

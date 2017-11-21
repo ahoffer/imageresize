@@ -1,9 +1,12 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
+
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 import org.apache.commons.lang3.SystemUtils;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
@@ -67,19 +70,22 @@ public class MagickSizer extends AbstractImageSizer {
     return exec;
   }
 
-  public Optional<BufferedImage> generate() {
-    endorse();
-    BufferedImage output;
-    try {
-      output = getOutputImage();
-    } catch (IOException e) {
-      output = null;
+  public BeLittlingResult generate() {
+    BufferedImage output = null;
+    stampNameOnResults();
+    if (endorse()) {
+      try {
+        output = getOutputImage();
+      } catch (InterruptedException | IM4JavaException | IOException e) {
+        addMessage(messageFactory.make(RESIZE_ERROR, e));
+      } finally {
+        cleanup();
+      }
     }
-    inputStream = null;
-    return Optional.ofNullable(output);
+    return new BeLittlingResultImpl(output, messages);
   }
 
-  BufferedImage getOutputImage() throws IOException {
+  BufferedImage getOutputImage() throws InterruptedException, IOException, IM4JavaException {
     // TODO if MIME type is JPEG, add this option "-define jpeg:generate=200x200" and substitute a
     // size that is twice the size of the desired thumbnail.
     // TODO use -sample to improve memory usage
@@ -100,25 +106,22 @@ public class MagickSizer extends AbstractImageSizer {
     command.setOutputConsumer(outputConsumer);
 
     command.setSearchPath(getPath());
-
-    try {
-      command.run(op);
-    } catch (InterruptedException | IM4JavaException e) {
-      throw new RuntimeException("Problem resizing image with ImageMagick", e);
-    }
+    command.run(op);
     return outputConsumer.getImage();
   }
 
-  public void endorse() {
+  public boolean endorse() {
 
     super.endorse();
 
     if (!isAvailable()) {
-      throw new RuntimeException(
-          "Cannot generate image. ImageMagick executable not found. "
-              + "Check executable path. \n "
-              + "Process does not inherit a PATH environment variable");
+      addMessage(
+          messageFactory.make(
+              EXTERNAL_EXECUTABLE,
+              "Cannot generate image. ImageMagick executable not found. Check executable path. "
+                  + "Process does not inherit a PATH environment variable"));
     }
+    return canProceedToGenerateImage();
   }
 
   public String getPath() {

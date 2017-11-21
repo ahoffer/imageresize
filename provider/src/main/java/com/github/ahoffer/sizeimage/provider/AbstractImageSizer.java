@@ -2,6 +2,7 @@ package com.github.ahoffer.sizeimage.provider;
 
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_WIDTH;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
@@ -13,8 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 
 public abstract class AbstractImageSizer implements ImageSizer {
 
@@ -26,17 +25,15 @@ public abstract class AbstractImageSizer implements ImageSizer {
   protected MessageFactory messageFactory = new MessageFactory();
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) {
+  public boolean equals(Object other) {
+    if (this == other) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (other == null || getClass() != other.getClass()) {
       return false;
     }
 
-    AbstractImageSizer that = (AbstractImageSizer) o;
-
-    return configuration.equals(that.configuration);
+    return configuration.equals(((AbstractImageSizer) other).configuration);
   }
 
   protected void cleanup() {
@@ -60,11 +57,18 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   public void setConfiguration(Map<String, String> configuration) {
-    this.configuration =
-        (Map)
-            Optional.ofNullable(configuration)
-                .map((Function<Map<String, String>, HashMap>) HashMap::new)
-                .orElseGet(HashMap::new);
+
+    if (configuration == null) {
+      this.configuration = new HashMap();
+    } else {
+      this.configuration = new HashMap<>(configuration);
+    }
+    // This was too pedantic to keep, buut it is adorable. So here:
+    //    this.configuration =
+    //        (Map)
+    //            Optional.ofNullable(configuration)
+    //                .map((Function<Map<String, String>, HashMap>) HashMap::new)
+    //                .orElseGet(HashMap::new);
   }
 
   protected void addMessage(BeLittlingMessage message) {
@@ -116,6 +120,10 @@ public abstract class AbstractImageSizer implements ImageSizer {
   public ImageSizer setInput(InputStream inputStream) {
     this.inputStream = inputStream;
     return this;
+  }
+
+  protected void stampNameOnResults() {
+    addMessage(messageFactory.make(SIZER_NAME, this.getClass().getSimpleName()));
   }
 
   public class CopyObjectException extends RuntimeException {

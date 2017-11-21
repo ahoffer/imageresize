@@ -10,11 +10,12 @@ import javax.imageio.ImageReader;
 
 public class SamplingImageReader {
 
-  protected int samplePeriod;
+  public static final int NO_SUBSAMPLING = 1;
+  static ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
+  private int samplingPeriod;
   int imageIndex;
   ImageReader reader;
   InputStream source;
-  static ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
 
   public static SamplingImageReader of(InputStream source) throws IOException {
     SamplingImageReader object = new SamplingImageReader();
@@ -36,8 +37,9 @@ public class SamplingImageReader {
     return this;
   }
 
+  // TODO: RE-ENABLE OVERWRITE OF COMPUTED SAMPLE PERIOD
   public SamplingImageReader samplePeriod(int period) {
-    samplePeriod = period;
+    samplingPeriod = period;
     return this;
   }
 
@@ -50,7 +52,7 @@ public class SamplingImageReader {
       sourceHeight = reader.getHeight(imageIndex);
       period = new ComputeResizeFactor().setWidthHeight(sourceWidth, sourceHeight).compute();
     } catch (IOException e) {
-      period = 1;
+      period = NO_SUBSAMPLING;
     }
     return period;
   }
@@ -61,9 +63,9 @@ public class SamplingImageReader {
     int rowOffset = 0;
     // Use the same sampling period for both rows and columns to preserve images's
     // aspect ratio.
-    int period = computeSamplingPeriod();
-    int columnSamplingPeriod = period;
-    int rowSamplingPeriod = period;
+    samplingPeriod = computeSamplingPeriod();
+    int columnSamplingPeriod = getSamplingPeriod();
+    int rowSamplingPeriod = getSamplingPeriod();
     ImageReadParam imageParam = reader.getDefaultReadParam();
     try {
       imageParam.setSourceSubsampling(
@@ -73,7 +75,10 @@ public class SamplingImageReader {
       source.close();
       reader.dispose();
     }
-
     return image;
+  }
+
+  protected int getSamplingPeriod() {
+    return samplingPeriod;
   }
 }

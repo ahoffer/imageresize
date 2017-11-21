@@ -1,10 +1,9 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
 import javax.imageio.ImageReader;
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -22,40 +21,50 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
    * five decomposition levels are used, which results in six resolution levels, all related by a
    * factor of two."
    */
+
+  // TODO Move this to the configuration instead of inst var
   int assumedMaximumNumberOfResolutionLayers = 6;
 
   int imageIndex = 0;
   ImageReader reader;
 
-  public Optional<BufferedImage> generate() {
-    BufferedImage outputImage;
+  public BeLittlingResult generate() {
+    BufferedImage outputImage = null;
+    BufferedImage decodedImage;
+    stampNameOnResults();
     endorse();
     try {
-      BufferedImage decodedImage = getDecodedImage();
-      outputImage =
-          Thumbnails.of(decodedImage).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+      decodedImage = getDecodedImage();
+      try {
+        outputImage =
+            Thumbnails.of(decodedImage).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+      } catch (IOException e) {
+        addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR, e));
+      }
     } catch (IOException e) {
-      outputImage = null;
+      addMessage(messageFactory.make(MessageConstants.DECODE_JPEG2000));
     } finally {
       cleanup();
     }
 
-    return Optional.ofNullable(outputImage);
+    return new BeLittlingResultImpl(outputImage, messages);
   }
 
-  void cleanup() {
-    if (Objects.nonNull(inputStream)) {
-      try {
-        inputStream.close();
-      } catch (IOException e) {
-        // There is nothing that can be done about it
-      }
-      inputStream = null;
-    }
-    if (Objects.nonNull(reader)) {
-      reader.dispose();
-    }
-  }
+  // TODO: Maybe I should wrap the input stream in a shielded stream and close the reader?
+  // TODO: CHECK FOR RESOURCE LEAKS BEFORE TRYING TO FIX RESOURCE LEAKS
+  //  void cleanup() {
+  //    if (Objects.nonNull(inputStream)) {
+  //      try {
+  //        inputStream.close();
+  //      } catch (IOException e) {
+  //        // There is nothing that can be done about it
+  //      }
+  //      inputStream = null;
+  //    }
+  //    if (Objects.nonNull(reader)) {
+  //      reader.dispose();
+  //    }
+  //  }
 
   BufferedImage getDecodedImage() throws IOException {
     reader = shortcuts.getReader(inputStream);

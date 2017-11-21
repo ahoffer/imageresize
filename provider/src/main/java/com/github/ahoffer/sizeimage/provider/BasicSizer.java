@@ -1,5 +1,7 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.*;
+
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -9,11 +11,12 @@ public class BasicSizer extends AbstractImageSizer {
 
   public BeLittlingResult generate() {
     BufferedImage output = null;
+    stampNameOnResults();
     if (endorse()) {
       try {
         output = getOutputImage();
       } catch (IOException e) {
-        addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR));
+        addMessage(messageFactory.make(RESIZE_ERROR, e));
       }
     }
     return new BeLittlingResultImpl(output, messages);
