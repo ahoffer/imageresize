@@ -133,7 +133,7 @@ public class BeLittleBenchmark {
   //    return lastThumbnail;
   //  }
 
-  //  @Benchmark
+  @Benchmark
   public BufferedImage scalrTikaTransformer() throws IOException {
     lastDescription = "scalrTikaTransformer";
     Image source = ImageIO.read(getSoureceFile());
@@ -147,7 +147,7 @@ public class BeLittleBenchmark {
     return lastThumbnail;
   }
 
-  //  @Benchmark
+  @Benchmark
   public BufferedImage imageMagickStream()
       throws IOException, IM4JavaException, InterruptedException {
     lastDescription = "imageMagickStream";
@@ -197,6 +197,8 @@ public class BeLittleBenchmark {
     return new File(inputDir + filename);
   }
 
+  @SuppressWarnings("unused")
+  // Example of fast duplication of a file, or fast copy
   void copyFileUsingFileChannels(File source, File dest) throws IOException {
     FileChannel inputChannel = null;
     FileChannel outputChannel = null;
