@@ -1,6 +1,6 @@
 package com.github.ahoffer.sizeimage.provider;
 
-
+// TODO: Should this be int he API module? I don't think so but it is worth getting some opinions
 public interface MessageConstants {
   String BAD_WIDTH = "BAD_WIDTH";
   String BAD_HEIGHT = "BAD_HEIGHT";
