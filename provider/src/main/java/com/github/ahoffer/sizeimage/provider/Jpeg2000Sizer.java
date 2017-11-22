@@ -68,6 +68,7 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
             .setInputWidthHeight(reader.getWidth(imageIndex), reader.getHeight(imageIndex))
             .compute();
     param.setResolution(levels);
+    param.setDecodingRate(0.01);
     addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
     return reader.read(imageIndex, param);
   }

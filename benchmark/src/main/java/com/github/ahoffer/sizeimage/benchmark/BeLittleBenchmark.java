@@ -53,14 +53,6 @@ public class BeLittleBenchmark {
   BufferedImage lastThumbnail;
   String lastDescription;
 
-  // ALL FILES
-  //    @Param({"unicorn-rainbow-57kb.gif", "land-100kb.jpg", "parliament-60kb.jpg",
-  // "city-300kb.jpg",
-  //            "UN-bus-attack.jpg", "militants.jpg", "building-30mb.jpg", "land-8mb.jpg",
-  //            "mountains-20mb.jpg", "crowd-3mb.jpg", "australia-250mb.png", "salt-lake-340mb.jpg",
-  //            "baghdad-j2k-20mb.jp2", "carrots-j2k-8mb.j2k", "olso-j2k-19mb.jp2"})
-  //    String filename;
-
   // LARGE FILES ( > 1 MB)
   @Param({
     "building-30mb.jpg",
@@ -71,8 +63,8 @@ public class BeLittleBenchmark {
     "salt-lake-340mb.jpg",
     "baghdad-j2k-20mb.jp2",
     "olso-j2k-19mb.jp2",
-    "mixed-city-and-undeveloped-15mb.jpg",
-    "gettysburg.jp2"
+    "city-and-land-15mb.jpg",
+    "gettysburg-6mb.jp2"
   })
   String filename;
 
