@@ -94,13 +94,17 @@ public class BeLittleBenchmark {
   //  @Param({"baghdad-j2k-20mb.jp2", "carrots-j2k-8mb.j2k", "olso-j2k-19mb.jp2"})
   //  String filename;
 
+  // TODO: Could account for common IO time by allocating a buffer in setup and copying the image
+  // todo: file's bits into it.
+  // TODO: Or could have a benchmark that does nothing but copy the input stream to get a sense of
+  // todo: the IO overhead.
   public static void main(String[] args) throws RunnerException {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
-            .forks(2)
+            .forks(1)
             .warmupIterations(1)
-            .measurementIterations(4)
+            .measurementIterations(3)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
@@ -177,14 +181,9 @@ public class BeLittleBenchmark {
     config.put("pathToImageMagickExecutables", "/opt/local/bin/");
 
     try (InputStream input = new FileInputStream(getSoureceFile())) {
+      sizer.setConfiguration(config);
       lastThumbnail =
-          sizer
-              .setConfiguration(config)
-              .setOutputSize(thumbSize, thumbSize)
-              .setInput(input)
-              .generate()
-              .getOutput()
-              .get();
+          sizer.setOutputSize(thumbSize, thumbSize).setInput(input).generate().getOutput().get();
     }
   }
 

@@ -15,8 +15,8 @@ import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle;
 import com.github.ahoffer.sizeimage.provider.BeLittle.ImageSizerCollection;
 import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
+import com.github.ahoffer.sizeimage.provider.Jpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
-import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -109,13 +109,9 @@ public class ContainerTest {
         sizers.getRecommendations().get(0),
         instanceOf(MagickSizer.class));
     assertThat(
-        "Expected second image sizer to be sampling",
+        "Expected second image sizer to be jpeg2000",
         sizers.getRecommendations().get(1),
-        instanceOf(SamplingSizer.class));
-    assertThat(
-        "Expected third image sizer to be basic",
-        sizers.getRecommendations().get(2),
-        instanceOf(BasicSizer.class));
+        instanceOf(Jpeg2000Sizer.class));
   }
 
   @Test

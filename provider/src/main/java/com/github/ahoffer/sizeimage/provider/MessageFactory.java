@@ -7,6 +7,7 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EX
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.NO_SIZER;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESOLUTION_LEVELS;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERIOD;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNKNOWN_MESSAGE_ID;
@@ -54,6 +55,11 @@ public class MessageFactory {
       case SAMPLE_PERIOD:
         return new BeLittlingMessageImpl(
             SAMPLE_PERIOD, BeLittlingSeverity.INFO, String.format("Sampling period=%d", values[0]));
+      case RESOLUTION_LEVELS:
+        return new BeLittlingMessageImpl(
+            RESOLUTION_LEVELS,
+            BeLittlingSeverity.INFO,
+            String.format("Resolutions levels decoded %d", values[0]));
       default:
         return makeUnrecognized(id);
     }

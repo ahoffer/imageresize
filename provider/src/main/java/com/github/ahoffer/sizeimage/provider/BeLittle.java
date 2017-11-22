@@ -1,7 +1,6 @@
 package com.github.ahoffer.sizeimage.provider;
 
 import static java.util.Collections.EMPTY_LIST;
-import static java.util.Collections.unmodifiableMap;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,16 +108,16 @@ public class BeLittle {
 
   @SuppressWarnings("unused")
   public synchronized Map<String, List<ImageSizer>> getConfiguration() {
-    return configuration;
+    return Collections.unmodifiableMap(configuration);
   }
 
   @SuppressWarnings("unused")
   public synchronized void setConfiguration(Map configuration) {
-    Map copy =
-        Optional.ofNullable(configuration)
-            .map((Function<Map, Map>) HashMap::new)
-            .orElseGet(HashMap::new);
-    this.configuration = unmodifiableMap(copy);
+    Map newConfiguration = new HashMap();
+    if (configuration != null) {
+      newConfiguration = new HashMap<>(configuration);
+    }
+    this.configuration = newConfiguration;
   }
 
   public synchronized int getMaxWidth() {

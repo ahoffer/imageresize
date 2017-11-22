@@ -56,20 +56,12 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return Collections.unmodifiableMap(configuration);
   }
 
-  public ImageSizer setConfiguration(Map<String, String> configuration) {
-
-    if (configuration == null) {
-      this.configuration = new HashMap();
-    } else {
-      this.configuration = new HashMap<>(configuration);
+  public void setConfiguration(Map configuration) {
+    Map newConfiguration = new HashMap();
+    if (configuration != null) {
+      newConfiguration = new HashMap<>(configuration);
     }
-    // This was too pedantic to keep, buut it is adorable. So here:
-    //    this.configuration =
-    //        (Map)
-    //            Optional.ofNullable(configuration)
-    //                .map((Function<Map<String, String>, HashMap>) HashMap::new)
-    //                .orElseGet(HashMap::new);
-    return this;
+    this.configuration = newConfiguration;
   }
 
   protected void addMessage(BeLittlingMessage message) {

@@ -17,20 +17,6 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
   }
 
   ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
-  /**
-   * Diego Santa Cruz, Touradj Ebrahimi, and Charilaos Christopoulos
-   *
-   * <p>Dr. Dobb's Journal, April 01, 2001
-   *
-   * <p>... by reconstructing only some of the decomposition levels, a lower resolution version of
-   * the image can be obtained. Each of these resolutions is called a "resolution level." Typically,
-   * five decomposition levels are used, which results in six resolution levels, all related by a
-   * factor of two."
-   */
-
-  // TODO Move this to the configuration instead of inst var
-  int assumedMaximumNumberOfResolutionLayers = 6;
-
   int imageIndex = 0;
   ImageReader reader;
 
@@ -76,16 +62,13 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
   BufferedImage getDecodedImage() throws IOException {
     reader = shortcuts.getReader(inputStream);
     J2KImageReadParam param = (J2KImageReadParam) reader.getDefaultReadParam();
-    param.setResolution(getResolutionLayersToDecode(reader));
-    imageIndex = 0;
-    return reader.read(imageIndex, param);
-  }
-
-  int getResolutionLayersToDecode(ImageReader reader) throws IOException {
-    int resizeFactor =
-        new ComputeResizeFactor(1024)
-            .setWidthHeight(reader.getWidth(imageIndex), reader.getHeight(imageIndex))
+    int levels =
+        new ComputeResolutionLevel()
+            .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+            .setInputWidthHeight(reader.getWidth(imageIndex), reader.getHeight(imageIndex))
             .compute();
-    return Math.min(resizeFactor, assumedMaximumNumberOfResolutionLayers);
+    param.setResolution(levels);
+    addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
+    return reader.read(imageIndex, param);
   }
 }

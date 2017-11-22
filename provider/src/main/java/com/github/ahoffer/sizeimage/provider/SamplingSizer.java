@@ -11,7 +11,6 @@ import javax.imageio.ImageReader;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class SamplingSizer extends AbstractImageSizer {
-  public static final int NO_SUBSAMPLING = 1;
   public static final String SAMPLING_PERIOD = "samplingPeriod";
   int imageIndex = 0;
 
@@ -39,13 +38,13 @@ public class SamplingSizer extends AbstractImageSizer {
     if (configuration.containsKey(SAMPLING_PERIOD)) {
       period = Integer.valueOf(configuration.get(SAMPLING_PERIOD));
     } else {
-      try {
-        int sourceWidth = reader.getWidth(imageIndex);
-        int sourceHeight = reader.getHeight(imageIndex);
-        period = new ComputeResizeFactor().setWidthHeight(sourceWidth, sourceHeight).compute();
-      } catch (IOException e) {
-        period = NO_SUBSAMPLING;
-      }
+      int sourceWidth = reader.getWidth(imageIndex);
+      int sourceHeight = reader.getHeight(imageIndex);
+      period =
+          new ComputeSubSamplingPeriod()
+              .setInputWidthHeight(sourceWidth, sourceHeight)
+              .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+              .compute();
     }
     imageParam.setSourceSubsampling(period, period, columnOffset, rowOffset);
     final BufferedImage input = reader.read(imageIndex, imageParam);
