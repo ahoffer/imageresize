@@ -30,10 +30,12 @@ public interface ImageSizer {
    * The configuration is expected to be a simple map of string keys to string values. One use is to
    * store the desired output generate of re-sized images. See implementers of this interface for
    * samples of how configuration can be used. It is expected implementers will copy the input and
-   * not keep a reference to the input. NOTE: Blueprint expects the method to return void.
+   * not keep a reference to the input.
    *
    * @param configuration
    */
+  // TODO: Blueprint expects the method to return void. Does a map w/ generics work in
+  // todo: blueprint?  Gotta check it out.
   void setConfiguration(Map configuration);
 
   /**
