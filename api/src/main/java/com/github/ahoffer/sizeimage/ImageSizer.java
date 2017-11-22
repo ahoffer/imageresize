@@ -34,7 +34,7 @@ public interface ImageSizer {
    *
    * @param configuration
    */
-  void setConfiguration(Map<String, String> configuration);
+  ImageSizer setConfiguration(Map<String, String> configuration);
 
   /**
    * Provide the image sizer with the image that should be re-sized.

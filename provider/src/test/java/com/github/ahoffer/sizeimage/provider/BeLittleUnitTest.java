@@ -1,6 +1,5 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.BeLittle.MATCH_ANY;
 import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -61,7 +60,7 @@ public class BeLittleUnitTest {
   private Map<String, List<ImageSizer>> getTestConfiguration() {
     Map<String, List<ImageSizer>> configuration = new HashMap<>();
     wildcardList = Arrays.asList(wildcardSizer);
-    configuration.put(MATCH_ANY, wildcardList);
+    configuration.put(new BeLittle().MATCH_ANY, wildcardList);
     List<ImageSizer> singletonList = Arrays.asList(otherSizer);
     multiplesList = Arrays.asList(basicSizer, unavailableSizer, duplicatedInstance, otherSizer);
     configuration.put(MANY, multiplesList);

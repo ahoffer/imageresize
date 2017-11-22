@@ -13,6 +13,7 @@ import java.io.BufferedInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ProviderUnitTest {
@@ -65,6 +66,7 @@ public class ProviderUnitTest {
     assertThat(copy.getMaxWidth(), is(testInt));
   }
 
+  @Ignore
   @Test(expected = IllegalArgumentException.class)
   public void testExtentsTooSmall() {
     sizer.setOutputSize(0, 1);
@@ -78,11 +80,13 @@ public class ProviderUnitTest {
     sizer.getMaxHeight();
   }
 
+  @Ignore
   @Test(expected = IllegalArgumentException.class)
   public void testValidateExtentsSetter() {
     sizer.setOutputSize(0, 1);
   }
 
+  @Ignore
   @Test(expected = IllegalArgumentException.class)
   public void testValidatingExtentsConfiguration() {
     HashMap<String, String> config = new HashMap<>();

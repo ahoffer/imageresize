@@ -2,13 +2,19 @@ package com.github.ahoffer.sizeimage.provider;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
+import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageReader;
+import javax.imageio.spi.IIORegistry;
 import net.coobird.thumbnailator.Thumbnails;
 
 @SuppressWarnings("squid:S2160")
 public class Jpeg2000Sizer extends AbstractImageSizer {
+
+  static {
+    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
+  }
 
   ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
   /**
@@ -76,7 +82,7 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
 
   int getResolutionLayersToDecode(ImageReader reader) throws IOException {
     int resizeFactor =
-        new ComputeResizeFactor()
+        new ComputeResizeFactor(1024)
             .setWidthHeight(reader.getWidth(imageIndex), reader.getHeight(imageIndex))
             .compute();
     return Math.min(resizeFactor, assumedMaximumNumberOfResolutionLayers);

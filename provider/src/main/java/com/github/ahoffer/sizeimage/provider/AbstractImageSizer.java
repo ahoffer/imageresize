@@ -56,7 +56,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return Collections.unmodifiableMap(configuration);
   }
 
-  public void setConfiguration(Map<String, String> configuration) {
+  public ImageSizer setConfiguration(Map<String, String> configuration) {
 
     if (configuration == null) {
       this.configuration = new HashMap();
@@ -69,6 +69,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     //            Optional.ofNullable(configuration)
     //                .map((Function<Map<String, String>, HashMap>) HashMap::new)
     //                .orElseGet(HashMap::new);
+    return this;
   }
 
   protected void addMessage(BeLittlingMessage message) {
@@ -76,7 +77,9 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   protected boolean canProceedToGenerateImage() {
-    return messages.stream().anyMatch(message -> message.getSeverity() == BeLittlingSeverity.ERROR);
+    return messages
+        .stream()
+        .noneMatch(message -> message.getSeverity() == BeLittlingSeverity.ERROR);
   }
 
   protected boolean endorse() {
