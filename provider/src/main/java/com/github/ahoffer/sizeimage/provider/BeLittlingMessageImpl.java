@@ -27,19 +27,19 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
 
   @Override
   public String getId() {
-    return null;
+    return id;
   }
 
   @Override
   public String getDescription() {
 
-    return null;
+    return description;
   }
 
   @Override
   public BeLittlingSeverity getSeverity() {
 
-    return null;
+    return severity;
   }
 
   @Override

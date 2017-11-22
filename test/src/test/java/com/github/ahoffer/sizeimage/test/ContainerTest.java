@@ -9,6 +9,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.CoreOptions.when;
 
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle;
@@ -17,18 +18,17 @@ import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.inject.Inject;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.CoreOptions;
@@ -69,6 +69,7 @@ public class ContainerTest {
     data = new TestData();
   }
 
+  @Ignore
   @Test
   public void runAllAvailableSizers() throws IOException {
     ImageSizerCollection imageSizers = belittler.getSizersFor((String) null);
@@ -81,8 +82,14 @@ public class ContainerTest {
   public void testGetSizersByJpegStream() throws StreamResetException {
     ImageSizerCollection sizers = belittler.getSizersFor(data.vanillaJpegStream);
     int expectedNumberOfSizers = 4;
-    assertThat("Unexpected different number of unique sizers", sizers.getAll(), hasSize(expectedNumberOfSizers));
-    assertThat("Unexpected number of unique, available sizers", sizers.getAvailable(), hasSize(expectedNumberOfSizers));
+    assertThat(
+        "Unexpected different number of unique sizers",
+        sizers.getAll(),
+        hasSize(expectedNumberOfSizers));
+    assertThat(
+        "Unexpected number of unique, available sizers",
+        sizers.getAvailable(),
+        hasSize(expectedNumberOfSizers));
     assertThat(
         "Expected second image sizer to be magick",
         sizers.getRecommendations().get(1),
@@ -127,9 +134,9 @@ public class ContainerTest {
 
   @Test
   public void testConvenienceMethod() throws StreamResetException {
-    Optional<BufferedImage> output = belittler.generate(data.jpeg2000Stream);
-    assertThat(output.isPresent(), is(true));
-    assertThat(output.get().getWidth(), equalTo(belittler.getMaxWidth()));
+    BeLittlingResult output = belittler.generate(data.jpeg2000Stream);
+    assertThat(output.getOutput().isPresent(), is(true));
+    assertThat(output.getOutput().get().getWidth(), equalTo(belittler.getMaxWidth()));
   }
 
   @org.ops4j.pax.exam.Configuration
@@ -182,14 +189,14 @@ public class ContainerTest {
     builder.append(
         String.format("\n%s\t%s\t%.2f MB", sizerName, input.getName(), input.length() / 1e6));
 
-    Optional<BufferedImage> output = sizer.setInput(inputStream).generate();
+    BeLittlingResult output = sizer.setInput(inputStream).generate();
     final long stop = System.nanoTime();
     builder.append(String.format("\tTime=%.2f s", (stop - start) / 1.0e9));
     LOGGER.info(builder.toString());
     java.io.File outputDirObject = new File(OUTPUTDIR);
     outputDirObject.mkdirs();
     java.io.File outputFile = new File(outputDirObject, sizerName + "-" + input.getName() + ".png");
-    ImageIO.write(output.get(), "png", outputFile);
+    ImageIO.write(output.getOutput().get(), "png", outputFile);
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {

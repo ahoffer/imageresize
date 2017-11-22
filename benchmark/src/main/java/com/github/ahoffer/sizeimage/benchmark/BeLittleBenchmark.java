@@ -1,5 +1,6 @@
 package com.github.ahoffer.sizeimage.benchmark;
 
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.Jpeg2000Sizer;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import net.coobird.thumbnailator.Thumbnailator;
 import org.apache.commons.io.FilenameUtils;
 import org.imgscalr.Scalr;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -96,9 +98,9 @@ public class BeLittleBenchmark {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
-            .forks(0)
-            .warmupIterations(0)
-            .measurementIterations(1)
+            .forks(2)
+            .warmupIterations(1)
+            .measurementIterations(4)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
@@ -142,10 +144,15 @@ public class BeLittleBenchmark {
   }
 
   @Benchmark
+  public void thumbnailator() throws IOException {
+    lastDescription = "thumbnailator";
+    lastThumbnail = Thumbnailator.createThumbnail(getSoureceFile(), thumbSize, thumbSize);
+  }
+
+  @Benchmark
   public void scalrTikaTransformer() throws IOException {
     lastDescription = "scalrTikaTransformer";
-    Image source = null;
-    source = ImageIO.read(getSoureceFile());
+    Image source = ImageIO.read(getSoureceFile());
     BufferedImage output = null;
     try {
       output =
@@ -156,7 +163,9 @@ public class BeLittleBenchmark {
       graphics.dispose();
       lastThumbnail = Scalr.resize(output, thumbSize);
     } catch (NullPointerException e) {
-      System.err.println("Failed to read " + getSoureceFile());
+      String msg = "Failed to read " + getSoureceFile().getName();
+      System.err.println(msg);
+      throw new RuntimeException(msg);
     }
   }
 
@@ -184,8 +193,9 @@ public class BeLittleBenchmark {
     lastDescription = "samplingSizer";
     ImageSizer sizer = new SamplingSizer();
     try (InputStream input = new FileInputStream(getSoureceFile())) {
-      lastThumbnail =
-          sizer.setOutputSize(thumbSize, thumbSize).setInput(input).generate().getOutput().get();
+      BeLittlingResult result =
+          sizer.setOutputSize(thumbSize, thumbSize).setInput(input).generate();
+      lastThumbnail = result.getOutput().get();
     }
   }
 
@@ -202,6 +212,8 @@ public class BeLittleBenchmark {
         lastThumbnail =
             sizer.setOutputSize(thumbSize, thumbSize).setInput(input).generate().getOutput().get();
       }
+    } else {
+      throw new RuntimeException("Do not create metrics for this test");
     }
   }
 

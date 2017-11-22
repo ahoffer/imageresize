@@ -37,6 +37,7 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
   public BeLittlingResult generate() {
     BufferedImage outputImage = null;
     BufferedImage decodedImage;
+    BeLittlingResult result;
     stampNameOnResults();
     endorse();
     try {
@@ -47,13 +48,13 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
       } catch (IOException e) {
         addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR, e));
       }
-    } catch (IOException e) {
+    } catch (IOException | ClassCastException e) {
       addMessage(messageFactory.make(MessageConstants.DECODE_JPEG2000));
     } finally {
+      result = new BeLittlingResultImpl(outputImage, messages);
       cleanup();
     }
-
-    return new BeLittlingResultImpl(outputImage, messages);
+    return result;
   }
 
   // TODO: Maybe I should wrap the input stream in a shielded stream and close the reader?

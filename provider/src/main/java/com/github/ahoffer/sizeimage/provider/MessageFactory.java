@@ -50,7 +50,7 @@ public class MessageFactory {
         return new BeLittlingMessageImpl(
             DECODE_JPEG2000,
             BeLittlingSeverity.ERROR,
-            "Exception attempting to decide JPEG 2000 image");
+            "Exception attempting to read/decode JPEG 2000 image. Is it a different kind of image?");
       case SAMPLE_PERIOD:
         return new BeLittlingMessageImpl(
             SAMPLE_PERIOD, BeLittlingSeverity.INFO, String.format("Sampling period=%d", values[0]));

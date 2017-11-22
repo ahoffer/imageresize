@@ -3,6 +3,7 @@ package com.github.ahoffer.sizeimage.provider;
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class BeLittlingResultImpl implements BeLittlingResult {
 
   public BeLittlingResultImpl(BufferedImage output, List<BeLittlingMessage> messages) {
     this.output = output;
-    this.messages = Collections.unmodifiableList(messages);
+    this.messages = Collections.unmodifiableList(new ArrayList<>(messages));
   }
 
   @Override

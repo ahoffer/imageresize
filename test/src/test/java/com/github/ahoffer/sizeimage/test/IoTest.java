@@ -1,14 +1,15 @@
 package com.github.ahoffer.sizeimage.test;
 
-import static junit.framework.TestCase.fail;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.DECODE_JPEG2000;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.assertThat;
 
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.AbstractImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
 import com.github.ahoffer.sizeimage.provider.ImageReaderShortcuts;
@@ -24,7 +25,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
@@ -66,9 +66,16 @@ public class IoTest {
     doSize(new Jpeg2000Sizer(), data.jpeg2000Stream);
   }
 
-  @Test(expected= IllegalArgumentException.class)
+  @Test
   public void testWrongImageTypeForJpeg2000Sizer() throws IOException {
-    doSize(new Jpeg2000Sizer(), data.vanillaJpegStream);
+    ImageSizer sizer =
+        new Jpeg2000Sizer()
+            .setInput(data.vanillaJpegStream)
+            .setOutputSize(TestData.PIXELS, TestData.PIXELS);
+    BeLittlingResult result = sizer.generate();
+    assertThat(result.getOutput().isPresent(), is(false));
+    assertThat(
+        result.getMessages().stream().anyMatch(m -> DECODE_JPEG2000.equals(m.getId())), is(true));
   }
 
   @Test
@@ -84,18 +91,10 @@ public class IoTest {
   private void doSize(ImageSizer sizer, InputStream inputStream) {
     sizer.setInput(inputStream);
     sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS);
-    Optional<BufferedImage> output = sizer.generate();
-    assertThat(output.get().getWidth(), equalTo(TestData.PIXELS));
-    assertThat(output.get().getHeight(), org.hamcrest.Matchers.lessThanOrEqualTo(TestData.PIXELS));
-
-    // Test the reference to the input stream is gone.
-    try {
-      ((AbstractImageSizer) sizer).endorse();
-    } catch (IllegalArgumentException e) {
-      return;
-    }
-
-    fail("Should have thrown IllegalArgumentException");
+    BeLittlingResult result = sizer.generate();
+    BufferedImage output = result.getOutput().get();
+    assertThat(output.getWidth(), equalTo(TestData.PIXELS));
+    assertThat(output.getHeight(), org.hamcrest.Matchers.lessThanOrEqualTo(TestData.PIXELS));
   }
 
   @Test
