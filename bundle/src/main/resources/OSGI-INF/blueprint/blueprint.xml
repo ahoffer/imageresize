@@ -7,13 +7,13 @@
   <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
     <property name="configuration">
       <map>
-        <entry key="pathToImageMagickExecutables" value="/opt/local/bin/"/>
+        <entry key="pathToExecutable" value="/opt/local/bin/"/>
         <entry key="outputFormat" value="png"/>
       </map>
     </property>
   </bean>
   <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
-  <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.provider.Jpeg2000Sizer"/>
+  <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer"/>
 
   <service id="belittle" auto-export="all-classes">
     <bean class="com.github.ahoffer.sizeimage.provider.BeLittle">

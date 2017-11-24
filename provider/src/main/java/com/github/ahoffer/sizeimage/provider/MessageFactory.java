@@ -6,10 +6,12 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.DECODE_JPEG
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.NO_SIZER;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESOLUTION_LEVELS;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERIOD;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNKNOWN_MESSAGE_ID;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
@@ -60,6 +62,16 @@ public class MessageFactory {
             RESOLUTION_LEVELS,
             BeLittlingSeverity.INFO,
             String.format("Resolutions levels decoded %d", values[0]));
+      case UNABLE_TO_CREATE_TEMP_FILE:
+        return new BeLittlingMessageImpl(
+            UNABLE_TO_CREATE_TEMP_FILE,
+            BeLittlingSeverity.ERROR,
+            "Could not create temporary file for input image");
+      case OPJ_FAILED:
+        return new BeLittlingMessageImpl(
+            OPJ_FAILED,
+            BeLittlingSeverity.ERROR,
+            "Failed to run Open JPEG 2000 decompress executable");
       default:
         return makeUnrecognized(id);
     }

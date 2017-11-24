@@ -10,7 +10,9 @@ import javax.imageio.spi.IIORegistry;
 import net.coobird.thumbnailator.Thumbnails;
 
 @SuppressWarnings("squid:S2160")
-public class Jpeg2000Sizer extends AbstractImageSizer {
+public class JaiJpeg2000Sizer extends AbstractImageSizer {
+
+  public static final double DEFAULT_BIT_PER_PIXEL = 0.3;
 
   static {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
@@ -68,7 +70,7 @@ public class Jpeg2000Sizer extends AbstractImageSizer {
             .setInputWidthHeight(reader.getWidth(imageIndex), reader.getHeight(imageIndex))
             .compute();
     param.setResolution(levels);
-    param.setDecodingRate(0.01);
+    param.setDecodingRate(DEFAULT_BIT_PER_PIXEL);
     addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
     return reader.read(imageIndex, param);
   }

@@ -16,10 +16,6 @@ import org.im4java.process.Pipe;
 
 public class MagickSizer extends AbstractImageSizer {
 
-  public static final String PATH_TO_IMAGE_MAGICK_EXECUTABLES = "pathToImageMagickExecutables";
-
-  public static final String EXEC_NAME = "executableName";
-
   /**
    * JPEG compresses well, but is designed for large real world images, not small thumbnails. It
    * also does not allow any form of transparency.
@@ -28,49 +24,19 @@ public class MagickSizer extends AbstractImageSizer {
    * small images this is rarely noticeable. It has limited ability to handle transparency (a pixel
    * is either transparent or not)
    *
-   * <p>PNG is the best format for thumbnails. It has a good compression and internal format styles.
+   * <p>PNG is a good format for thumbnails. It has a good compression and internal format styles.
    * It is non-lossy, and can display many colors.
    */
   public static final String DEFAULT_OUTPUT_FORMAT = "png";
 
-  public static final String WINDOWS_EXEC_NAME = "convert.exe";
+  public static final String OUTPUT_FORMAT_KEY = "outputFormat";
+  public static final String STD_IN = "-";
+  public static final String STD_OUT = ":-";
 
-  public static final String NIX_EXEC_NAME = "convert";
-
-  public static final String OUTPUT_FORMAT = "outputFormat";
-
-  @Override
-  public boolean isAvailable() {
-    return getImageMagickExecutable().canExecute();
-  }
-
-  // Not sure which way of getting the executable is better.
-  @SuppressWarnings("unused")
-  public File getImageMagickExecutableAlternativeMethod() {
-    String result;
-    ConvertCmd command = new ConvertCmd();
-    try {
-      result = command.searchForCmd(command.getCommand().get(0), getPath());
-      return new File(result);
-    } catch (IOException e) {
-      return new File("");
-    }
-  }
-
-  public File getImageMagickExecutable() {
-    String execName =
-        configuration.getOrDefault(
-            EXEC_NAME, SystemUtils.IS_OS_WINDOWS ? WINDOWS_EXEC_NAME : NIX_EXEC_NAME);
-    File exec;
-    if (configuration.containsKey(PATH_TO_IMAGE_MAGICK_EXECUTABLES)) {
-      exec = new File(configuration.get(PATH_TO_IMAGE_MAGICK_EXECUTABLES), execName);
-    } else {
-      exec = new File(execName);
-    }
-    return exec;
-  }
+  private File imgMagick;
 
   public BeLittlingResult generate() {
+    BeLittlingResultImpl result = null;
     BufferedImage output = null;
     stampNameOnResults();
     if (endorse()) {
@@ -79,10 +45,11 @@ public class MagickSizer extends AbstractImageSizer {
       } catch (InterruptedException | IM4JavaException | IOException e) {
         addMessage(messageFactory.make(RESIZE_ERROR, e));
       } finally {
+        result = new BeLittlingResultImpl(output, messages);
         cleanup();
       }
     }
-    return new BeLittlingResultImpl(output, messages);
+    return result;
   }
 
   BufferedImage getOutputImage() throws InterruptedException, IOException, IM4JavaException {
@@ -96,39 +63,49 @@ public class MagickSizer extends AbstractImageSizer {
     op.thumbnail(getMaxWidth(), getMaxHeight());
 
     // Read from std in
-    op.addImage("-");
+    op.addImage(STD_IN);
     command.setInputProvider(new Pipe(inputStream, null));
 
     // Write to std out
     String outputFormatDirectedToStandardOut =
-        configuration.getOrDefault(OUTPUT_FORMAT, DEFAULT_OUTPUT_FORMAT) + ":-";
+        configuration.getOrDefault(OUTPUT_FORMAT_KEY, DEFAULT_OUTPUT_FORMAT) + STD_OUT;
     op.addImage(outputFormatDirectedToStandardOut);
     command.setOutputConsumer(outputConsumer);
 
-    command.setSearchPath(getPath());
+    command.setSearchPath(getExecPath());
     command.run(op);
     return outputConsumer.getImage();
   }
 
+  @Override
+  public boolean isAvailable() {
+    return getExecFile().canExecute();
+  }
+
+  protected String getExecPath() {
+    return configuration.get(PATH_TO_EXECUTABLE_KEY);
+  }
+
+  protected File getExecFile() {
+    if (imgMagick == null) {
+      imgMagick = new File(getExecPath(), getExecName());
+    }
+    return imgMagick;
+  }
+
+  protected String getExecName() {
+    return SystemUtils.IS_OS_WINDOWS ? "convert.exe" : "convert";
+  }
+
   public boolean endorse() {
-
     super.endorse();
-
     if (!isAvailable()) {
       addMessage(
           messageFactory.make(
               EXTERNAL_EXECUTABLE,
-              "Cannot generate image. ImageMagick executable not found. Check executable path. "
+              "Executable not found. Check executable path. "
                   + "Process does not inherit a PATH environment variable"));
     }
     return canProceedToGenerateImage();
-  }
-
-  public String getPath() {
-    if (configuration.containsKey(PATH_TO_IMAGE_MAGICK_EXECUTABLES)) {
-      return configuration.get(PATH_TO_IMAGE_MAGICK_EXECUTABLES);
-    } else {
-      return "";
-    }
   }
 }

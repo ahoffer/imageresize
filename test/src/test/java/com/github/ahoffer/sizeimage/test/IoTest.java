@@ -10,10 +10,11 @@ import static org.junit.Assert.assertThat;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.provider.AbstractImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
 import com.github.ahoffer.sizeimage.provider.ImageReaderShortcuts;
-import com.github.ahoffer.sizeimage.provider.Jpeg2000Sizer;
+import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
@@ -63,13 +64,13 @@ public class IoTest {
 
   @Test
   public void testJpeg2000ResolutionSizer() throws IOException {
-    doSize(new Jpeg2000Sizer(), data.jpeg2000Stream);
+    doSize(new JaiJpeg2000Sizer(), data.jpeg2000Stream);
   }
 
   @Test
   public void testWrongImageTypeForJpeg2000Sizer() throws IOException {
     ImageSizer sizer =
-        new Jpeg2000Sizer()
+        new JaiJpeg2000Sizer()
             .setInput(data.vanillaJpegStream)
             .setOutputSize(TestData.PIXELS, TestData.PIXELS);
     BeLittlingResult result = sizer.generate();
@@ -82,7 +83,7 @@ public class IoTest {
   public void testMagickSizer() throws IOException {
     ImageSizer sizer = new MagickSizer();
     HashMap configuration = new HashMap();
-    configuration.put(MagickSizer.PATH_TO_IMAGE_MAGICK_EXECUTABLES, TEST_PATH_TO_MAGICK_EXEC);
+    configuration.put(AbstractImageSizer.PATH_TO_EXECUTABLE_KEY, TEST_PATH_TO_MAGICK_EXEC);
     sizer.setConfiguration(configuration);
     assertThat(sizer.isAvailable(), equalTo(true));
     doSize(sizer, data.vanillaJpegStream);

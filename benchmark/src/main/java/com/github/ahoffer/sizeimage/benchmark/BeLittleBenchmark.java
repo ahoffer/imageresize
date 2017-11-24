@@ -3,7 +3,7 @@ package com.github.ahoffer.sizeimage.benchmark;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
-import com.github.ahoffer.sizeimage.provider.Jpeg2000Sizer;
+import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import java.awt.Graphics2D;
@@ -193,7 +193,7 @@ public class BeLittleBenchmark {
   @Benchmark
   public void jpeg2000Sizer() throws IOException {
     lastDescription = "jpeg2000Sizer";
-    ImageSizer sizer = new Jpeg2000Sizer();
+    ImageSizer sizer = new JaiJpeg2000Sizer();
     File soureceFile = getSoureceFile();
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
