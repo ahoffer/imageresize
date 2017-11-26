@@ -18,7 +18,6 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
   }
 
-  ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
   int imageIndex = 0;
   ImageReader reader;
 
@@ -62,8 +61,8 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   //  }
 
   BufferedImage getDecodedImage() throws IOException {
-    reader = shortcuts.getReader(inputStream);
-    J2KImageReadParam param = (J2KImageReadParam) reader.getDefaultReadParam();
+
+    J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultImageReadParam(inputStream);
     int levels =
         new ComputeResolutionLevel()
             .setOutputWidthHeight(getMaxWidth(), getMaxHeight())

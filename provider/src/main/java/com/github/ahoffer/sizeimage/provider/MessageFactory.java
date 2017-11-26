@@ -2,6 +2,7 @@ package com.github.ahoffer.sizeimage.provider;
 
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_WIDTH;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.DECODE_JPEG2000;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
@@ -69,9 +70,12 @@ public class MessageFactory {
             "Could not create temporary file for input image");
       case OPJ_FAILED:
         return new BeLittlingMessageImpl(
-            OPJ_FAILED,
-            BeLittlingSeverity.ERROR,
-            "Failed to run Open JPEG 2000 decompress executable");
+            OPJ_FAILED, BeLittlingSeverity.ERROR, ((Exception) values[0]).getMessage());
+      case CANNOT_READ_WIDTH_AND_HEIGHT:
+        return new BeLittlingMessageImpl(
+            CANNOT_READ_WIDTH_AND_HEIGHT,
+            BeLittlingSeverity.WARNING,
+            "Could not read width and height of image. Using resolution level 0 (maximum)");
       default:
         return makeUnrecognized(id);
     }

@@ -80,7 +80,7 @@ public class ContainerTest {
 
   @Test
   public void testGetSizersByJpegStream() throws StreamResetException {
-    ImageSizerCollection sizers = belittler.getSizersFor(data.vanillaJpegStream);
+    ImageSizerCollection sizers = belittler.getSizersFor(data.vanillaJpeg_128x80Stream);
     int expectedNumberOfSizers = 4;
     assertThat(
         "Unexpected different number of unique sizers",
@@ -102,7 +102,7 @@ public class ContainerTest {
 
   @Test
   public void testGetSizersByJp2Stream() throws StreamResetException {
-    ImageSizerCollection sizers = belittler.getSizersFor(data.jpeg2000Stream);
+    ImageSizerCollection sizers = belittler.getSizersFor(data.jpeg2000_128x80Stream);
     assertThat("Expect 6 image sizers", sizers.getRecommendations(), hasSize(5));
     assertThat(
         "Expected first image sizer to be magick",
@@ -130,7 +130,7 @@ public class ContainerTest {
 
   @Test
   public void testConvenienceMethod() throws StreamResetException {
-    BeLittlingResult output = belittler.generate(data.jpeg2000Stream);
+    BeLittlingResult output = belittler.generate(data.jpeg2000_513x341Stream);
     assertThat(output.getOutput().isPresent(), is(true));
     assertThat(output.getOutput().get().getWidth(), equalTo(belittler.getMaxWidth()));
   }

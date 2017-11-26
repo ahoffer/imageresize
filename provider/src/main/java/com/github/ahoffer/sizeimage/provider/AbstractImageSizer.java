@@ -28,6 +28,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
   protected InputStream inputStream;
   protected List<BeLittlingMessage> messages = new LinkedList<>();
   protected MessageFactory messageFactory = new MessageFactory();
+  ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
 
   @Override
   public boolean equals(Object other) {

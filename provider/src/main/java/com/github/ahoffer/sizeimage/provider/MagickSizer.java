@@ -60,6 +60,8 @@ public class MagickSizer extends AbstractImageSizer {
     IMOperation op = new IMOperation();
     ConvertCmd command = new ConvertCmd();
     Stream2BufferedImage outputConsumer = new Stream2BufferedImage();
+    // TODO: Does "thumbnail" use "sample" option?
+    // todo: If not, maybe compose a sample and scale operation to improve performance?
     op.thumbnail(getMaxWidth(), getMaxHeight());
 
     // Read from std in

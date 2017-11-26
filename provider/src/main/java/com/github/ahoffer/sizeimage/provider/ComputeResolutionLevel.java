@@ -31,8 +31,8 @@ public class ComputeResolutionLevel extends Computation {
   public int compute() {
     double biggestRatio = getBiggestRatio();
     return (int)
-        Math.min(
+        Math.max(
             FULL_RESOLUTION,
-            Math.max(assumedMaximumNumberOfResolutionlevels, logBase2Int(biggestRatio)));
+            Math.min(assumedMaximumNumberOfResolutionlevels, logBase2Int(biggestRatio)));
   }
 }
