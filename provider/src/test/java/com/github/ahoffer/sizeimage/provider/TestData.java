@@ -19,13 +19,14 @@ public class TestData {
   InputStream vanillaJpeg_128x80Stream;
   InputStream jpeg2000_128x80Stream;
   InputStream jpeg2000_513x341Stream;
-
+  InputStream jpeg_300x200Stream;
   List<File> inputFiles = new ArrayList<>();
 
   public TestData() throws IOException {
     vanillaJpeg_128x80Stream = getClass().getResourceAsStream("/sample-jpeg.jpg");
     jpeg2000_128x80Stream = getClass().getResourceAsStream("/sample-jpeg2000.jp2");
     jpeg2000_513x341Stream = getClass().getResourceAsStream("/airplane-jpeg2000.jp2");
+    jpeg_300x200Stream = getClass().getResourceAsStream("/airplane-jpeg2000.jp2");
     IIORegistry.getDefaultInstance().registerServiceProvider(J2KImageReaderSpi.class);
 
     inputFiles =

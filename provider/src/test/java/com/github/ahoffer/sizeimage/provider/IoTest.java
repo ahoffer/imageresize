@@ -48,15 +48,12 @@ public class IoTest {
 
   @Test
   public void testBasicSizer() throws IOException {
-    doSize(
-        new BasicSizer()
-            .setInput(data.vanillaJpeg_128x80Stream)
-            .setOutputSize(TestData.PIXELS, TestData.PIXELS));
+    doSize(new BasicSizer().setInput(data.vanillaJpeg_128x80Stream));
   }
 
   @Test
   public void testSamplingSizer() throws Exception {
-    doSize(new SamplingSizer());
+    doSize(new SamplingSizer().setInput(data.jpeg_300x200Stream));
   }
 
   @Test

@@ -74,7 +74,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     messages.add(message);
   }
 
-  protected boolean canProceedToGenerateImage() {
+  protected boolean canProceed() {
     return messages
         .stream()
         .noneMatch(message -> message.getSeverity() == BeLittlingSeverity.ERROR);
@@ -92,7 +92,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     if (Objects.isNull(inputStream)) {
       addMessage(messageFactory.make(MessageConstants.MISSING_INPUT_STREAM));
     }
-    return canProceedToGenerateImage();
+    return canProceed();
   }
 
   public int getMaxWidth() {

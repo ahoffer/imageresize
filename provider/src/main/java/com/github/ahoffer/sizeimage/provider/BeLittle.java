@@ -158,7 +158,11 @@ public class BeLittle {
     }
   }
 
-  public static class StreamResetException extends IOException {}
+  public static class StreamResetException extends IOException {
+    StreamResetException(Throwable t) {
+      super(t);
+    }
+  }
 
   public static class ImageReaderException extends RuntimeException {
     ImageReaderException(Throwable t) {

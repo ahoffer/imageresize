@@ -43,13 +43,14 @@ public class ImageReaderShortcuts {
       ImageInputStream iis = createImageInputStream(inputStream);
       ImageReader reader = getFirstImageReaderSpi(inputStream).createReaderInstance();
       reader.setInput(iis);
-
       try {
         Arrays.asList(consumers)
             .forEach(
                 consumer -> {
                   try {
+                    inputStream.mark(READLIMIT);
                     consumer.accept(reader);
+                    inputStream.reset();
                   } catch (IOException e) {
                     throw new BeLittle.ImageReaderException(e);
                   }
@@ -105,11 +106,14 @@ public class ImageReaderShortcuts {
         while (imageServiceProviders.hasNext()) {
           next = imageServiceProviders.next();
           try {
+            iis.reset();
             canDecode = next.canDecodeInput(iis);
+            iis.reset();
           } catch (IOException e) {
             // Why would a method called "canDecodeInput" declare a checked exception?
             // I guess an IOException here means "I cannot decode the input"
           }
+
           if (canDecode) {
             break;
           }
@@ -135,7 +139,7 @@ public class ImageReaderShortcuts {
         inputStream.reset();
       } catch (IOException e) {
         // We mangled your input stream and we are very sorry.
-        throw new StreamResetException();
+        throw new StreamResetException(e);
       }
     }
     return next;

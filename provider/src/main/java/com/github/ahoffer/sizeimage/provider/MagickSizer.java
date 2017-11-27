@@ -108,6 +108,6 @@ public class MagickSizer extends AbstractImageSizer {
               "Executable not found. Check executable path. "
                   + "Process does not inherit a PATH environment variable"));
     }
-    return canProceedToGenerateImage();
+    return canProceed();
   }
 }

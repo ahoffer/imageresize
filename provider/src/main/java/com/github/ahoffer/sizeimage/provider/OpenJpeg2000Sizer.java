@@ -4,6 +4,7 @@ import static com.github.ahoffer.sizeimage.provider.ComputeResolutionLevel.FULL_
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import javax.imageio.ImageIO;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.SystemUtils;
 
 public class OpenJpeg2000Sizer extends AbstractImageSizer {
@@ -23,9 +25,8 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   public BeLittlingResult generate() {
 
     // TODO Add call to endorse()
-
+    stampNameOnResults();
     BeLittlingResult result;
-    BufferedImage output = null;
     File inputFile = null;
     File outputFile = null;
     int returnCode;
@@ -54,23 +55,34 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       addMessage(messageFactory.make(UNABLE_TO_CREATE_TEMP_FILE));
     }
 
-    // TODO: Add call to canProceedToGenerateImage
+    // TODO: Add call to canProceed
 
     // TODO Benchmark force-rgb option. Probably won't make a difference.
     // TODO investigate the -l option for the number of quality layers. wtf is a quality layer?
-    String execPath = getExecFile().getPath();
-    String rFactor = String.valueOf(reductionFactor);
-    String inputFilePath = inputFile.toString();
-    String outputFilePath = outputFile.toString();
     ProcessBuilder processBuilder =
-        getProcessBuilderForDecompress(execPath, rFactor, inputFilePath, outputFilePath);
+        getProcessBuilderForDecompress(
+            getExecFile().getPath(),
+            String.valueOf(reductionFactor),
+            inputFile.toString(),
+            outputFile.toString());
     startProcess(processBuilder);
 
-    // TODO Add call to canProceedToGenerateImage
+    // TODO Add call to canProceed
 
-    output = getImage(outputFile);
-    result = new BeLittlingResultImpl(output, messages);
-    cleanup();
+    final BufferedImage output = getImage(outputFile);
+
+    // The image might be smaller than its original size because a reduction factor was passed
+    // to the Open JPEG 2000 decoder. It is not the size specified by the sizer's configuration.
+    // Use another sizing library to get the exact size.
+    BufferedImage finalOutput = null;
+    try {
+      finalOutput = Thumbnails.of(output).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+      cleanup();
+    } catch (IOException e) {
+      addMessage(messageFactory.make(RESIZE_ERROR, e));
+    }
+
+    result = new BeLittlingResultImpl(finalOutput, messages);
     return result;
   }
 
@@ -166,7 +178,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
               "Executable not found. Check executable path. "
                   + "Process does not inherit a PATH environment variable"));
     }
-    return canProceedToGenerateImage();
+    return canProceed();
   }
 
   String getStdError(InputStream inputStream) {
