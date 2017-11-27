@@ -160,6 +160,12 @@ public class BeLittle {
 
   public static class StreamResetException extends IOException {}
 
+  public static class ImageReaderException extends RuntimeException {
+    ImageReaderException(Throwable t) {
+      super(t);
+    }
+  }
+
   /**
    * Encapsulate information about what resizing techniques are (or are not) available and
    * recommended.

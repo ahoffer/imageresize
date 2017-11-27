@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.test;
+package com.github.ahoffer.sizeimage.provider;
 
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.DECODE_JPEG2000;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -10,14 +10,7 @@ import static org.junit.Assert.assertThat;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.AbstractImageSizer;
-import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
-import com.github.ahoffer.sizeimage.provider.ImageReaderShortcuts;
-import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
-import com.github.ahoffer.sizeimage.provider.MagickSizer;
-import com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer;
-import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
@@ -55,7 +48,10 @@ public class IoTest {
 
   @Test
   public void testBasicSizer() throws IOException {
-    doSize(new BasicSizer());
+    doSize(
+        new BasicSizer()
+            .setInput(data.vanillaJpeg_128x80Stream)
+            .setOutputSize(TestData.PIXELS, TestData.PIXELS));
   }
 
   @Test
@@ -92,7 +88,6 @@ public class IoTest {
     doSize(sizer);
   }
 
-  @Ignore
   @Test
   public void testOpenJpeg2000Sizer() throws Exception {
     ImageSizer sizer = new OpenJpeg2000Sizer();
@@ -113,7 +108,7 @@ public class IoTest {
   }
 
   @Test
-  public void testGetMimeTypes() throws StreamResetException {
+  public void testGetMimeTypes() throws IOException {
     List<String> mimeTypes = shortcuts.getMimeTypes(data.vanillaJpeg_128x80Stream);
     assertThat(mimeTypes, hasItem(equalToIgnoringCase("image/jpeg")));
 

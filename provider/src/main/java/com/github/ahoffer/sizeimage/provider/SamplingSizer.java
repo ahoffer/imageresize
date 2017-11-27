@@ -7,7 +7,6 @@ import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class SamplingSizer extends AbstractImageSizer {
@@ -30,26 +29,33 @@ public class SamplingSizer extends AbstractImageSizer {
   }
 
   BufferedImage getOutputImage() throws IOException {
-    ImageReader reader = new ImageReaderShortcuts().getReader(inputStream);
-    ImageReadParam imageParam = reader.getDefaultReadParam();
+    ImageReadParam imageParam = shortcuts.getDefaultImageReadParam(inputStream);
     int columnOffset = 0;
     int rowOffset = 0;
+    final BufferedImage[] inputImage = new BufferedImage[1];
     int period;
     if (configuration.containsKey(SAMPLING_PERIOD)) {
       period = Integer.valueOf(configuration.get(SAMPLING_PERIOD));
     } else {
-      int sourceWidth = reader.getWidth(imageIndex);
-      int sourceHeight = reader.getHeight(imageIndex);
+      final int[] sourceWidth = new int[1];
+      final int[] sourceHeight = new int[1];
+      shortcuts.executeWithReader(
+          inputStream,
+          reader -> sourceWidth[0] = reader.getWidth(imageIndex),
+          reader -> sourceHeight[0] = reader.getHeight(imageIndex));
       period =
           new ComputeSubSamplingPeriod()
-              .setInputWidthHeight(sourceWidth, sourceHeight)
+              .setInputWidthHeight(sourceWidth[0], sourceHeight[0])
               .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
               .compute();
     }
+
     imageParam.setSourceSubsampling(period, period, columnOffset, rowOffset);
-    final BufferedImage input = reader.read(imageIndex, imageParam);
+    shortcuts.executeWithReader(
+        inputStream, reader -> inputImage[0] = reader.read(imageIndex, imageParam));
+
     BufferedImage output =
-        Thumbnails.of(input).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+        Thumbnails.of(inputImage[0]).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
     addMessage(messageFactory.make(SAMPLE_PERIOD, period));
     return output;
   }

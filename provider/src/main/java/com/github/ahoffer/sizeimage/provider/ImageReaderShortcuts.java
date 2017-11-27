@@ -1,22 +1,20 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static java.util.Collections.EMPTY_LIST;
 import static javax.imageio.ImageIO.createImageInputStream;
 
+import com.github.ahoffer.sizeimage.provider.BeLittle.ImageReaderException;
+import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
-import org.apache.commons.io.input.CloseShieldInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,102 +29,119 @@ public class ImageReaderShortcuts {
   // TODO: I have not idea if 8K is big enough. It seems HUGE, iff all the image's metadata
   // todo: is at the begining of the stream.
   public static final int READLIMIT = 1024 * 8;
-  public static final String WIDTH = "WIDTH";
-  public static final String HEIGHT = "HEIGHT";
 
-  public ImageReader getReader(InputStream inputStream) throws IOException {
-    CloseShieldInputStream shieldedStream = new CloseShieldInputStream(inputStream);
-    ImageInputStream imageStream = createImageInputStream(shieldedStream);
-    Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
-    Validate.isTrue(
-        readers.hasNext(),
-        "Could not find an image reader. "
-            + "Stream closed or not at zero postion? "
-            + "Missing JAI reader for image type");
-    ImageReader reader = readers.next();
-    reader.setInput(imageStream);
-    return reader;
-  }
-
-  public void executeWithReader(InputStream inputStream, Consumer<ImageReader> doWithReader)
-      throws IOException {
-    // TODO: Profile this to make sure all this stream stuff isn't expensive.
-    inputStream.mark(READLIMIT);
-    ImageInputStream imageStream = createImageInputStream(new CloseShieldInputStream(inputStream));
-    Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
-    Validate.isTrue(
-        readers.hasNext(),
-        "Could not find an image reader. "
-            + "Stream closed or not at zero postion? "
-            + "Missing JAI reader for image type");
-    ImageReader reader = readers.next();
-    reader.setInput(imageStream);
+  /**
+   * Keep the cleanup code here so the client does not have to worry about it. Does not attempt to
+   * mark, reset, or close the stream passed to it.
+   *
+   * @param inputStream
+   * @param consumers
+   * @throws IOException
+   */
+  public void executeWithReader(InputStream inputStream, IoConsumer<ImageReader>... consumers) {
     try {
-      doWithReader.accept(reader);
-    } finally {
-      // http://info.michael-simons.eu/2012/01/25/the-dangers-of-javas-imageio/
-      // "ImageReader caches some data in files. It is essential to dispose the reader
-      // and the underlying ImageInputStream if it’s not needed anymore..."
-      if (reader.getInput() != null && reader.getInput() instanceof ImageInputStream) {
+      ImageInputStream iis = createImageInputStream(inputStream);
+      ImageReader reader = getFirstImageReaderSpi(inputStream).createReaderInstance();
+      reader.setInput(iis);
+
+      try {
+        Arrays.asList(consumers)
+            .forEach(
+                consumer -> {
+                  try {
+                    consumer.accept(reader);
+                  } catch (IOException e) {
+                    throw new BeLittle.ImageReaderException(e);
+                  }
+                });
+      } finally {
+        //       http://info.michael-simons.eu/2012/01/25/the-dangers-of-javas-imageio/
+        //       "ImageReader caches some data in files. It is essential to dispose the reader
+        //       and the underlying ImageInputStream if it’s not needed anymore..."
         ((ImageInputStream) reader.getInput()).close();
+        reader.dispose();
       }
-      reader.dispose();
-      inputStream.reset();
+    } catch (IOException e) {
+      // Do throw a checked exception like IOException because it wreaks havoc with lambdas.
+      throw new ImageReaderException(e);
     }
   }
 
-  public List<String> getMimeTypes(InputStream source) {
-    Validate.notNull(source);
-    final String[][] mimeTypes = new String[1][];
+  /**
+   * Returns the MIME types as read decoding the image file header
+   *
+   * @param source
+   * @return
+   * @throws StreamResetException
+   */
+  public List<String> getMimeTypes(InputStream source) throws StreamResetException {
+    return Arrays.asList(getFirstImageReaderSpi(source).getMIMETypes());
+  }
+
+  /**
+   * Return an ImageReaderSpi or null if none could be found. Some formats, like TIFF are not part
+   * of the base installation. More commonly, there is something wrong with the input stream.
+   *
+   * @param inputStream
+   * @return
+   */
+  public ImageReaderSpi getFirstImageReaderSpi(InputStream inputStream)
+      throws StreamResetException {
+    Validate.notNull(inputStream);
+    Validate.isTrue(inputStream.markSupported());
+    int readlimit = 256;
+    inputStream.mark(readlimit);
+    ImageReaderSpi next = null;
     try {
-      executeWithReader(
-          source,
-          reader -> {
-            mimeTypes[0] = reader.getOriginatingProvider().getMIMETypes();
-          });
-    } catch (IOException e) {
-      return EMPTY_LIST;
+      // Mem cache image input stream should be faster than file cached for this use -- we are only
+      // reading the first few bytes. Also, the clean up should be easier because there are no temp
+      // files.
+      MemoryCacheImageInputStream iis = new MemoryCacheImageInputStream(inputStream);
+
+      boolean canDecode = false;
+      try {
+        Iterator<ImageReaderSpi> imageServiceProviders =
+            IIORegistry.getDefaultInstance().getServiceProviders(ImageReaderSpi.class, true);
+        while (imageServiceProviders.hasNext()) {
+          next = imageServiceProviders.next();
+          try {
+            canDecode = next.canDecodeInput(iis);
+          } catch (IOException e) {
+            // Why would a method called "canDecodeInput" declare a checked exception?
+            // I guess an IOException here means "I cannot decode the input"
+          }
+          if (canDecode) {
+            break;
+          }
+        }
+
+        Validate.isTrue(
+            canDecode,
+            "Could not find an image reader. "
+                + "Stream closed or not at zero postion? "
+                + "Missing JAI reader for image type");
+
+      } finally {
+        if (iis != null) {
+          try {
+            iis.close();
+          } catch (IOException e) {
+            // Should not matter one whit.
+          }
+        }
+      }
+    } finally {
+      try {
+        inputStream.reset();
+      } catch (IOException e) {
+        // We mangled your input stream and we are very sorry.
+        throw new StreamResetException();
+      }
     }
-    return Arrays.asList(mimeTypes[0]);
+    return next;
   }
 
   public ImageReadParam getDefaultImageReadParam(InputStream source) throws IOException {
-    Validate.notNull(source);
-    final ImageReadParam[] param = new ImageReadParam[1];
-    executeWithReader(
-        source,
-        reader -> {
-          param[0] = reader.getDefaultReadParam();
-        });
-    return param[0];
-  }
-
-  public Optional<Map<String, Integer>> getWidthAndHeight(InputStream source) {
-
-    Validate.notNull(source);
-    final boolean[] failed = new boolean[1];
-    final Integer[] sizes = new Integer[2];
-    try {
-      executeWithReader(
-          source,
-          reader -> {
-            try {
-              sizes[0] = reader.getWidth(0);
-              sizes[1] = reader.getHeight(0);
-            } catch (IOException e) {
-              failed[0] = true;
-            }
-          });
-    } catch (IOException e) {
-      failed[0] = true;
-    }
-
-    if (failed[0]) {
-      return Optional.empty();
-    }
-    Map<String, Integer> map = new HashMap<>();
-    map.put(WIDTH, sizes[0]);
-    map.put(HEIGHT, sizes[1]);
-    return Optional.empty().of(map);
+    return getFirstImageReaderSpi(source).createReaderInstance().getDefaultReadParam();
   }
 }

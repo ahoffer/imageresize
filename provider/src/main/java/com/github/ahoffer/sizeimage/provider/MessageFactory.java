@@ -8,6 +8,8 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EX
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.NO_SIZER;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_FAILED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_INTERRUPTED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESOLUTION_LEVELS;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERIOD;
@@ -68,14 +70,19 @@ public class MessageFactory {
             UNABLE_TO_CREATE_TEMP_FILE,
             BeLittlingSeverity.ERROR,
             "Could not create temporary file for input image");
-      case OPJ_FAILED:
+      case OS_PROCESS_FAILED:
         return new BeLittlingMessageImpl(
-            OPJ_FAILED, BeLittlingSeverity.ERROR, ((Exception) values[0]).getMessage());
+            OS_PROCESS_FAILED, BeLittlingSeverity.ERROR, ((Exception) values[0]).getMessage());
+      case OPJ_FAILED:
+        return new BeLittlingMessageImpl(OPJ_FAILED, BeLittlingSeverity.ERROR, (String) values[0]);
       case CANNOT_READ_WIDTH_AND_HEIGHT:
         return new BeLittlingMessageImpl(
             CANNOT_READ_WIDTH_AND_HEIGHT,
             BeLittlingSeverity.WARNING,
             "Could not read width and height of image. Using resolution level 0 (maximum)");
+      case OS_PROCESS_INTERRUPTED:
+        return new BeLittlingMessageImpl(
+            OS_PROCESS_INTERRUPTED, BeLittlingSeverity.ERROR, "OS process interrupted");
       default:
         return makeUnrecognized(id);
     }
