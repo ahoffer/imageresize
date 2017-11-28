@@ -5,7 +5,6 @@ import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -17,9 +16,6 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   static {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
   }
-
-  int imageIndex = 0;
-  ImageReader reader;
 
   public BeLittlingResult generate() {
     BufferedImage outputImage = null;
@@ -44,33 +40,18 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     return result;
   }
 
-  // TODO: Maybe I should wrap the input stream in a shielded stream and close the reader?
-  // TODO: CHECK FOR RESOURCE LEAKS BEFORE TRYING TO FIX RESOURCE LEAKS
-  //  void cleanup() {
-  //    if (Objects.nonNull(inputStream)) {
-  //      try {
-  //        inputStream.close();
-  //      } catch (IOException e) {
-  //        // There is nothing that can be done about it
-  //      }
-  //      inputStream = null;
-  //    }
-  //    if (Objects.nonNull(reader)) {
-  //      reader.dispose();
-  //    }
-  //  }
-
   BufferedImage getDecodedImage() throws IOException {
 
     J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultImageReadParam(inputStream);
+    Jpeg2000SizeExtractor extractor = new Jpeg2000SizeExtractor(inputStream);
     int levels =
         new ComputeResolutionLevel()
             .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
-            .setInputWidthHeight(reader.getWidth(imageIndex), reader.getHeight(imageIndex))
+            .setInputWidthHeight(extractor.getWidth(), extractor.getHeight())
             .compute();
     param.setResolution(levels);
     param.setDecodingRate(DEFAULT_BIT_PER_PIXEL);
     addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
-    return reader.read(imageIndex, param);
+    return shortcuts.read(inputStream, 0, param);
   }
 }

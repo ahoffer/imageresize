@@ -26,7 +26,7 @@ public class TestData {
     vanillaJpeg_128x80Stream = getClass().getResourceAsStream("/sample-jpeg.jpg");
     jpeg2000_128x80Stream = getClass().getResourceAsStream("/sample-jpeg2000.jp2");
     jpeg2000_513x341Stream = getClass().getResourceAsStream("/airplane-jpeg2000.jp2");
-    jpeg_300x200Stream = getClass().getResourceAsStream("/airplane-jpeg2000.jp2");
+    jpeg_300x200Stream = getClass().getResourceAsStream("/crowd-17kb.jpg");
     IIORegistry.getDefaultInstance().registerServiceProvider(J2KImageReaderSpi.class);
 
     inputFiles =

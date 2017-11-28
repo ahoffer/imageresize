@@ -4,6 +4,7 @@ import static javax.imageio.ImageIO.createImageInputStream;
 
 import com.github.ahoffer.sizeimage.provider.BeLittle.ImageReaderException;
 import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -31,6 +32,30 @@ public class ImageReaderShortcuts {
   public static final int READLIMIT = 1024 * 8;
 
   /**
+   * Attempt to reset the input stream. Useful if only reading header
+   *
+   * @param inputStream
+   * @param consumers
+   */
+  public void executeWithReader(InputStream inputStream, IoConsumer<ImageReader>... consumers) {
+    executeWithReader(inputStream, true, consumers);
+  }
+
+  /**
+   * Consume the input stream to read its image.
+   *
+   * @param inputStream
+   * @param imageIndex
+   * @param imageParam
+   * @return
+   */
+  public BufferedImage read(InputStream inputStream, int imageIndex, ImageReadParam imageParam) {
+    final BufferedImage[] image = new BufferedImage[1];
+    executeWithReader(inputStream, false, reader -> image[0] = reader.read(imageIndex, imageParam));
+    return image[0];
+  }
+
+  /**
    * Keep the cleanup code here so the client does not have to worry about it. Does not attempt to
    * mark, reset, or close the stream passed to it.
    *
@@ -38,7 +63,8 @@ public class ImageReaderShortcuts {
    * @param consumers
    * @throws IOException
    */
-  public void executeWithReader(InputStream inputStream, IoConsumer<ImageReader>... consumers) {
+  public void executeWithReader(
+      InputStream inputStream, boolean attemptToResetStream, IoConsumer<ImageReader>... consumers) {
     try {
       ImageInputStream iis = createImageInputStream(inputStream);
       ImageReader reader = getFirstImageReaderSpi(inputStream).createReaderInstance();
@@ -48,11 +74,15 @@ public class ImageReaderShortcuts {
             .forEach(
                 consumer -> {
                   try {
-                    inputStream.mark(READLIMIT);
+                    if (attemptToResetStream) {
+                      inputStream.mark(READLIMIT);
+                    }
                     consumer.accept(reader);
-                    inputStream.reset();
+                    if (attemptToResetStream) {
+                      inputStream.reset();
+                    }
                   } catch (IOException e) {
-                    throw new BeLittle.ImageReaderException(e);
+                    throw new BeLittle.StreamResetException(e);
                   }
                 });
       } finally {

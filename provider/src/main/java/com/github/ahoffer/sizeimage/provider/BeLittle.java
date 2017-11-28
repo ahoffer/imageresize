@@ -4,7 +4,6 @@ import static java.util.Collections.EMPTY_LIST;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -158,7 +157,7 @@ public class BeLittle {
     }
   }
 
-  public static class StreamResetException extends IOException {
+  public static class StreamResetException extends RuntimeException {
     StreamResetException(Throwable t) {
       super(t);
     }

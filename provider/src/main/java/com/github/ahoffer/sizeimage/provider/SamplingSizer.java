@@ -32,7 +32,6 @@ public class SamplingSizer extends AbstractImageSizer {
     ImageReadParam imageParam = shortcuts.getDefaultImageReadParam(inputStream);
     int columnOffset = 0;
     int rowOffset = 0;
-    final BufferedImage[] inputImage = new BufferedImage[1];
     int period;
     if (configuration.containsKey(SAMPLING_PERIOD)) {
       period = Integer.valueOf(configuration.get(SAMPLING_PERIOD));
@@ -51,11 +50,10 @@ public class SamplingSizer extends AbstractImageSizer {
     }
 
     imageParam.setSourceSubsampling(period, period, columnOffset, rowOffset);
-    shortcuts.executeWithReader(
-        inputStream, reader -> inputImage[0] = reader.read(imageIndex, imageParam));
+    BufferedImage source = shortcuts.read(inputStream, imageIndex, imageParam);
 
     BufferedImage output =
-        Thumbnails.of(inputImage[0]).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+        Thumbnails.of(source).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
     addMessage(messageFactory.make(SAMPLE_PERIOD, period));
     return output;
   }
