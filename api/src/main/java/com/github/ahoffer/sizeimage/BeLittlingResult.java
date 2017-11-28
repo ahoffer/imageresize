@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface BeLittlingResult {
 
-  public Optional<BufferedImage> getOutput();
+  Optional<BufferedImage> getOutput();
 
-  public List<BeLittlingMessage> getMessages();
+  List<BeLittlingMessage> getMessages();
 }

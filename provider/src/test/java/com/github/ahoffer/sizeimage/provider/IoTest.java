@@ -52,12 +52,13 @@ public class IoTest {
   }
 
   // NOTE: Switched to getting a reader and letting the sizer manager it manage it.
+  // J2K reader tries to read the ENTIRE image to get the header. A simple mark/reset will not
+  // work unless the image file is actually mark than the read limit.
   //  @Test(expected = StreamResetException.class)
-  //  public void testSamplingSizerWithJP2() {
-  //    // J2K reader tries to read the ENTIRE image to get the header. A simple mark/reset will not
-  //    // work unless the image file is actually mark than the read limit.
-  //    doSize(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
-  //  }
+  @Test
+  public void testSamplingSizerWithJP2() {
+    doSize(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
+  }
 
   @Test
   public void testSamplingSizer() {

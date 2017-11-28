@@ -120,8 +120,7 @@ public class ImageReaderShortcuts {
       throws StreamResetException {
     Validate.notNull(inputStream);
     Validate.isTrue(inputStream.markSupported());
-    int readlimit = 256;
-    inputStream.mark(readlimit);
+    inputStream.mark(READLIMIT);
     ImageReaderSpi next = null;
     try {
       // Mem cache image input stream should be faster than file cached for this use -- we are only

@@ -194,6 +194,8 @@ magnitude faster than the Java JAI module for JPEG 2000.
 3. Turn Factory and Image mime type guess into interfaces. Use instances of implementors 
    so we can inject them with blueprint.
 3. Create Karaf feature.
+4. Instead of throwing an exception, if a stream does not suppport mark/reset,
+just wrap it in a buffered stream.
 
 
 #### More about JPEG 2000
