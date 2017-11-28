@@ -59,19 +59,17 @@ public class BeLittleBenchmark {
 
   // LARGE FILES ( > 1 MB)
   @Param({
-    "building-30mb.jpg",
-    "land-8mb.jpg",
-    "mountains-20mb.jpg",
     "crowd-3mb.jpg",
-    "australia-250mb.png",
-    "salt-lake-340mb.jpg",
-    "baghdad-j2k-20mb.jp2",
-    "olso-j2k-19mb.jp2",
-    "city-and-land-15mb.jpg",
     "gettysburg-6mb.jp2",
-    "salt-lake-340mb.jpg",
-    "salt-lake-340mb.jp2",
-    "carrots-j2k-8mb.j2k"
+    "land-8mb.jpg",
+    "carrots-j2k-8mb.j2k",
+    "city-and-land-15mb.jpg",
+    "olso-j2k-19mb.jp2",
+    "mountains-20mb.jpg",
+    "baghdad-j2k-20mb.jp2",
+    "building-30mb.jpg",
+    "australia-250mb.png",
+    "salt-lake-340mb.jpg"
   })
   String filename;
 
@@ -93,10 +91,7 @@ public class BeLittleBenchmark {
   //  @Param({"baghdad-j2k-20mb.jp2", "carrots-j2k-8mb.j2k", "olso-j2k-19mb.jp2"})
   //  String filename;
 
-  // TODO: Could account for common IO time by allocating a buffer in setup and copying the image
-  // todo: file's bits into it.
-  // TODO: Or could have a benchmark that does nothing but copy the input stream to get a sense of
-  // todo: the IO overhead.
+  // TODO:Could have a benchmark that just copies input stream to get a sense of IO overhead
   public static void main(String[] args) throws RunnerException {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
@@ -116,18 +111,23 @@ public class BeLittleBenchmark {
   @Setup
   public void setup() throws IOException {}
 
-  @TearDown
-  public void teardown() throws IOException {
-    // Save thumbnail as a PNG in the output directory
-    String ext = FilenameUtils.getExtension(filename);
-    String nameWithoutExt = filename.replaceAll("." + ext, "");
-    if (lastThumbnail != null) {
-      File file = new File(outputDir + nameWithoutExt + "-" + lastDescription + "." + ext);
-      file.mkdirs();
-      ImageIO.write(lastThumbnail, "png", file);
+  @Benchmark
+  public void jaiJpeg2000Sizer() throws IOException {
+    lastDescription = "jpeg2000Sizer";
+    ImageSizer sizer = new JaiJpeg2000Sizer();
+
+    // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
+    if (isJp2Image(getSoureceFile())) {
+      lastThumbnail =
+          sizer
+              .setOutputSize(thumbSize, thumbSize)
+              .setInput(getSourceSteam())
+              .generate()
+              .getOutput()
+              .get();
+    } else {
+      //      throw new RuntimeException("Do not create metrics for this test");
     }
-    lastDescription = null;
-    lastThumbnail = null;
   }
 
   @Benchmark
@@ -161,7 +161,7 @@ public class BeLittleBenchmark {
   public void scalrTikaTransformer() throws IOException {
     lastDescription = "scalrTikaTransformer";
     Image source = ImageIO.read(getSourceSteam());
-    BufferedImage output = null;
+    BufferedImage output;
     try {
       output =
           new BufferedImage(
@@ -182,7 +182,7 @@ public class BeLittleBenchmark {
     lastDescription = "magickSizer";
     ImageSizer sizer = new MagickSizer();
     Map<String, String> config = new HashMap<>();
-    config.put("pathToImageMagickExecutables", "/opt/local/bin/");
+    config.put(AbstractImageSizer.PATH_TO_EXECUTABLE, "/opt/local/bin");
 
     sizer.setConfiguration(config);
     lastThumbnail =
@@ -204,36 +204,17 @@ public class BeLittleBenchmark {
   }
 
   @Benchmark
-  public void jaiJpeg2000Sizer() throws IOException {
-    lastDescription = "jpeg2000Sizer";
-    ImageSizer sizer = new JaiJpeg2000Sizer();
-
-    // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
-    if (isJp2Image()) {
-      lastThumbnail =
-          sizer
-              .setOutputSize(thumbSize, thumbSize)
-              .setInput(getSourceSteam())
-              .generate()
-              .getOutput()
-              .get();
-    } else {
-      throw new RuntimeException("Do not create metrics for this test");
-    }
-  }
-
-  @Benchmark
-  public void openJeg2000Sizer() throws IOException {
+  public void a_openJeg2000Sizer() throws IOException {
     lastDescription = "openJpeg2000Sizer";
     ImageSizer sizer = new OpenJpeg2000Sizer();
     HashMap<String, String> configuration = new HashMap<>();
     configuration.put(
-        AbstractImageSizer.PATH_TO_EXECUTABLE_KEY,
+        AbstractImageSizer.PATH_TO_EXECUTABLE,
         "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
     sizer.setConfiguration(configuration);
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
-    if (isJp2Image()) {
+    if (isJp2Image(getSoureceFile())) {
       lastThumbnail =
           sizer
               .setOutputSize(thumbSize, thumbSize)
@@ -242,16 +223,34 @@ public class BeLittleBenchmark {
               .getOutput()
               .get();
     } else {
-      throw new RuntimeException("Do not create metrics for this test");
+      //      throw new RuntimeException("Do not create metrics for this test");
     }
   }
 
-  private boolean isJp2Image() {
-    String ext = FilenameUtils.getExtension(getSoureceFile().getName());
+  @TearDown
+  public void teardown() throws IOException {
+    // Save thumbnail as a PNG in the output directory
+    String ext = FilenameUtils.getExtension(filename);
+    String nameWithoutExt = filename.replaceAll("." + ext, "");
+    if (lastThumbnail != null) {
+      File file = new File(outputDir + nameWithoutExt + "-" + lastDescription + "." + ext);
+      file.mkdirs();
+      ImageIO.write(lastThumbnail, "png", file);
+    }
+    lastDescription = null;
+    lastThumbnail = null;
+  }
+
+  private boolean isJp2Image(File file) {
+    String ext = FilenameUtils.getExtension(file.getName());
     return "jp2".equalsIgnoreCase(ext) || "j2k".equalsIgnoreCase(ext);
   }
 
-  public File getSoureceFile() {
+  InputStream getSourceSteam() throws FileNotFoundException {
+    return new BufferedInputStream(new FileInputStream(getSoureceFile()));
+  }
+
+  File getSoureceFile() {
     return new File(inputDir + filename);
   }
 
@@ -268,9 +267,5 @@ public class BeLittleBenchmark {
       inputChannel.close();
       outputChannel.close();
     }
-  }
-
-  InputStream getSourceSteam() throws FileNotFoundException {
-    return new BufferedInputStream(new FileInputStream(getSoureceFile()));
   }
 }

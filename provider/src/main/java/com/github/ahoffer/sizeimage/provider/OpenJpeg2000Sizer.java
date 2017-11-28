@@ -1,7 +1,5 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.ComputeResolutionLevel.FULL_RESOLUTION;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
@@ -9,6 +7,8 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_C
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.jaiimageio.jpeg2000.impl.IISRandomAccessIO;
+import com.github.jaiimageio.jpeg2000.impl.J2KMetadata;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import jj2000.j2k.fileformat.reader.FileFormatReader;
+import jj2000.j2k.io.RandomAccessIO;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -26,7 +29,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
 
     // TODO Add call to endorse()
     stampNameOnResults();
-    BeLittlingResult result;
+    BeLittlingResult result = null;
     File inputFile = null;
     File outputFile = null;
     int returnCode;
@@ -69,7 +72,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
 
     // TODO Add call to canProceed
 
-    final BufferedImage output = getImage(outputFile);
+    final BufferedImage output = getOutput(outputFile);
 
     // The image might be smaller than its original size because a reduction factor was passed
     // to the Open JPEG 2000 decoder. It is not the size specified by the sizer's configuration.
@@ -77,16 +80,16 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     BufferedImage finalOutput = null;
     try {
       finalOutput = Thumbnails.of(output).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
-      cleanup();
     } catch (IOException e) {
       addMessage(messageFactory.make(RESIZE_ERROR, e));
+    } finally {
+      result = new BeLittlingResultImpl(finalOutput, messages);
+      cleanup();
     }
-
-    result = new BeLittlingResultImpl(finalOutput, messages);
     return result;
   }
 
-  private BufferedImage getImage(File file) {
+  private BufferedImage getOutput(File file) {
     BufferedImage image = null;
     try {
       image = ImageIO.read(file);
@@ -134,19 +137,36 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   }
 
   private int getReductionFactor() {
-
-    Jpeg2000SizeExtractor extractor = new Jpeg2000SizeExtractor(inputStream);
+    ImageInputStream iis = null;
+    J2KMetadata metadata = new J2KMetadata();
+    FileFormatReader ff;
     try {
-      extractor.extract();
+      iis = ImageIO.createImageInputStream(inputStream);
+      RandomAccessIO in = new IISRandomAccessIO(iis);
+      iis.mark();
+      // If the codestream is wrapped in the jp2 fileformat, Read the
+      // file format wrapper
+      ff = new FileFormatReader(in, metadata);
+      ff.readFileFormat();
+      iis.reset();
     } catch (IOException e) {
-      addMessage(messageFactory.make(CANNOT_READ_WIDTH_AND_HEIGHT));
-      return FULL_RESOLUTION;
+      e.printStackTrace();
     }
-    return new ComputeResolutionLevel()
-        .setInputWidthHeight(extractor.getWidth(), extractor.getHeight())
-        .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
-        .compute();
+    return 0;
   }
+
+  //    Jpeg2000SHeaderReader reader = new Jpeg2000SHeaderReader(inputStream);
+  //    try {
+  //      reader.readHeader();
+  //    } catch (IOException e) {
+  //      addMessage(messageFactory.make(CANNOT_READ_WIDTH_AND_HEIGHT));
+  //      return FULL_RESOLUTION;
+  //    }
+  //    return new ComputeResolutionLevel()
+  //        .setMaxResolutionlevels(reader.getResolutionLevels())
+  //        .setInputWidthHeight(reader.getWidth(), reader.getHeight())
+  //        .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+  //        .compute();
 
   @Override
   public boolean isAvailable() {
@@ -156,7 +176,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   protected File getExecFile() {
     return new File(
         // Pull the "get configuration" code out and add a WARNING message if not present.
-        configuration.getOrDefault(PATH_TO_EXECUTABLE_KEY, ""),
+        configuration.getOrDefault(PATH_TO_EXECUTABLE, ""),
         SystemUtils.IS_OS_WINDOWS ? "opj_decompress.exe" : "opj_decompress");
   }
 

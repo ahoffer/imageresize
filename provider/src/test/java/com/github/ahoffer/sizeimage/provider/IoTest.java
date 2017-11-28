@@ -86,7 +86,7 @@ public class IoTest {
   public void testMagickSizer() {
     ImageSizer sizer = new MagickSizer();
     HashMap configuration = new HashMap();
-    configuration.put(AbstractImageSizer.PATH_TO_EXECUTABLE_KEY, TEST_PATH_TO_MAGICK_EXEC);
+    configuration.put(AbstractImageSizer.PATH_TO_EXECUTABLE, TEST_PATH_TO_MAGICK_EXEC);
     sizer.setConfiguration(configuration);
     sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setInput(data.vanillaJpeg_128x80_Stream);
 
@@ -99,7 +99,7 @@ public class IoTest {
     ImageSizer sizer = new OpenJpeg2000Sizer();
     HashMap<String, String> configuration = new HashMap<>();
     configuration.put(
-        AbstractImageSizer.PATH_TO_EXECUTABLE_KEY,
+        AbstractImageSizer.PATH_TO_EXECUTABLE,
         "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
     sizer.setInput(data.jpeg2000_513x341_Stream).setConfiguration(configuration);
     doSize(sizer);

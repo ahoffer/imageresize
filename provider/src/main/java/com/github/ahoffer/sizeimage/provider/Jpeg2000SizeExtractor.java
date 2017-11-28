@@ -27,17 +27,22 @@ public class Jpeg2000SizeExtractor {
     dis.mark(readlimit);
     Integer nextInt = dis.readInt();
     int intsRead = 1;
-
+    int pos = Integer.BYTES;
+    boolean foundImageHeader = false;
     // Fast-forward to first image header box
     // NOTE: There can be multiple images in one JPEG 2000 file. If that every happens, this
     // method retrieves the dimensions of the first.
-    while (nextInt != magicNumberImageHeaderBox) {
+    // NOTE: Had to add read limit because a JP2 image never had the magic int.
+    while (pos < readlimit) {
+      foundImageHeader = nextInt != magicNumberImageHeaderBox;
+      if (foundImageHeader) {
+        this.height = dis.readInt();
+        this.width = dis.readInt();
+        break;
+      }
       nextInt = dis.readInt();
-      intsRead++;
+      pos += Integer.BYTES;
     }
-    this.bytesRead = intsRead * Integer.BYTES;
-    this.height = dis.readInt();
-    this.width = dis.readInt();
 
     dis.reset();
   }

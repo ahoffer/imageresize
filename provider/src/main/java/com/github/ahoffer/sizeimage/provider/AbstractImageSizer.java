@@ -18,9 +18,9 @@ import java.util.Objects;
 public abstract class AbstractImageSizer implements ImageSizer {
 
   // TODO: Temporarily parking these constants until there is a better place for them
-  public static final String PATH_TO_EXECUTABLE_KEY = "pathToIExecutable";
-  public static final String WINDOWS_EXEC_NAME_KEY = "windowsExecName";
-  public static final String NIX_EXEC_NAME_KEY = "nixExecName";
+  public static final String PATH_TO_EXECUTABLE = "pathToIExecutable";
+  public static final String WINDOWS_EXEC_NAME = "windowsExecName";
+  public static final String NIX_EXEC_NAME = "nixExecName";
 
   public static final String MAX_WIDTH = "maxWidth";
   public static final String MAX_HEIGHT = "maxHeight";

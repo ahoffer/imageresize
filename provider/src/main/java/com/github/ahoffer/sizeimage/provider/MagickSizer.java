@@ -85,7 +85,7 @@ public class MagickSizer extends AbstractImageSizer {
   }
 
   protected String getExecPath() {
-    return configuration.get(PATH_TO_EXECUTABLE_KEY);
+    return configuration.get(PATH_TO_EXECUTABLE);
   }
 
   protected File getExecFile() {
