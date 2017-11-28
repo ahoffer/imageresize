@@ -6,7 +6,9 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERI
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class SamplingSizer extends AbstractImageSizer {
@@ -28,33 +30,63 @@ public class SamplingSizer extends AbstractImageSizer {
     return new BeLittlingResultImpl(output, messages);
   }
 
+  //  BufferedImage getOutputImage() throws IOException {
+  //    ImageReadParam imageParam = shortcuts.getDefaultReadParam(inputStream);
+  //    int columnOffset = 0;
+  //    int rowOffset = 0;
+  //    int period;
+  //    if (configuration.containsKey(SAMPLING_PERIOD)) {
+  //      period = Integer.valueOf(configuration.get(SAMPLING_PERIOD));
+  //    } else {
+  //      final int[] sourceWidth = new int[1];
+  //      final int[] sourceHeight = new int[1];
+  //      shortcuts.executeWithReader(
+  //          inputStream,
+  //          reader -> sourceWidth[0] = reader.getWidth(imageIndex),
+  //          reader -> sourceHeight[0] = reader.getHeight(imageIndex));
+  //      period =
+  //          new ComputeSubSamplingPeriod()
+  //              .setInputWidthHeight(sourceWidth[0], sourceHeight[0])
+  //              .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+  //              .compute();
+  //    }
+  //
+  //    imageParam.setSourceSubsampling(period, period, columnOffset, rowOffset);
+  //
+  //    // This will cause a problem  with JP2 because JP2 reader reads the WHOLE stream when
+  //    // it initializes the reader.
+  //    BufferedImage source = shortcuts.read(inputStream, imageIndex, imageParam);
+  //
+  //    BufferedImage output =
+  //        Thumbnails.of(source).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+  //    addMessage(messageFactory.make(SAMPLE_PERIOD, period));
+  //    return output;
+  //  }
+
   BufferedImage getOutputImage() throws IOException {
-    ImageReadParam imageParam = shortcuts.getDefaultImageReadParam(inputStream);
+    ImageReader reader = shortcuts.getFirstImageReaderSpi(inputStream).createReaderInstance();
+    reader.setInput(ImageIO.createImageInputStream(inputStream));
+    ImageReadParam imageParam = reader.getDefaultReadParam();
     int columnOffset = 0;
     int rowOffset = 0;
     int period;
     if (configuration.containsKey(SAMPLING_PERIOD)) {
       period = Integer.valueOf(configuration.get(SAMPLING_PERIOD));
     } else {
-      final int[] sourceWidth = new int[1];
-      final int[] sourceHeight = new int[1];
-      shortcuts.executeWithReader(
-          inputStream,
-          reader -> sourceWidth[0] = reader.getWidth(imageIndex),
-          reader -> sourceHeight[0] = reader.getHeight(imageIndex));
+      final int inputWidth = reader.getWidth(imageIndex);
+      final int inputHeight = reader.getHeight(imageIndex);
       period =
           new ComputeSubSamplingPeriod()
-              .setInputWidthHeight(sourceWidth[0], sourceHeight[0])
+              .setInputWidthHeight(inputWidth, inputHeight)
               .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
               .compute();
     }
-
     imageParam.setSourceSubsampling(period, period, columnOffset, rowOffset);
-    BufferedImage source = shortcuts.read(inputStream, imageIndex, imageParam);
-
+    BufferedImage input = reader.read(imageIndex, imageParam);
     BufferedImage output =
-        Thumbnails.of(source).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+        Thumbnails.of(input).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
     addMessage(messageFactory.make(SAMPLE_PERIOD, period));
+    reader.dispose();
     return output;
   }
 }

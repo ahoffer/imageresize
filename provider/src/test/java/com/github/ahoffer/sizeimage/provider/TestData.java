@@ -16,17 +16,17 @@ public class TestData {
 
   public static final int PIXELS = 100;
   static final String INPUT_DIR = "/Users/aaronhoffer/data/small-image-set/";
-  InputStream vanillaJpeg_128x80Stream;
-  InputStream jpeg2000_128x80Stream;
-  InputStream jpeg2000_513x341Stream;
-  InputStream jpeg_300x200Stream;
+  InputStream vanillaJpeg_128x80_Stream;
+  InputStream jpeg2000_128x80_Stream;
+  InputStream jpeg2000_513x341_Stream;
+  InputStream vanillaJpeg_300x200_Stream;
   List<File> inputFiles = new ArrayList<>();
 
   public TestData() throws IOException {
-    vanillaJpeg_128x80Stream = getClass().getResourceAsStream("/sample-jpeg.jpg");
-    jpeg2000_128x80Stream = getClass().getResourceAsStream("/sample-jpeg2000.jp2");
-    jpeg2000_513x341Stream = getClass().getResourceAsStream("/airplane-jpeg2000.jp2");
-    jpeg_300x200Stream = getClass().getResourceAsStream("/crowd-17kb.jpg");
+    vanillaJpeg_128x80_Stream = getClass().getResourceAsStream("/sample-jpeg.jpg");
+    jpeg2000_128x80_Stream = getClass().getResourceAsStream("/sample-jpeg2000.jp2");
+    jpeg2000_513x341_Stream = getClass().getResourceAsStream("/airplane-jpeg2000.jp2");
+    vanillaJpeg_300x200_Stream = getClass().getResourceAsStream("/crowd-17kb.jpg");
     IIORegistry.getDefaultInstance().registerServiceProvider(J2KImageReaderSpi.class);
 
     inputFiles =

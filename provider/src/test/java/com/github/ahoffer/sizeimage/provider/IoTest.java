@@ -48,31 +48,32 @@ public class IoTest {
 
   @Test
   public void testBasicSizer() {
-    doSize(new BasicSizer().setInput(data.vanillaJpeg_128x80Stream));
+    doSize(new BasicSizer().setInput(data.vanillaJpeg_128x80_Stream));
   }
 
-  @Test(expected = StreamResetException.class)
-  public void testSamplingSizerWithJP2() {
-    // J2K reader tries to read the ENTIRE image to get the header. A simple mark/reset will not
-    // work unless the image file is actually mark than the read limit.
-    doSize(new SamplingSizer().setInput(data.jpeg2000_513x341Stream));
-  }
+  // NOTE: Switched to getting a reader and letting the sizer manager it manage it.
+  //  @Test(expected = StreamResetException.class)
+  //  public void testSamplingSizerWithJP2() {
+  //    // J2K reader tries to read the ENTIRE image to get the header. A simple mark/reset will not
+  //    // work unless the image file is actually mark than the read limit.
+  //    doSize(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
+  //  }
 
   @Test
   public void testSamplingSizer() {
-    doSize(new SamplingSizer().setInput(data.jpeg_300x200Stream));
+    doSize(new SamplingSizer().setInput(data.vanillaJpeg_300x200_Stream));
   }
 
   @Test
   public void testJpeg2000ResolutionSizer() {
-    doSize(new JaiJpeg2000Sizer().setInput(data.jpeg2000_513x341Stream));
+    doSize(new JaiJpeg2000Sizer().setInput(data.jpeg2000_513x341_Stream));
   }
 
   @Test
   public void testWrongImageTypeForJpeg2000Sizer() {
     ImageSizer sizer =
         new JaiJpeg2000Sizer()
-            .setInput(data.vanillaJpeg_128x80Stream)
+            .setInput(data.vanillaJpeg_128x80_Stream)
             .setOutputSize(TestData.PIXELS, TestData.PIXELS);
     BeLittlingResult result = sizer.generate();
     assertThat(result.getOutput().isPresent(), is(false));
@@ -86,7 +87,7 @@ public class IoTest {
     HashMap configuration = new HashMap();
     configuration.put(AbstractImageSizer.PATH_TO_EXECUTABLE_KEY, TEST_PATH_TO_MAGICK_EXEC);
     sizer.setConfiguration(configuration);
-    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setInput(data.vanillaJpeg_128x80Stream);
+    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setInput(data.vanillaJpeg_128x80_Stream);
 
     assertThat(sizer.isAvailable(), equalTo(true));
     doSize(sizer);
@@ -99,7 +100,7 @@ public class IoTest {
     configuration.put(
         AbstractImageSizer.PATH_TO_EXECUTABLE_KEY,
         "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
-    sizer.setInput(data.jpeg2000_513x341Stream).setConfiguration(configuration);
+    sizer.setInput(data.jpeg2000_513x341_Stream).setConfiguration(configuration);
     doSize(sizer);
   }
 
@@ -113,17 +114,17 @@ public class IoTest {
 
   @Test
   public void testGetMimeTypes() throws IOException {
-    List<String> mimeTypes = shortcuts.getMimeTypes(data.vanillaJpeg_128x80Stream);
+    List<String> mimeTypes = shortcuts.getMimeTypes(data.vanillaJpeg_128x80_Stream);
     assertThat(mimeTypes, hasItem(equalToIgnoringCase("image/jpeg")));
 
-    mimeTypes = shortcuts.getMimeTypes(data.jpeg2000_128x80Stream);
+    mimeTypes = shortcuts.getMimeTypes(data.jpeg2000_128x80_Stream);
     assertThat(mimeTypes, containsInAnyOrder("image/jp2", "image/jpeg2000"));
   }
 
   @Test
   public void testPreservingInputStream() throws StreamResetException {
     // Use the same stream twice
-    InputStream inputStream = data.vanillaJpeg_128x80Stream;
+    InputStream inputStream = data.vanillaJpeg_128x80_Stream;
     List<String> mimeTypesFirstTime = shortcuts.getMimeTypes(inputStream);
     List<String> mimeTypesSecondTime = shortcuts.getMimeTypes(inputStream);
     assertThat(mimeTypesFirstTime, equalTo(mimeTypesSecondTime));
@@ -131,7 +132,7 @@ public class IoTest {
 
   @Test
   public void testImageIO() throws IOException {
-    ImageInputStream imgStream = ImageIO.createImageInputStream(data.vanillaJpeg_128x80Stream);
+    ImageInputStream imgStream = ImageIO.createImageInputStream(data.vanillaJpeg_128x80_Stream);
     ImageIO.getImageReaders(imgStream);
     Iterator<ImageReader> readers = ImageIO.getImageReaders(imgStream);
     ImageReader reader = readers.next();

@@ -175,7 +175,7 @@ public class ImageReaderShortcuts {
     return next;
   }
 
-  public ImageReadParam getDefaultImageReadParam(InputStream source) throws IOException {
+  public ImageReadParam getDefaultReadParam(InputStream source) throws IOException {
     return getFirstImageReaderSpi(source).createReaderInstance().getDefaultReadParam();
   }
 }

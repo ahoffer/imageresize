@@ -42,7 +42,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
   BufferedImage getDecodedImage() throws IOException {
 
-    J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultImageReadParam(inputStream);
+    J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultReadParam(inputStream);
     Jpeg2000SizeExtractor extractor = new Jpeg2000SizeExtractor(inputStream);
     int levels =
         new ComputeResolutionLevel()
