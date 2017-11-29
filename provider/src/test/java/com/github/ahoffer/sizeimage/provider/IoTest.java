@@ -57,7 +57,8 @@ public class IoTest {
   //  @Test(expected = StreamResetException.class)
   @Test
   public void testSamplingSizerWithJP2() {
-    doSize(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
+    //    doSize(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
+    doSize(new SamplingSizer().setInput(data.jpeg2000_128x80_Stream));
   }
 
   @Test
@@ -120,6 +121,22 @@ public class IoTest {
 
     mimeTypes = shortcuts.getMimeTypes(data.jpeg2000_128x80_Stream);
     assertThat(mimeTypes, containsInAnyOrder("image/jp2", "image/jpeg2000"));
+  }
+
+  @Test
+  public void testJpeg2000MetadataReader() throws IOException {
+    Jpeg2000MetadataMicroReader smaller =
+        new Jpeg2000MetadataMicroReader(data.jpeg2000_128x80_Stream);
+    smaller.read();
+    assertThat(smaller.getWidth(), is(128));
+    assertThat(smaller.getHeight(), is(80));
+    assertThat(smaller.getMinNumberDecompLevels(), is(5));
+    Jpeg2000MetadataMicroReader larger =
+        new Jpeg2000MetadataMicroReader(data.jpeg2000_513x341_Stream);
+    larger.read();
+    assertThat(larger.getWidth(), is(513));
+    assertThat(larger.getHeight(), is(341));
+    assertThat(smaller.getMinNumberDecompLevels(), is(5));
   }
 
   @Test

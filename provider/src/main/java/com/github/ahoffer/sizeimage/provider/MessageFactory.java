@@ -14,6 +14,7 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERRO
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESOLUTION_LEVELS;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERIOD;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.STREAM_MANGLED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNKNOWN_MESSAGE_ID;
 
@@ -83,6 +84,9 @@ public class MessageFactory {
       case OS_PROCESS_INTERRUPTED:
         return new BeLittlingMessageImpl(
             OS_PROCESS_INTERRUPTED, BeLittlingSeverity.ERROR, "OS process interrupted");
+      case STREAM_MANGLED:
+        return new BeLittlingMessageImpl(
+            STREAM_MANGLED, BeLittlingSeverity.ERROR, ((Exception) values[0]).getMessage());
       default:
         return makeUnrecognized(id);
     }

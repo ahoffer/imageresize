@@ -7,8 +7,6 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_C
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
-import com.github.jaiimageio.jpeg2000.impl.IISRandomAccessIO;
-import com.github.jaiimageio.jpeg2000.impl.J2KMetadata;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,9 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-import jj2000.j2k.fileformat.reader.FileFormatReader;
-import jj2000.j2k.io.RandomAccessIO;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -137,36 +132,26 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   }
 
   private int getReductionFactor() {
-    ImageInputStream iis = null;
-    J2KMetadata metadata = new J2KMetadata();
-    FileFormatReader ff;
-    try {
-      iis = ImageIO.createImageInputStream(inputStream);
-      RandomAccessIO in = new IISRandomAccessIO(iis);
-      iis.mark();
-      // If the codestream is wrapped in the jp2 fileformat, Read the
-      // file format wrapper
-      ff = new FileFormatReader(in, metadata);
-      ff.readFileFormat();
-      iis.reset();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return 0;
-  }
 
-  //    Jpeg2000SHeaderReader reader = new Jpeg2000SHeaderReader(inputStream);
-  //    try {
-  //      reader.readHeader();
-  //    } catch (IOException e) {
-  //      addMessage(messageFactory.make(CANNOT_READ_WIDTH_AND_HEIGHT));
-  //      return FULL_RESOLUTION;
-  //    }
-  //    return new ComputeResolutionLevel()
-  //        .setMaxResolutionlevels(reader.getResolutionLevels())
-  //        .setInputWidthHeight(reader.getWidth(), reader.getHeight())
-  //        .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
-  //        .compute();
+    Jpeg2000MetadataMicroReader reader;
+
+    try {
+      reader = new Jpeg2000MetadataMicroReader(inputStream);
+      boolean success = reader.read();
+      if (!success) {
+        return ComputeResolutionLevel.FULL_RESOLUTION;
+      }
+      return new ComputeResolutionLevel()
+          .setMaxResolutionlevels(reader.getMinNumbeResolutionLevels())
+          .setInputWidthHeight(reader.getWidth(), reader.getHeight())
+          .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+          .compute();
+
+    } catch (IOException e) {
+      addMessage(messageFactory.make(MessageConstants.STREAM_MANGLED, e));
+      return ComputeResolutionLevel.FULL_RESOLUTION;
+    }
+  }
 
   @Override
   public boolean isAvailable() {

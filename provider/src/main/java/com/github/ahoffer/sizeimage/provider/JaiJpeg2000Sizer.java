@@ -43,12 +43,13 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   BufferedImage getDecodedImage() throws IOException {
 
     J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultReadParam(inputStream);
-    Jpeg2000SizeExtractor extractor = new Jpeg2000SizeExtractor(inputStream);
-    int levels =
-        new ComputeResolutionLevel()
-            .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
-            .setInputWidthHeight(extractor.getWidth(), extractor.getHeight())
-            .compute();
+    //    Jpeg2000FileWrapperReader extractor = new Jpeg2000FileWrapperReader(inputStream);
+    //    int levels =
+    //        new ComputeResolutionLevel()
+    //            .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+    //            .setInputWidthHeight(extractor.getWidth(), extractor.getHeight())
+    //            .compute();
+    int levels = 0;
     param.setResolution(levels);
     param.setDecodingRate(DEFAULT_BIT_PER_PIXEL);
     addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
