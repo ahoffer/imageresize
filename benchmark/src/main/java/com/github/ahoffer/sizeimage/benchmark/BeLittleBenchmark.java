@@ -57,21 +57,26 @@ public class BeLittleBenchmark {
   BufferedImage lastThumbnail;
   String lastDescription;
 
+  // JPEG 2000 FILES
+  // LARGE FILES ( > 1 MB)
+  //  @Param({"carrots-j2k-8mb.j2k", "gettysburg-6mb.jp2", "olso-j2k-19mb.jp2",
+  // "baghdad-j2k-20mb.jp2"})
+
+  // Vanilla JPEG FILES
   // LARGE FILES ( > 1 MB)
   @Param({
-    //    "crowd-3mb.jpg",
-    //    "gettysburg-6mb.jp2",
-    //    "land-8mb.jpg",
-    "carrots-j2k-8mb.j2k"
-    //      ,
-    //    "city-and-land-15mb.jpg",
-    //    "olso-j2k-19mb.jp2",
-    //    "mountains-20mb.jpg",
-    //    "baghdad-j2k-20mb.jp2",
-    //    "building-30mb.jpg",
-    //    "australia-250mb.png",
-    //    "salt-lake-340mb.jpg"
+    "crowd-3mb.jpg",
+    "land-8mb.jpg",
+    "city-and-land-15mb.jpg",
+    "mountains-20mb.jpg",
+    "building-30mb.jpg"
   })
+
+  // HUGE FILES > 100 MB
+  //    "australia-250mb.png",
+  //    "salt-lake-340mb.jpg",
+  //    "salm-1gb.jp2"
+
   String filename;
 
   //   SINGLE FILE
@@ -86,10 +91,6 @@ public class BeLittleBenchmark {
   //    "parliament-60kb.jpg",
   //    "palace.j2k"
   //  })
-  //  String filename;
-
-  //     JPEG2000 FILES
-  //  @Param({"baghdad-j2k-20mb.jp2", "carrots-j2k-8mb.j2k", "olso-j2k-19mb.jp2"})
   //  String filename;
 
   // TODO:Could have a benchmark that just copies input stream to get a sense of IO overhead
@@ -158,7 +159,7 @@ public class BeLittleBenchmark {
         Thumbnails.of(getSourceSteam()).height(thumbSize).width(thumbSize).asBufferedImage();
   }
 
-  @Benchmark
+  //  @Benchmark
   public void scalrTikaTransformer() throws IOException {
     lastDescription = "scalrTikaTransformer";
     Image source = ImageIO.read(getSourceSteam());
@@ -205,7 +206,7 @@ public class BeLittleBenchmark {
   }
 
   @Benchmark
-  public void a_openJeg2000Sizer() throws IOException {
+  public void openJeg2000Sizer() throws IOException {
     lastDescription = "openJpeg2000Sizer";
     ImageSizer sizer = new OpenJpeg2000Sizer();
     HashMap<String, String> configuration = new HashMap<>();

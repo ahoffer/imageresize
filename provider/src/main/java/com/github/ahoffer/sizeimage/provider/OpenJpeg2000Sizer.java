@@ -141,7 +141,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
             rFactor,
             "-threads",
             "ALL_CPUS",
-            //            "-force-rgb",
+            "-force-rgb",
             "-i",
             inputFilePath,
             "-o",
