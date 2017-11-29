@@ -76,7 +76,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   int widthFromImgHeaderBox;
   int widthFromCodeStreamStreamBox;
   int heightFromCodeStreamStreamBox;
-  int minNumberDecompLevels;
+  int minNumResolutionLevels;
 
   /**
    * The constructor of the FileFormatReader
@@ -223,7 +223,10 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
     widthFromCodeStreamStreamBox = hd.getImgWidth();
     heightFromCodeStreamStreamBox = hd.getImgHeight();
     // Get minimum number of resolution levels available across all tile-components.
-    minNumberDecompLevels = hd.getDecoderSpecs().dls.getMin();
+    // The docs indicate this is field is actually "decomposition levels", where decomposition
+    // levels + 1 = resolution levels. But I'm not so sure. I need to get something that can read
+    // JPEG 2000 metadata better than this JAI library to know.
+    minNumResolutionLevels = hd.getDecoderSpecs().dls.getMin();
 
     return true;
   }
@@ -413,11 +416,8 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
     }
   }
 
-  public int getMinNumberDecompLevels() {
-    return minNumberDecompLevels;
-  }
-
   public int getMinNumbeResolutionLevels() {
-    return getMinNumberDecompLevels() + 1;
+
+    return minNumResolutionLevels;
   }
 }

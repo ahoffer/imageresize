@@ -13,11 +13,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 import javax.imageio.ImageIO;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.SystemUtils;
 
 public class OpenJpeg2000Sizer extends AbstractImageSizer {
+
+  public static final String EXPECTED_JPEG_2000_FILE_EXT = ".jp2";
+  // There is a limited number of output formats to choose from.
+  // For Open JPEG v2.3.0 they are: PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|RAW|RAWL|TGA
+  // Chose BMP. No, seriously! It is much faster than PNG and smaller than PPM.
+
+  public static final String OUTPUT_FORMAT_EXT = ".bmp";
 
   @Override
   public BeLittlingResult generate() {
@@ -26,7 +36,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     stampNameOnResults();
     BeLittlingResult result = null;
     File inputFile = null;
-    File outputFile = null;
+    Path outputFile = null;
     int returnCode;
     long bytesWritten;
     long bytesRead;
@@ -34,15 +44,13 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     int reductionFactor = getReductionFactor();
 
     try {
-      inputFile = File.createTempFile("input", ".jp2");
+      inputFile = File.createTempFile("input", EXPECTED_JPEG_2000_FILE_EXT);
       inputFile.deleteOnExit();
-      // There is a limited number of output formats to choose from.
-      // For Open JPEG v2.3.0 they are: PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|RAW|RAWL|TGA
-      // Choose PNG given that is an excellent format for thumbnails. Also it is compressed which
-      // should cut down on JVM-OS IO times. However, it is possible that another format could
-      // lower overall image generation time. TODO: Something to experiment with...
-      outputFile = File.createTempFile("output", ".png");
-      outputFile.deleteOnExit();
+
+      // Don't create a file for output. The OS might not let it be overwritten by the command line
+      // program.
+      String tempDir = inputFile.getParent();
+      outputFile = Paths.get(tempDir, "out" + UUID.randomUUID() + OUTPUT_FORMAT_EXT);
 
       // TODO 1: I do not know why yet, but I cannot pass null for the CopyOption.
       // todo: Read indications you can pass null, but will throw exception if file already
@@ -63,11 +71,18 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
             String.valueOf(reductionFactor),
             inputFile.toString(),
             outputFile.toString());
-    startProcess(processBuilder);
+
+    BufferedImage output;
+
+    try {
+      startProcess(processBuilder);
+      output = getOutput(outputFile);
+    } finally {
+      inputFile.delete();
+      outputFile.toFile().delete();
+    }
 
     // TODO Add call to canProceed
-
-    final BufferedImage output = getOutput(outputFile);
 
     // The image might be smaller than its original size because a reduction factor was passed
     // to the Open JPEG 2000 decoder. It is not the size specified by the sizer's configuration.
@@ -84,10 +99,10 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     return result;
   }
 
-  private BufferedImage getOutput(File file) {
+  private BufferedImage getOutput(Path file) {
     BufferedImage image = null;
     try {
-      image = ImageIO.read(file);
+      image = ImageIO.read(file.toFile());
 
     } catch (IOException e) {
       // TODO: Add message that could not read file.
@@ -117,13 +132,15 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
 
   private ProcessBuilder getProcessBuilderForDecompress(
       String execPath, String rFactor, String inputFilePath, String outputFilePath) {
+    // TODO play around with Quality Layers -l "
+    // Include space after options
     return new ProcessBuilder(
             execPath,
             "-r",
             rFactor,
             "-threads",
             "ALL_CPUS",
-            "-force-rgb",
+            //            "-force-rgb",
             "-i",
             inputFilePath,
             "-o",
@@ -198,7 +215,9 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       String eof = "--EOF--";
       while (line != null && !line.trim().equals(eof)) {
         line = stdOutReader.readLine();
-        builder.append(line);
+        if (line != null) {
+          builder.append(line);
+        }
       }
     } catch (IOException e) {
       return "<COULD NOT READ ERR STREAM>";

@@ -59,17 +59,18 @@ public class BeLittleBenchmark {
 
   // LARGE FILES ( > 1 MB)
   @Param({
-    "crowd-3mb.jpg",
-    "gettysburg-6mb.jp2",
-    "land-8mb.jpg",
-    "carrots-j2k-8mb.j2k",
-    "city-and-land-15mb.jpg",
-    "olso-j2k-19mb.jp2",
-    "mountains-20mb.jpg",
-    "baghdad-j2k-20mb.jp2",
-    "building-30mb.jpg",
-    "australia-250mb.png",
-    "salt-lake-340mb.jpg"
+    //    "crowd-3mb.jpg",
+    //    "gettysburg-6mb.jp2",
+    //    "land-8mb.jpg",
+    "carrots-j2k-8mb.j2k"
+    //      ,
+    //    "city-and-land-15mb.jpg",
+    //    "olso-j2k-19mb.jp2",
+    //    "mountains-20mb.jpg",
+    //    "baghdad-j2k-20mb.jp2",
+    //    "building-30mb.jpg",
+    //    "australia-250mb.png",
+    //    "salt-lake-340mb.jpg"
   })
   String filename;
 

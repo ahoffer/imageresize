@@ -130,13 +130,13 @@ public class IoTest {
     smaller.read();
     assertThat(smaller.getWidth(), is(128));
     assertThat(smaller.getHeight(), is(80));
-    assertThat(smaller.getMinNumberDecompLevels(), is(5));
+    assertThat(smaller.minNumResolutionLevels, is(5));
     Jpeg2000MetadataMicroReader larger =
         new Jpeg2000MetadataMicroReader(data.jpeg2000_513x341_Stream);
     larger.read();
     assertThat(larger.getWidth(), is(513));
     assertThat(larger.getHeight(), is(341));
-    assertThat(smaller.getMinNumberDecompLevels(), is(5));
+    assertThat(smaller.minNumResolutionLevels, is(5));
   }
 
   @Test
