@@ -78,6 +78,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       startProcess(processBuilder);
       output = getOutput(outputFile);
     } finally {
+      // TODO: Add warning message if either file cannot be deleted
       inputFile.delete();
       outputFile.toFile().delete();
     }
@@ -148,7 +149,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
         .redirectErrorStream(false);
   }
 
-  private int getReductionFactor() {
+  int getReductionFactor() {
 
     Jpeg2000MetadataMicroReader reader;
 

@@ -41,18 +41,33 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   }
 
   BufferedImage getDecodedImage() throws IOException {
-
     J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultReadParam(inputStream);
-    //    Jpeg2000FileWrapperReader extractor = new Jpeg2000FileWrapperReader(inputStream);
-    //    int levels =
-    //        new ComputeResolutionLevel()
-    //            .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
-    //            .setInputWidthHeight(extractor.getWidth(), extractor.getHeight())
-    //            .compute();
-    int levels = 0;
+    int levels = getReductionFactor();
     param.setResolution(levels);
     param.setDecodingRate(DEFAULT_BIT_PER_PIXEL);
     addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
     return shortcuts.read(inputStream, 0, param);
+  }
+
+  int getReductionFactor() {
+
+    Jpeg2000MetadataMicroReader reader;
+
+    try {
+      reader = new Jpeg2000MetadataMicroReader(inputStream);
+      boolean success = reader.read();
+      if (!success) {
+        return ComputeResolutionLevel.FULL_RESOLUTION;
+      }
+      return new ComputeResolutionLevel()
+          .setMaxResolutionlevels(reader.getMinNumbeResolutionLevels())
+          .setInputWidthHeight(reader.getWidth(), reader.getHeight())
+          .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+          .compute();
+
+    } catch (IOException e) {
+      addMessage(messageFactory.make(MessageConstants.STREAM_MANGLED, e));
+      return ComputeResolutionLevel.FULL_RESOLUTION;
+    }
   }
 }
