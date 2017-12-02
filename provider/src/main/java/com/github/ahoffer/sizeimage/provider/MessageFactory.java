@@ -2,7 +2,9 @@ package com.github.ahoffer.sizeimage.provider;
 
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_WIDTH;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.BIT_RATE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.COULD_NOT_READ_IMAGE_METADATA;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.DECODE_JPEG2000;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
@@ -37,7 +39,7 @@ public class MessageFactory {
             BeLittlingSeverity.ERROR,
             String.format("%d is not a valid size", values[0]));
       case SIZER_NAME:
-        return new BeLittlingMessageImpl(SIZER_NAME, BeLittlingSeverity.INFO, (String) values[0]);
+        return new BeLittlingMessageImpl(SIZER_NAME, BeLittlingSeverity.INFO, values[0].toString());
       case EXTERNAL_EXECUTABLE:
         return new BeLittlingMessageImpl(
             EXTERNAL_EXECUTABLE, BeLittlingSeverity.ERROR, (String) values[0]);
@@ -75,7 +77,8 @@ public class MessageFactory {
         return new BeLittlingMessageImpl(
             OS_PROCESS_FAILED, BeLittlingSeverity.ERROR, ((Exception) values[0]).getMessage());
       case OPJ_FAILED:
-        return new BeLittlingMessageImpl(OPJ_FAILED, BeLittlingSeverity.ERROR, (String) values[0]);
+        return new BeLittlingMessageImpl(
+            OPJ_FAILED, BeLittlingSeverity.ERROR, values[0].toString());
       case CANNOT_READ_WIDTH_AND_HEIGHT:
         return new BeLittlingMessageImpl(
             CANNOT_READ_WIDTH_AND_HEIGHT,
@@ -87,6 +90,13 @@ public class MessageFactory {
       case STREAM_MANGLED:
         return new BeLittlingMessageImpl(
             STREAM_MANGLED, BeLittlingSeverity.ERROR, ((Exception) values[0]).getMessage());
+      case BIT_RATE:
+        return new BeLittlingMessageImpl(BIT_RATE, BeLittlingSeverity.INFO, values[0].toString());
+      case COULD_NOT_READ_IMAGE_METADATA:
+        return new BeLittlingMessageImpl(
+            COULD_NOT_READ_IMAGE_METADATA,
+            BeLittlingSeverity.ERROR,
+            "Could not read metadata from image. Image might be corrupt");
       default:
         return makeUnrecognized(id);
     }

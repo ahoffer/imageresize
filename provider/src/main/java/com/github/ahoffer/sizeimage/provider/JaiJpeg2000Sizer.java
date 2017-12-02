@@ -5,7 +5,10 @@ import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
+import javax.imageio.stream.ImageInputStream;
 import net.coobird.thumbnailator.Thumbnails;
 
 @SuppressWarnings("squid:S2160")
@@ -41,12 +44,20 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   }
 
   BufferedImage getDecodedImage() throws IOException {
-    J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultReadParam(inputStream);
+
+    final J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultReadParam(inputStream);
     int levels = getReductionFactor();
     param.setResolution(levels);
     param.setDecodingRate(DEFAULT_BIT_PER_PIXEL);
     addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
-    return shortcuts.read(inputStream, 0, param);
+    addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
+    final ImageReader reader = ImageIO.getImageReadersByMIMEType("image/jp2").next();
+    final ImageInputStream iis = ImageIO.createImageInputStream(inputStream);
+    reader.setInput(iis, true, true);
+    final BufferedImage img = reader.read(0, param);
+    return img;
+
+    //    return shortcuts.read(inputStream, 0, param);
   }
 
   int getReductionFactor() {

@@ -14,7 +14,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,25 +58,26 @@ public class BeLittleBenchmark {
 
   // JPEG 2000 FILES
   // LARGE FILES ( > 1 MB)
-  //  @Param({"carrots-j2k-8mb.j2k", "gettysburg-6mb.jp2", "olso-j2k-19mb.jp2",
-  // "baghdad-j2k-20mb.jp2"})
+  @Param({"gis-16mb.jp2", "carrots-j2k-8mb.j2k", "gettysburg-6mb.jp2", "oslo-j2k-19mb.jp2"})
+  String filename;
 
   // Vanilla JPEG FILES
   // LARGE FILES ( > 1 MB)
-  @Param({
-    "crowd-3mb.jpg",
-    "land-8mb.jpg",
-    "city-and-land-15mb.jpg",
-    "mountains-20mb.jpg",
-    "building-30mb.jpg"
-  })
+  //  @Param({
+  //    "crowd-3mb.jpg",
+  //    "land-8mb.jpg",
+  //    "city-and-land-15mb.jpg",
+  //    "mountains-20mb.jpg",
+  //    "building-30mb.jpg",
+  //    "australia-250mb.png",
+  //    "salt-lake-340mb.jpg"
+  //  })
 
   // HUGE FILES > 100 MB
   //    "australia-250mb.png",
   //    "salt-lake-340mb.jpg",
-  //    "salm-1gb.jp2"
-
-  String filename;
+  //    "salm-1gb.jp2",
+  //  "mars-crater-456mb.JP2"
 
   //   SINGLE FILE
   //  @Param({"tank.jpg"})
@@ -92,6 +92,8 @@ public class BeLittleBenchmark {
   //    "palace.j2k"
   //  })
   //  String filename;
+
+  InputStream source;
 
   // TODO:Could have a benchmark that just copies input stream to get a sense of IO overhead
   public static void main(String[] args) throws RunnerException {
@@ -111,65 +113,56 @@ public class BeLittleBenchmark {
   }
 
   @Setup
-  public void setup() throws IOException {}
+  public void setup() throws IOException {
+    source = new BufferedInputStream(new FileInputStream(getSoureceFile()));
+  }
 
-  @Benchmark
-  public void jaiJpeg2000Sizer() throws IOException {
+  //  @Benchmark
+  public void a_jaiJpeg2000Sizer() throws IOException {
     lastDescription = "jpeg2000Sizer";
     ImageSizer sizer = new JaiJpeg2000Sizer();
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
     if (isJp2Image(getSoureceFile())) {
       lastThumbnail =
-          sizer
-              .setOutputSize(thumbSize, thumbSize)
-              .setInput(getSourceSteam())
-              .generate()
-              .getOutput()
-              .get();
+          sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
     } else {
       //      throw new RuntimeException("Do not create metrics for this test");
     }
   }
 
-  @Benchmark
+  //  @Benchmark
   public void scalr() throws IOException {
     lastDescription = "scalr";
-    lastThumbnail = Scalr.resize(ImageIO.read(getSourceSteam()), thumbSize);
+    lastThumbnail = Scalr.resize(ImageIO.read(source), thumbSize);
   }
 
-  @Benchmark
+  //  @Benchmark
   public void basicSizer() throws IOException {
     lastDescription = "basicSizer";
     ImageSizer sizer = new BasicSizer();
 
     lastThumbnail =
-        sizer
-            .setOutputSize(thumbSize, thumbSize)
-            .setInput(getSourceSteam())
-            .generate()
-            .getOutput()
-            .get();
+        sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
   }
 
-  @Benchmark
+  //  @Benchmark
   public void thumbnailator() throws IOException {
     lastDescription = "thumbnailator";
-    lastThumbnail =
-        Thumbnails.of(getSourceSteam()).height(thumbSize).width(thumbSize).asBufferedImage();
+    lastThumbnail = Thumbnails.of(source).height(thumbSize).width(thumbSize).asBufferedImage();
   }
 
   //  @Benchmark
   public void scalrTikaTransformer() throws IOException {
     lastDescription = "scalrTikaTransformer";
-    Image source = ImageIO.read(getSourceSteam());
+    Image input = ImageIO.read(source);
     BufferedImage output;
     try {
       output =
           new BufferedImage(
-              source.getWidth(null), source.getHeight(null), BufferedImage.TYPE_INT_RGB);
+              input.getWidth(null), input.getHeight(null), BufferedImage.TYPE_INT_RGB);
       Graphics2D graphics = output.createGraphics();
-      graphics.drawImage(source, null, null);
+      graphics.drawImage(input, null, null);
       graphics.dispose();
       lastThumbnail = Scalr.resize(output, thumbSize);
     } catch (NullPointerException e) {
@@ -179,7 +172,7 @@ public class BeLittleBenchmark {
     }
   }
 
-  @Benchmark
+  //  @Benchmark
   public void magickSizer() throws IOException {
     lastDescription = "magickSizer";
     ImageSizer sizer = new MagickSizer();
@@ -188,20 +181,14 @@ public class BeLittleBenchmark {
 
     sizer.setConfiguration(config);
     lastThumbnail =
-        sizer
-            .setOutputSize(thumbSize, thumbSize)
-            .setInput(getSourceSteam())
-            .generate()
-            .getOutput()
-            .get();
+        sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
   }
 
-  @Benchmark
+  //  @Benchmark
   public void samplingSizer() throws IOException {
     lastDescription = "samplingSizer";
     ImageSizer sizer = new SamplingSizer();
-    BeLittlingResult result =
-        sizer.setOutputSize(thumbSize, thumbSize).setInput(getSourceSteam()).generate();
+    BeLittlingResult result = sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate();
     lastThumbnail = result.getOutput().get();
   }
 
@@ -218,12 +205,7 @@ public class BeLittleBenchmark {
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
     if (isJp2Image(getSoureceFile())) {
       lastThumbnail =
-          sizer
-              .setOutputSize(thumbSize, thumbSize)
-              .setInput(getSourceSteam())
-              .generate()
-              .getOutput()
-              .get();
+          sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
     } else {
       //      throw new RuntimeException("Do not create metrics for this test");
     }
@@ -246,10 +228,6 @@ public class BeLittleBenchmark {
   private boolean isJp2Image(File file) {
     String ext = FilenameUtils.getExtension(file.getName());
     return "jp2".equalsIgnoreCase(ext) || "j2k".equalsIgnoreCase(ext);
-  }
-
-  InputStream getSourceSteam() throws FileNotFoundException {
-    return new BufferedInputStream(new FileInputStream(getSoureceFile()));
   }
 
   File getSoureceFile() {

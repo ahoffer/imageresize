@@ -25,9 +25,11 @@ public class MagickSizer extends AbstractImageSizer {
    * is either transparent or not)
    *
    * <p>PNG is a good format for thumbnails. It has a good compression and internal format styles.
-   * It is non-lossy, and can display many colors.
+   * It is non-lossy, and can display many colors. It is slow to encode.
+   *
+   * <p>BMP is fast tot encode and smaller than a pixel map
    */
-  public static final String DEFAULT_OUTPUT_FORMAT = "png";
+  public static final String DEFAULT_OUTPUT_FORMAT = "bmp";
 
   public static final String OUTPUT_FORMAT_KEY = "outputFormat";
   public static final String STD_IN = "-";

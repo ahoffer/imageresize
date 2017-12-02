@@ -49,6 +49,8 @@ import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import jj2000.j2k.codestream.HeaderInfo;
 import jj2000.j2k.codestream.Markers;
 import jj2000.j2k.codestream.reader.HeaderDecoder;
@@ -64,6 +66,34 @@ import jj2000.j2k.util.ISRandomAccessIO;
  */
 public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
 
+  public static final List<Integer> JPX_FILE_FORMAT_BOXES =
+      Arrays.asList(
+          0x72726571,
+          0x636f6d70,
+          0x6a706368,
+          0x6a706c68,
+          0x61736f63,
+          0x6e6c7374,
+          0x66726565,
+          0x726F6964,
+          0x6c626c20,
+          0x636F7074,
+          0x696E7374,
+          0x63677270,
+          0x6f706374,
+          0x63726567,
+          0x6474626C,
+          0x6674626C,
+          0x666C7374,
+          0x63726566,
+          0x6D646174,
+          0x6266696C,
+          0x64726570,
+          0x6774736F,
+          0x6368636B,
+          0x6D703762);
+  public static final int READ_LIMIT = 8192;
+
   final InputStream inputStream;
 
   /** The random access from which the file format boxes are read */
@@ -77,6 +107,8 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   int widthFromCodeStreamStreamBox;
   int heightFromCodeStreamStreamBox;
   int minNumResolutionLevels;
+  boolean isJpeg2000File;
+  boolean codestreamBoxDetected;
 
   /**
    * The constructor of the FileFormatReader
@@ -89,7 +121,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
     InputStream saferStream =
         inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
     this.inputStream = saferStream;
-    this.in = new ISRandomAccessIO(inputStream, 8096, 8096, 8096);
+    this.in = new ISRandomAccessIO(inputStream, READ_LIMIT, READ_LIMIT, READ_LIMIT);
   }
 
   /**
@@ -99,7 +131,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    */
   public boolean read() throws IOException {
 
-    inputStream.mark(8096);
+    inputStream.mark(READ_LIMIT);
     try {
       read0();
     } catch (IOException e) {
@@ -117,17 +149,18 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
 
     // Make sure that the first 12 bytes is the JP2_SIGNATURE_BOX
     // or if not that the first 2 bytes is the SOC marker
-    boolean isJpeg2000File =
+    isJpeg2000File =
         in.readInt() == 0x0000000c
             && in.readInt() == JP2_SIGNATURE_BOX
             && in.readInt() == 0x0d0a870a;
-    if (isJpeg2000File) {
+    if (isJpeg2000File()) {
       // This method also tried to read fast file header and access codestream box
       whileLoop();
     } else {
       in.seek(initialPos);
       short twoBytes = in.readShort();
-      if (twoBytes == Markers.SOC) {
+      codestreamBoxDetected = twoBytes == Markers.SOC;
+      if (isCodestreamBoxDetected()) {
         // Stream represents a JPEG 2000 codestream. Read its header
         in.seek(initialPos);
         readContiguousCodeStreamBox();
@@ -405,10 +438,14 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
           skipBytes(boxLength);
           break;
         default:
-          byte[] data = new byte[boxLength];
-          in.readFully(data, 0, boxLength);
-          Box box = new Box(boxLength + 8, boxId, 0, data);
-          throw new RuntimeException("Something probably went wrong");
+          if (JPX_FILE_FORMAT_BOXES.contains(boxId)) {
+            byte[] data = new byte[boxLength];
+            in.readFully(data, 0, boxLength);
+            // Unknown box type
+            Box box = new Box(boxLength + 8, boxId, 0, data);
+          } else {
+            throw new RuntimeException("Unknown JPEG box ID");
+          }
       }
 
       // Advance the stream to the next box
@@ -419,5 +456,13 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   public int getMinNumbeResolutionLevels() {
 
     return minNumResolutionLevels;
+  }
+
+  public boolean isJpeg2000File() {
+    return isJpeg2000File;
+  }
+
+  public boolean isCodestreamBoxDetected() {
+    return codestreamBoxDetected;
   }
 }

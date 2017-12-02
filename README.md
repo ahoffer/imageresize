@@ -219,3 +219,7 @@ decomposition levels, a lower resolution version of the image can be obtained.
 Each of these resolutions is called a "resolution level." Typically, 
 five decomposition levels are used, which results in six resolution levels, 
 all related by a factor of two.
+
+
+#### Factoid
+"j2k" for a codestream file. "jp2" for the base file format. "jpx" for the extended file format.

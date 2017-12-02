@@ -71,7 +71,7 @@ public class IoTest {
     doSize(new JaiJpeg2000Sizer().setInput(data.jpeg2000_513x341_Stream));
   }
 
-  @Test
+  // @Test
   public void testWrongImageTypeForJpeg2000Sizer() {
     ImageSizer sizer =
         new JaiJpeg2000Sizer()

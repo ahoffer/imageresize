@@ -16,17 +16,9 @@
     <!--Embed this for JP2K support in the application-->
     <dependency>
       <groupId>com.github.jai-imageio</groupId>
-      <artifactId>jai-imageio-core</artifactId>
-      <version>${jai-imageio-core.version}</version>
-    </dependency>
-
-    <!--Embed this for JP2K support in the application-->
-    <dependency>
-      <groupId>com.github.jai-imageio</groupId>
       <artifactId>jai-imageio-jpeg2000</artifactId>
       <version>${jpeg2000.version}</version>
     </dependency>
-
 
     <!--The API and service ImageSizerCollection-->
     <dependency>

@@ -22,29 +22,29 @@ import org.apache.commons.lang3.SystemUtils;
 
 public class OpenJpeg2000Sizer extends AbstractImageSizer {
 
-  public static final String EXPECTED_JPEG_2000_FILE_EXT = ".jp2";
   // There is a limited number of output formats to choose from.
   // For Open JPEG v2.3.0 they are: PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|RAW|RAWL|TGA
   // Chose BMP. No, seriously! It is much faster than PNG and smaller than PPM.
 
   public static final String OUTPUT_FORMAT_EXT = ".bmp";
+  Jpeg2000MetadataMicroReader metadata;
 
   @Override
   public BeLittlingResult generate() {
+
+    readMetaData();
 
     // TODO Add call to endorse()
     stampNameOnResults();
     BeLittlingResult result = null;
     File inputFile = null;
     Path outputFile = null;
-    int returnCode;
     long bytesWritten;
-    long bytesRead;
 
     int reductionFactor = getReductionFactor();
 
     try {
-      inputFile = File.createTempFile("input", EXPECTED_JPEG_2000_FILE_EXT);
+      inputFile = File.createTempFile("input", getProperFileExt());
       inputFile.deleteOnExit();
 
       // Don't create a file for output. The OS might not let it be overwritten by the command line
@@ -100,6 +100,40 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     return result;
   }
 
+  private String getProperFileExt() {
+    // Open JPEG 2000 is very strict about file extensions. It will refuse to read a file if it has
+    // the wrong extension.
+    // From Wikipedia:
+    // JPEG 2000 defines both a file format and a code stream. Whereas JPEG 2000 entirely describes
+    // the image samples, JPEG-1 includes additional meta-information such as the resolution of the
+    // image or the color space that has been used to encode the image. JPEG 2000 images should — if
+    // stored as files — be boxed in the JPEG 2000 file format, where they get the .jp2 extension.
+    // The part-2 extension to JPEG 2000, i.e., ISO/IEC 15444-2, also enriches this file format by
+    // including mechanisms for animation or composition of several code streams into one single
+    // image. Images in this extended file-format use the .jpx extension.
+    //   There is no standardized extension for code-stream data because code-stream data is not to
+    // be considered to be stored in files in the first place, though when done for testing
+    // purposes, the extension .jpc or .j2k appear frequently.
+
+    if (metadata.isJpeg2000File()) {
+      return ".jp2";
+    } else {
+      return ".j2k";
+    }
+  }
+
+  void readMetaData() {
+    try {
+      metadata = new Jpeg2000MetadataMicroReader(inputStream);
+      boolean success = metadata.read();
+      if (!success) {
+        addMessage(messageFactory.make(MessageConstants.COULD_NOT_READ_IMAGE_METADATA));
+      }
+    } catch (IOException e) {
+      addMessage(messageFactory.make(MessageConstants.STREAM_MANGLED, e));
+    }
+  }
+
   private BufferedImage getOutput(Path file) {
     BufferedImage image = null;
     try {
@@ -141,7 +175,6 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
             rFactor,
             "-threads",
             "ALL_CPUS",
-            "-force-rgb",
             "-i",
             inputFilePath,
             "-o",
@@ -150,25 +183,11 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   }
 
   int getReductionFactor() {
-
-    Jpeg2000MetadataMicroReader reader;
-
-    try {
-      reader = new Jpeg2000MetadataMicroReader(inputStream);
-      boolean success = reader.read();
-      if (!success) {
-        return ComputeResolutionLevel.FULL_RESOLUTION;
-      }
-      return new ComputeResolutionLevel()
-          .setMaxResolutionlevels(reader.getMinNumbeResolutionLevels())
-          .setInputWidthHeight(reader.getWidth(), reader.getHeight())
-          .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
-          .compute();
-
-    } catch (IOException e) {
-      addMessage(messageFactory.make(MessageConstants.STREAM_MANGLED, e));
-      return ComputeResolutionLevel.FULL_RESOLUTION;
-    }
+    return new ComputeResolutionLevel()
+        .setMaxResolutionlevels(metadata.getMinNumbeResolutionLevels())
+        .setInputWidthHeight(metadata.getWidth(), metadata.getHeight())
+        .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+        .compute();
   }
 
   @Override
