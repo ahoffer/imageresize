@@ -42,6 +42,15 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
     return severity;
   }
 
+  public String toString() {
+    return ""
+        + (getId() == null ? "??" : getId())
+        + ", "
+        + (getSeverity() == null ? "??" : getSeverity().toString())
+        + ", "
+        + (getDescription() == null ? "??" : getDescription());
+  }
+
   @Override
   public Optional<Exception> getException() {
     return Optional.ofNullable(exception);

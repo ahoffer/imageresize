@@ -8,12 +8,14 @@ import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
+import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FilenameUtils;
 import org.imgscalr.Scalr;
@@ -56,11 +59,18 @@ public class BeLittleBenchmark {
   BufferedImage lastThumbnail;
   String lastDescription;
 
-  // JPEG 2000 FILES
   // LARGE FILES ( > 1 MB)
-  @Param({"gis-16mb.jp2", "carrots-j2k-8mb.j2k", "gettysburg-6mb.jp2", "oslo-j2k-19mb.jp2"})
+  // JPEG 2000
+  @Param({"carrots-j2k-8mb.j2k", "gettysburg-6mb.jp2", "oslo-j2k-19mb.jp2", "airplane-4mb.jp2"})
+
+  // SMALL FILES ( < 1 MB)
+  // JPEG 2000
+
   String filename;
 
+  static {
+    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
+  }
   // Vanilla JPEG FILES
   // LARGE FILES ( > 1 MB)
   //  @Param({
@@ -100,9 +110,9 @@ public class BeLittleBenchmark {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
-            .forks(0)
+            .forks(1)
             .warmupIterations(0)
-            .measurementIterations(1)
+            .measurementIterations(2)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
@@ -113,49 +123,62 @@ public class BeLittleBenchmark {
   }
 
   @Setup
-  public void setup() throws IOException {
-    source = new BufferedInputStream(new FileInputStream(getSoureceFile()));
+  public void setup() throws IOException {}
+
+  private BufferedInputStream getSourceStream() throws FileNotFoundException {
+    return new BufferedInputStream(new FileInputStream(getSoureceFile()));
   }
 
-  //  @Benchmark
-  public void a_jaiJpeg2000Sizer() throws IOException {
+  @Benchmark
+  public void jaiJpeg2000Sizer() throws IOException {
     lastDescription = "jpeg2000Sizer";
     ImageSizer sizer = new JaiJpeg2000Sizer();
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
-    if (isJp2Image(getSoureceFile())) {
+    if (isJpeg2000(getSoureceFile())) {
       lastThumbnail =
-          sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
+          sizer
+              .setOutputSize(thumbSize, thumbSize)
+              .setInput(getSourceStream())
+              .generate()
+              .getOutput()
+              .get();
     } else {
       //      throw new RuntimeException("Do not create metrics for this test");
     }
   }
 
-  //  @Benchmark
+  @Benchmark
   public void scalr() throws IOException {
     lastDescription = "scalr";
-    lastThumbnail = Scalr.resize(ImageIO.read(source), thumbSize);
+    lastThumbnail = Scalr.resize(ImageIO.read(getSourceStream()), thumbSize);
   }
 
-  //  @Benchmark
+  //    @Benchmark
   public void basicSizer() throws IOException {
     lastDescription = "basicSizer";
     ImageSizer sizer = new BasicSizer();
 
     lastThumbnail =
-        sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
+        sizer
+            .setOutputSize(thumbSize, thumbSize)
+            .setInput(getSourceStream())
+            .generate()
+            .getOutput()
+            .get();
   }
 
-  //  @Benchmark
+  @Benchmark
   public void thumbnailator() throws IOException {
     lastDescription = "thumbnailator";
-    lastThumbnail = Thumbnails.of(source).height(thumbSize).width(thumbSize).asBufferedImage();
+    lastThumbnail =
+        Thumbnails.of(getSourceStream()).height(thumbSize).width(thumbSize).asBufferedImage();
   }
 
-  //  @Benchmark
+  //    @Benchmark
   public void scalrTikaTransformer() throws IOException {
     lastDescription = "scalrTikaTransformer";
-    Image input = ImageIO.read(source);
+    Image input = ImageIO.read(getSourceStream());
     BufferedImage output;
     try {
       output =
@@ -172,7 +195,7 @@ public class BeLittleBenchmark {
     }
   }
 
-  //  @Benchmark
+  @Benchmark
   public void magickSizer() throws IOException {
     lastDescription = "magickSizer";
     ImageSizer sizer = new MagickSizer();
@@ -181,19 +204,26 @@ public class BeLittleBenchmark {
 
     sizer.setConfiguration(config);
     lastThumbnail =
-        sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
+        sizer
+            .setOutputSize(thumbSize, thumbSize)
+            .setInput(getSourceStream())
+            .generate()
+            .getOutput()
+            .get();
   }
 
-  //  @Benchmark
+  @Benchmark
   public void samplingSizer() throws IOException {
     lastDescription = "samplingSizer";
     ImageSizer sizer = new SamplingSizer();
-    BeLittlingResult result = sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate();
+    BeLittlingResult result =
+        sizer.setOutputSize(thumbSize, thumbSize).setInput(getSourceStream()).generate();
     lastThumbnail = result.getOutput().get();
   }
 
   @Benchmark
   public void openJeg2000Sizer() throws IOException {
+
     lastDescription = "openJpeg2000Sizer";
     ImageSizer sizer = new OpenJpeg2000Sizer();
     HashMap<String, String> configuration = new HashMap<>();
@@ -203,9 +233,10 @@ public class BeLittleBenchmark {
     sizer.setConfiguration(configuration);
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
-    if (isJp2Image(getSoureceFile())) {
-      lastThumbnail =
-          sizer.setOutputSize(thumbSize, thumbSize).setInput(source).generate().getOutput().get();
+    if (isJpeg2000(getSoureceFile())) {
+      BeLittlingResult result =
+          sizer.setOutputSize(thumbSize, thumbSize).setInput(getSourceStream()).generate();
+      lastThumbnail = result.getOutput().get();
     } else {
       //      throw new RuntimeException("Do not create metrics for this test");
     }
@@ -225,7 +256,7 @@ public class BeLittleBenchmark {
     lastThumbnail = null;
   }
 
-  private boolean isJp2Image(File file) {
+  private boolean isJpeg2000(File file) {
     String ext = FilenameUtils.getExtension(file.getName());
     return "jp2".equalsIgnoreCase(ext) || "j2k".equalsIgnoreCase(ext);
   }

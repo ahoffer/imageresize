@@ -20,11 +20,16 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
   }
 
+  Jpeg2000MetadataMicroReader metadata;
+
   public BeLittlingResult generate() {
     BufferedImage outputImage = null;
     BufferedImage decodedImage;
     BeLittlingResult result;
     stampNameOnResults();
+
+    readMetaData();
+
     endorse();
     try {
       decodedImage = getDecodedImage();
@@ -43,15 +48,26 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     return result;
   }
 
+  void readMetaData() {
+    try {
+      metadata = new Jpeg2000MetadataMicroReader(inputStream);
+      boolean success = metadata.read();
+      if (!success) {
+        addMessage(messageFactory.make(MessageConstants.COULD_NOT_READ_IMAGE_METADATA));
+      }
+    } catch (IOException e) {
+      addMessage(messageFactory.make(MessageConstants.STREAM_MANGLED, e));
+    }
+  }
+
   BufferedImage getDecodedImage() throws IOException {
 
-    final J2KImageReadParam param = (J2KImageReadParam) shortcuts.getDefaultReadParam(inputStream);
     int levels = getReductionFactor();
+    addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
+    final ImageReader reader = ImageIO.getImageReadersByMIMEType("image/jpeg2000").next();
+    final J2KImageReadParam param = (J2KImageReadParam) reader.getDefaultReadParam();
     param.setResolution(levels);
     param.setDecodingRate(DEFAULT_BIT_PER_PIXEL);
-    addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
-    addMessage(messageFactory.make(MessageConstants.RESOLUTION_LEVELS, levels));
-    final ImageReader reader = ImageIO.getImageReadersByMIMEType("image/jp2").next();
     final ImageInputStream iis = ImageIO.createImageInputStream(inputStream);
     reader.setInput(iis, true, true);
     final BufferedImage img = reader.read(0, param);

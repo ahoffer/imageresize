@@ -72,7 +72,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
             inputFile.toString(),
             outputFile.toString());
 
-    BufferedImage output;
+    BufferedImage output = null;
 
     try {
       startProcess(processBuilder);
