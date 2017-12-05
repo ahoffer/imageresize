@@ -18,6 +18,7 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERI
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.STREAM_MANGLED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNCONFIGURED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNKNOWN_MESSAGE_ID;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
@@ -97,6 +98,9 @@ public class MessageFactory {
             COULD_NOT_READ_IMAGE_METADATA,
             BeLittlingSeverity.ERROR,
             "Could not read metadata from image. Image might be corrupt");
+      case UNCONFIGURED:
+        return new BeLittlingMessageImpl(
+            UNCONFIGURED, BeLittlingSeverity.WARNING, values[0].toString());
       default:
         return makeUnrecognized(id);
     }

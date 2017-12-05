@@ -93,7 +93,7 @@ public class ImageReaderShortcuts {
         reader.dispose();
       }
     } catch (IOException e) {
-      // Do throw a checked exception like IOException because it wreaks havoc with lambdas.
+      // Do throw a checked throwable like IOException because it wreaks havoc with lambdas.
       throw new ImageReaderException(e);
     }
   }
@@ -139,7 +139,7 @@ public class ImageReaderShortcuts {
             canDecode = next.canDecodeInput(iis);
             iis.reset();
           } catch (IOException e) {
-            // Why would a method called "canDecodeInput" declare a checked exception?
+            // Why would a method called "canDecodeInput" declare a checked throwable?
             // I guess an IOException here means "I cannot decode the input"
           }
 

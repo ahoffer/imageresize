@@ -23,29 +23,31 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   Jpeg2000MetadataMicroReader metadata;
 
   public BeLittlingResult generate() {
-    BufferedImage outputImage = null;
-    BufferedImage decodedImage;
-    BeLittlingResult result;
-    stampNameOnResults();
 
-    readMetaData();
-
-    endorse();
-    try {
-      decodedImage = getDecodedImage();
-      try {
-        outputImage =
-            Thumbnails.of(decodedImage).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
-      } catch (IOException e) {
-        addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR, e));
-      }
-    } catch (IOException | ClassCastException e) {
-      addMessage(messageFactory.make(MessageConstants.DECODE_JPEG2000));
-    } finally {
-      result = new BeLittlingResultImpl(outputImage, messages);
-      cleanup();
-    }
-    return result;
+    return doWithTimeout(
+        () -> {
+          BufferedImage outputImage = null;
+          BufferedImage decodedImage;
+          BeLittlingResult result;
+          stampNameOnResults();
+          readMetaData();
+          endorse();
+          try {
+            decodedImage = getDecodedImage();
+            try {
+              outputImage =
+                  Thumbnails.of(decodedImage).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+            } catch (IOException e) {
+              addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR, e));
+            }
+          } catch (IOException | ClassCastException e) {
+            addMessage(messageFactory.make(MessageConstants.DECODE_JPEG2000));
+          } finally {
+            result = new BeLittlingResultImpl(outputImage, messages);
+            cleanup();
+          }
+          return result;
+        });
   }
 
   void readMetaData() {

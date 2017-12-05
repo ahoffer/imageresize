@@ -97,4 +97,6 @@ public interface ImageSizer {
    */
   // TODO: Tried using scope=prototype in blueprint withgetServiceObjects(), but always same inst.
   ImageSizer getNew();
+
+  ImageSizer addMessage(BeLittlingMessage message);
 }

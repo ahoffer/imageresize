@@ -1,6 +1,6 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.*;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
@@ -23,6 +23,7 @@ public class BasicSizer extends AbstractImageSizer {
   }
 
   BufferedImage getOutputImage() throws IOException {
-    return Thumbnails.of(inputStream).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+    return doWithTimeout(
+        () -> Thumbnails.of(inputStream).size(getMaxWidth(), getMaxHeight()).asBufferedImage());
   }
 }

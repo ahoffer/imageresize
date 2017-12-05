@@ -193,10 +193,13 @@ magnitude faster than the Java JAI module for JPEG 2000.
 2  Write a sizer for that geo image library Derek is using
 3. Turn Factory and Image mime type guess into interfaces. Use instances of implementors 
    so we can inject them with blueprint.
-3. Create Karaf feature.
-4. Instead of throwing an exception, if a stream does not suppport mark/reset,
+4. Create Karaf feature.
+5. Instead of throwing an exception, if a stream does not suppport mark/reset,
 just wrap it in a buffered stream.
-
+6. The mars jpeg 2000 file of ~450mb never completes with the JAI decoder. 
+It never gets an out of memory exception, but it never finishes (I let it run overnight). 
+Add the ability to "timeout" a sizer and return incomplete results. Clients can iterate through
+recommnded sizers until one works.
 
 #### More about JPEG 2000
 

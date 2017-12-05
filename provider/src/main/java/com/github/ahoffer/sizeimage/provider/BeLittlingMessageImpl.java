@@ -8,7 +8,7 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
   String id;
   String description;
   BeLittlingSeverity severity;
-  Exception exception;
+  Throwable throwable;
 
   @SuppressWarnings("unsed")
   private BeLittlingMessageImpl() {}
@@ -20,9 +20,9 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
   }
 
   public BeLittlingMessageImpl(
-      String id, BeLittlingSeverity severity, String description, Exception exception) {
+      String id, BeLittlingSeverity severity, String description, Throwable throwable) {
     this(id, severity, description);
-    this.exception = exception;
+    this.throwable = throwable;
   }
 
   @Override
@@ -52,7 +52,7 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
   }
 
   @Override
-  public Optional<Exception> getException() {
-    return Optional.ofNullable(exception);
+  public Optional<Throwable> getThrowable() {
+    return Optional.ofNullable(throwable);
   }
 }

@@ -20,9 +20,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import net.coobird.thumbnailator.Thumbnails;
@@ -46,6 +50,10 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 // Website with large ortho images: https://apollomapping.com/
+// Also: The Land Management Information Center, MN Planning
+// https://earthexplorer.usgs.gov/
+// https://glovis.usgs.gov/
+
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
@@ -54,18 +62,69 @@ public class BeLittleBenchmark {
   @Param({"128"})
   public int thumbSize;
 
-  String inputDir = "/Users/aaronhoffer/data/sample-images/";
-  String outputDir = inputDir + "output/";
+  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
+  //  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
+  static String outputDir = inputDir + "output/";
   BufferedImage lastThumbnail;
   String lastDescription;
 
   // LARGE FILES ( > 1 MB)
   // JPEG 2000
-  @Param({"carrots-j2k-8mb.j2k", "gettysburg-6mb.jp2", "oslo-j2k-19mb.jp2", "airplane-4mb.jp2"})
+  @Param({
+    "carrots-j2k-8mb.j2k",
+    "gettysburg-6mb.jp2",
+    "oslo-j2k-19mb.jp2",
+    "airplane-4mb.jp2",
+    "ortho-744mb.jp2",
+    "old-map-60mb.jp2"
+  })
 
-  // SMALL FILES ( < 1 MB)
-  // JPEG 2000
+  // HUGE FILES > 100 MB
+  // JPEG, JPEG 2000, PNG
+  //  @Param({
+  //    "australia-250mb.png",
+  //    "salt-lake-340mb.jpg",
+  //    "salt-lake-1gb.png",
+  //    "britain-108mb.jpg",
+  //    "seattle-300mb.tif"
+  //  //        "mars-crater-456mb.JP2" // NEVER FINISHES. VERY MESSED FILE!
+  //  })
 
+  // COMPLIANCE TESTS
+  //  @Param({
+  //    "p1_04.j2k",
+  //    "file9.jp2",
+  //    "file8.jp2",
+  //    "p1_05.j2k",
+  //    "p1_07.j2k",
+  //    "p1_06.j2k",
+  //    "p1_02.j2k",
+  //    "p1_03.j2k",
+  //    "p1_01.j2k",
+  //    "p0_09.j2k",
+  //    "p0_08.j2k",
+  //    "p0_06.j2k",
+  //    "p0_12.j2k",
+  //    "p0_13.j2k",
+  //    "p0_07.j2k",
+  //    "p0_11.j2k",
+  //    "p0_05.j2k",
+  //    "p0_04.j2k",
+  //    "p0_10.j2k",
+  //    "p0_14.j2k",
+  //    "p0_01.j2k",
+  //    "p0_15.j2k",
+  //    "p0_03.j2k",
+  //    "p0_16.j2k",
+  //    "p0_02.j2k",
+  //    "file1.jp2",
+  //    "file3.jp2",
+  //    "file2.jp2",
+  //    "file6.jp2",
+  //    "file7.jp2",
+  //    "file5.jp2",
+  //    "file4.jp2"
+  //  })
   String filename;
 
   static {
@@ -106,13 +165,16 @@ public class BeLittleBenchmark {
   InputStream source;
 
   // TODO:Could have a benchmark that just copies input stream to get a sense of IO overhead
-  public static void main(String[] args) throws RunnerException {
+  public static void main(String[] args) throws RunnerException, IOException {
+
+    //    String names = getFilenames(inputDir);
+
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
             .forks(1)
-            .warmupIterations(0)
-            .measurementIterations(2)
+            .warmupIterations(1)
+            .measurementIterations(3)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
@@ -154,7 +216,7 @@ public class BeLittleBenchmark {
     lastThumbnail = Scalr.resize(ImageIO.read(getSourceStream()), thumbSize);
   }
 
-  //    @Benchmark
+  @Benchmark
   public void basicSizer() throws IOException {
     lastDescription = "basicSizer";
     ImageSizer sizer = new BasicSizer();
@@ -168,7 +230,7 @@ public class BeLittleBenchmark {
             .get();
   }
 
-  @Benchmark
+  //  @Benchmark
   public void thumbnailator() throws IOException {
     lastDescription = "thumbnailator";
     lastThumbnail =
@@ -278,5 +340,15 @@ public class BeLittleBenchmark {
       inputChannel.close();
       outputChannel.close();
     }
+  }
+
+  public static String getFilenames(String dir) throws IOException {
+    return Files.list(Paths.get(dir))
+        .map(Path::toFile)
+        .filter(File::isFile)
+        .filter(file -> !file.getName().equals(".DS_Store"))
+        .map(File::getName)
+        .map(s -> String.format("\"%s\"", s))
+        .collect(Collectors.joining(","));
   }
 }

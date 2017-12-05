@@ -3,6 +3,7 @@ package com.github.ahoffer.sizeimage.provider;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_WIDTH;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNCONFIGURED;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
@@ -14,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractImageSizer implements ImageSizer {
 
@@ -21,6 +24,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
   public static final String PATH_TO_EXECUTABLE = "pathToIExecutable";
   public static final String WINDOWS_EXEC_NAME = "windowsExecName";
   public static final String NIX_EXEC_NAME = "nixExecName";
+  public static final String TIMEOUT_SECONDS = "TIMEOUT_SECONDS";
 
   public static final String MAX_WIDTH = "maxWidth";
   public static final String MAX_HEIGHT = "maxHeight";
@@ -29,6 +33,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
   protected List<BeLittlingMessage> messages = new LinkedList<>();
   protected MessageFactory messageFactory = new MessageFactory();
   ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
+  protected LittleWorker worker;
 
   @Override
   public boolean equals(Object other) {
@@ -70,8 +75,9 @@ public abstract class AbstractImageSizer implements ImageSizer {
     this.configuration = newConfiguration;
   }
 
-  protected void addMessage(BeLittlingMessage message) {
+  public ImageSizer addMessage(BeLittlingMessage message) {
     messages.add(message);
+    return this;
   }
 
   protected boolean canProceed() {
@@ -127,10 +133,47 @@ public abstract class AbstractImageSizer implements ImageSizer {
     addMessage(messageFactory.make(SIZER_NAME, this.getClass().getSimpleName()));
   }
 
+  LittleWorker getWorker() {
+    if (worker == null) {
+      worker = new LittleWorker(this, getTimeoutSeconds(), TimeUnit.SECONDS);
+    }
+    return worker;
+  }
+
   public class CopyObjectException extends RuntimeException {
 
     CopyObjectException(Throwable cause) {
       super(cause);
     }
+  }
+
+  <T> T doWithTimeout(Callable<T> callable) {
+    return getWorker().doThis(callable);
+  }
+
+  long getTimeoutSeconds() {
+    if (configuration == null) {
+      addMessage(
+          messageFactory.make(
+              MessageConstants.UNCONFIGURED,
+              "Object has no configuration. Using default timeout value."));
+
+      return 60L;
+    } else if (getConfiguration().containsKey(TIMEOUT_SECONDS)) {
+      return Long.parseLong(getConfiguration().get(TIMEOUT_SECONDS));
+    } else {
+      addMessage(
+          messageFactory.make(
+              UNCONFIGURED,
+              "Object has configuration, but is missing "
+                  + TIMEOUT_SECONDS
+                  + ". Adding default value to the object's configuration"));
+      HashMap<String, String> cfg = new HashMap<>(getConfiguration());
+      cfg.put(TIMEOUT_SECONDS, "60");
+      setConfiguration(cfg);
+    }
+
+    String timeout = getConfiguration().getOrDefault(TIMEOUT_SECONDS, "60");
+    return Long.parseLong(timeout);
   }
 }

@@ -3,15 +3,15 @@ package com.github.ahoffer.sizeimage;
 import java.util.Optional;
 
 public interface BeLittlingMessage {
-  public String getId();
+  String getId();
 
-  public String getDescription();
+  String getDescription();
 
-  public BeLittlingSeverity getSeverity();
+  BeLittlingSeverity getSeverity();
 
-  public Optional<Exception> getException();
+  Optional<Throwable> getThrowable();
 
-  public enum BeLittlingSeverity {
+  enum BeLittlingSeverity {
     ERROR,
     WARNING,
     INFO

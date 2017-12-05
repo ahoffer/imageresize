@@ -53,7 +53,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       outputFile = Paths.get(tempDir, "out" + UUID.randomUUID() + OUTPUT_FORMAT_EXT);
 
       // TODO 1: I do not know why yet, but I cannot pass null for the CopyOption.
-      // todo: Read indications you can pass null, but will throw exception if file already
+      // todo: Read indications you can pass null, but will throw throwable if file already
       // todo: exists. But existing file shouldn't be an issue in this case.
       // TODO 2: Add check on bytes written. If bytes read < 1, it is an error.
       bytesWritten = java.nio.file.Files.copy(inputStream, inputFile.toPath(), REPLACE_EXISTING);
