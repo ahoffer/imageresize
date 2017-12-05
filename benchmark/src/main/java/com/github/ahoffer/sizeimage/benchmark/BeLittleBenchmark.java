@@ -1,9 +1,12 @@
 package com.github.ahoffer.sizeimage.benchmark;
 
+import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.INFO;
+import static com.github.ahoffer.sizeimage.provider.AbstractImageSizer.PATH_TO_EXECUTABLE;
+
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.AbstractImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
+import com.github.ahoffer.sizeimage.provider.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer;
@@ -62,22 +65,22 @@ public class BeLittleBenchmark {
   @Param({"128"})
   public int thumbSize;
 
-  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
-  //  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
+  //  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
+  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
   static String outputDir = inputDir + "output/";
   BufferedImage lastThumbnail;
   String lastDescription;
 
   // LARGE FILES ( > 1 MB)
   // JPEG 2000
-  @Param({
-    "carrots-j2k-8mb.j2k",
-    "gettysburg-6mb.jp2",
-    "oslo-j2k-19mb.jp2",
-    "airplane-4mb.jp2",
-    "ortho-744mb.jp2",
-    "old-map-60mb.jp2"
-  })
+  //  @Param({
+  //    "carrots-j2k-8mb.j2k",
+  //    "gettysburg-6mb.jp2",
+  //    "oslo-j2k-19mb.jp2",
+  //    "airplane-4mb.jp2",
+  //    "ortho-744mb.jp2",
+  //    "old-map-60mb.jp2"
+  //  })
 
   // HUGE FILES > 100 MB
   // JPEG, JPEG 2000, PNG
@@ -91,40 +94,40 @@ public class BeLittleBenchmark {
   //  })
 
   // COMPLIANCE TESTS
-  //  @Param({
-  //    "p1_04.j2k",
-  //    "file9.jp2",
-  //    "file8.jp2",
-  //    "p1_05.j2k",
-  //    "p1_07.j2k",
-  //    "p1_06.j2k",
-  //    "p1_02.j2k",
-  //    "p1_03.j2k",
-  //    "p1_01.j2k",
-  //    "p0_09.j2k",
-  //    "p0_08.j2k",
-  //    "p0_06.j2k",
-  //    "p0_12.j2k",
-  //    "p0_13.j2k",
-  //    "p0_07.j2k",
-  //    "p0_11.j2k",
-  //    "p0_05.j2k",
-  //    "p0_04.j2k",
-  //    "p0_10.j2k",
-  //    "p0_14.j2k",
-  //    "p0_01.j2k",
-  //    "p0_15.j2k",
-  //    "p0_03.j2k",
-  //    "p0_16.j2k",
-  //    "p0_02.j2k",
-  //    "file1.jp2",
-  //    "file3.jp2",
-  //    "file2.jp2",
-  //    "file6.jp2",
-  //    "file7.jp2",
-  //    "file5.jp2",
-  //    "file4.jp2"
-  //  })
+  @Param({
+    "p1_04.j2k",
+    "file9.jp2",
+    "file8.jp2",
+    "p1_05.j2k",
+    "p1_07.j2k",
+    "p1_06.j2k",
+    "p1_02.j2k",
+    "p1_03.j2k",
+    "p1_01.j2k",
+    "p0_09.j2k",
+    "p0_08.j2k",
+    "p0_06.j2k",
+    "p0_12.j2k",
+    "p0_13.j2k",
+    "p0_07.j2k",
+    "p0_11.j2k",
+    "p0_05.j2k",
+    "p0_04.j2k",
+    "p0_10.j2k",
+    "p0_14.j2k",
+    "p0_01.j2k",
+    "p0_15.j2k",
+    "p0_03.j2k",
+    "p0_16.j2k",
+    "p0_02.j2k",
+    "file1.jp2",
+    "file3.jp2",
+    "file2.jp2",
+    "file6.jp2",
+    "file7.jp2",
+    "file5.jp2",
+    "file4.jp2"
+  })
   String filename;
 
   static {
@@ -172,9 +175,9 @@ public class BeLittleBenchmark {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
-            .forks(1)
-            .warmupIterations(1)
-            .measurementIterations(3)
+            .forks(0)
+            .warmupIterations(0)
+            .measurementIterations(1)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
@@ -191,7 +194,7 @@ public class BeLittleBenchmark {
     return new BufferedInputStream(new FileInputStream(getSoureceFile()));
   }
 
-  @Benchmark
+  //  @Benchmark
   public void jaiJpeg2000Sizer() throws IOException {
     lastDescription = "jpeg2000Sizer";
     ImageSizer sizer = new JaiJpeg2000Sizer();
@@ -210,31 +213,70 @@ public class BeLittleBenchmark {
     }
   }
 
-  @Benchmark
+  //  @Benchmark
   public void scalr() throws IOException {
     lastDescription = "scalr";
     lastThumbnail = Scalr.resize(ImageIO.read(getSourceStream()), thumbSize);
   }
 
-  @Benchmark
+  //  @Benchmark
   public void basicSizer() throws IOException {
-    lastDescription = "basicSizer";
-    ImageSizer sizer = new BasicSizer();
-
-    lastThumbnail =
-        sizer
-            .setOutputSize(thumbSize, thumbSize)
-            .setInput(getSourceStream())
-            .generate()
-            .getOutput()
-            .get();
+    runBenchmark(new BasicSizer());
   }
 
   //  @Benchmark
+
   public void thumbnailator() throws IOException {
     lastDescription = "thumbnailator";
     lastThumbnail =
         Thumbnails.of(getSourceStream()).height(thumbSize).width(thumbSize).asBufferedImage();
+  }
+
+  //  @Benchmark
+  public void magickSizer() throws IOException {
+    lastDescription = "magickSizer";
+    ImageSizer sizer = new MagickSizer();
+    Map<String, String> config = new HashMap<>();
+    config.put(PATH_TO_EXECUTABLE, "/opt/local/bin");
+    sizer.setConfiguration(config);
+    runBenchmark(sizer);
+  }
+
+  @Benchmark
+  public void samplingSizer() throws IOException {
+    runBenchmark(new SamplingSizer());
+    lastDescription = "samplingSizer";
+  }
+
+  //  @Benchmark
+
+  public void openJeg2000Sizer() throws IOException {
+
+    ImageSizer sizer = new OpenJpeg2000Sizer();
+    HashMap<String, String> configuration = new HashMap<>();
+    configuration.put(PATH_TO_EXECUTABLE, "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
+    sizer.setConfiguration(configuration);
+
+    // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
+    if (isJpeg2000(getSoureceFile())) {
+      runBenchmark(sizer);
+    } else {
+      //      throw new RuntimeException("Do not create metrics for this test");
+    }
+  }
+
+  @TearDown
+  public void teardown() throws IOException {
+    // Save thumbnail as a PNG in the output directory
+    String ext = FilenameUtils.getExtension(filename);
+    String nameWithoutExt = filename.replaceAll("." + ext, "");
+    if (lastThumbnail != null) {
+      File file = new File(outputDir + nameWithoutExt + "-" + lastDescription + "." + ext);
+      file.mkdirs();
+      ImageIO.write(lastThumbnail, "png", file);
+    }
+    lastDescription = null;
+    lastThumbnail = null;
   }
 
   //    @Benchmark
@@ -257,70 +299,25 @@ public class BeLittleBenchmark {
     }
   }
 
-  @Benchmark
-  public void magickSizer() throws IOException {
-    lastDescription = "magickSizer";
-    ImageSizer sizer = new MagickSizer();
-    Map<String, String> config = new HashMap<>();
-    config.put(AbstractImageSizer.PATH_TO_EXECUTABLE, "/opt/local/bin");
-
-    sizer.setConfiguration(config);
-    lastThumbnail =
-        sizer
-            .setOutputSize(thumbSize, thumbSize)
-            .setInput(getSourceStream())
-            .generate()
-            .getOutput()
-            .get();
-  }
-
-  @Benchmark
-  public void samplingSizer() throws IOException {
-    lastDescription = "samplingSizer";
-    ImageSizer sizer = new SamplingSizer();
-    BeLittlingResult result =
-        sizer.setOutputSize(thumbSize, thumbSize).setInput(getSourceStream()).generate();
-    lastThumbnail = result.getOutput().get();
-  }
-
-  @Benchmark
-  public void openJeg2000Sizer() throws IOException {
-
-    lastDescription = "openJpeg2000Sizer";
-    ImageSizer sizer = new OpenJpeg2000Sizer();
-    HashMap<String, String> configuration = new HashMap<>();
-    configuration.put(
-        AbstractImageSizer.PATH_TO_EXECUTABLE,
-        "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
-    sizer.setConfiguration(configuration);
-
-    // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
-    if (isJpeg2000(getSoureceFile())) {
-      BeLittlingResult result =
-          sizer.setOutputSize(thumbSize, thumbSize).setInput(getSourceStream()).generate();
-      lastThumbnail = result.getOutput().get();
-    } else {
-      //      throw new RuntimeException("Do not create metrics for this test");
-    }
-  }
-
-  @TearDown
-  public void teardown() throws IOException {
-    // Save thumbnail as a PNG in the output directory
-    String ext = FilenameUtils.getExtension(filename);
-    String nameWithoutExt = filename.replaceAll("." + ext, "");
-    if (lastThumbnail != null) {
-      File file = new File(outputDir + nameWithoutExt + "-" + lastDescription + "." + ext);
-      file.mkdirs();
-      ImageIO.write(lastThumbnail, "png", file);
-    }
-    lastDescription = null;
-    lastThumbnail = null;
-  }
-
   private boolean isJpeg2000(File file) {
     String ext = FilenameUtils.getExtension(file.getName());
     return "jp2".equalsIgnoreCase(ext) || "j2k".equalsIgnoreCase(ext);
+  }
+
+  void runBenchmark(ImageSizer sizer) throws FileNotFoundException {
+    lastDescription = sizer.getClass().getSimpleName();
+
+    BeLittlingResult result =
+        sizer
+            .setOutputSize(thumbSize, thumbSize)
+            .setInput(getSourceStream())
+            .addMessage(new BeLittlingMessageImpl("FILE", INFO, getSoureceFile().getName()))
+            .generate();
+    if (result.getOutput().isPresent()) {
+      lastThumbnail = result.getOutput().get();
+    } else {
+      System.err.println(System.lineSeparator() + result);
+    }
   }
 
   File getSoureceFile() {
@@ -342,6 +339,7 @@ public class BeLittleBenchmark {
     }
   }
 
+  @SuppressWarnings("unused")
   public static String getFilenames(String dir) throws IOException {
     return Files.list(Paths.get(dir))
         .map(Path::toFile)

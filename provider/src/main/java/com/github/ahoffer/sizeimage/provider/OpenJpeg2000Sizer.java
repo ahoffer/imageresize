@@ -83,8 +83,11 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       outputFile.toFile().delete();
     }
 
-    // TODO Add call to canProceed
-
+    if (!canProceed()) {
+      result = new BeLittlingResultImpl(null, messages);
+      cleanup();
+      return result;
+    }
     // The image might be smaller than its original size because a reduction factor was passed
     // to the Open JPEG 2000 decoder. It is not the size specified by the sizer's configuration.
     // Use another sizing library to get the exact size.

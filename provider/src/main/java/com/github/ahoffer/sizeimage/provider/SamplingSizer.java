@@ -16,18 +16,24 @@ public class SamplingSizer extends AbstractImageSizer {
   int imageIndex = 0;
 
   public BeLittlingResult generate() {
-    BufferedImage output = null;
-    stampNameOnResults();
-    if (endorse()) {
-      try {
-        output = getOutputImage();
-      } catch (IOException e) {
-        addMessage(messageFactory.make(RESIZE_ERROR, e));
-      } finally {
-        cleanup();
-      }
-    }
-    return new BeLittlingResultImpl(output, messages);
+
+    return doWithTimeout(
+        () -> {
+          BeLittlingResult results = null;
+          BufferedImage output = null;
+          stampNameOnResults();
+          if (endorse()) {
+            try {
+              output = getOutputImage();
+            } catch (IOException e) {
+              addMessage(messageFactory.make(RESIZE_ERROR, e));
+            } finally {
+              results = new BeLittlingResultImpl(output, messages);
+              cleanup();
+            }
+          }
+          return results;
+        });
   }
 
   //  BufferedImage getOutputImage() throws IOException {

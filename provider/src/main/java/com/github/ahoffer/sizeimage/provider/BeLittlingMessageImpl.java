@@ -43,12 +43,11 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
   }
 
   public String toString() {
-    return ""
-        + (getId() == null ? "??" : getId())
-        + ", "
-        + (getSeverity() == null ? "??" : getSeverity().toString())
-        + ", "
-        + (getDescription() == null ? "??" : getDescription());
+    return String.format(
+        "%s, %s, %s",
+        getSeverity() == null ? "??" : getSeverity().toString(),
+        getId() == null ? "??" : getId(),
+        getDescription() == null ? "??" : getDescription());
   }
 
   @Override

@@ -50,6 +50,10 @@ public abstract class AbstractImageSizer implements ImageSizer {
   protected void cleanup() {
     inputStream = null;
     messages = Collections.EMPTY_LIST;
+    if (worker != null) {
+      worker.shutdownNow();
+      worker = null;
+    }
   }
 
   @Override
@@ -158,7 +162,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
               MessageConstants.UNCONFIGURED,
               "Object has no configuration. Using default timeout value."));
 
-      return 60L;
+      return 30L;
     } else if (getConfiguration().containsKey(TIMEOUT_SECONDS)) {
       return Long.parseLong(getConfiguration().get(TIMEOUT_SECONDS));
     } else {
@@ -169,11 +173,11 @@ public abstract class AbstractImageSizer implements ImageSizer {
                   + TIMEOUT_SECONDS
                   + ". Adding default value to the object's configuration"));
       HashMap<String, String> cfg = new HashMap<>(getConfiguration());
-      cfg.put(TIMEOUT_SECONDS, "60");
+      cfg.put(TIMEOUT_SECONDS, "30");
       setConfiguration(cfg);
     }
 
-    String timeout = getConfiguration().getOrDefault(TIMEOUT_SECONDS, "60");
+    String timeout = getConfiguration().getOrDefault(TIMEOUT_SECONDS, "30");
     return Long.parseLong(timeout);
   }
 }

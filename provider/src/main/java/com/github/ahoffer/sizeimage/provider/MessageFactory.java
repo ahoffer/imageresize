@@ -48,11 +48,11 @@ public class MessageFactory {
         return new BeLittlingMessageImpl(
             MISSING_INPUT_STREAM, BeLittlingSeverity.ERROR, "Input stream cannot be null");
       case RESIZE_ERROR:
-        return new BeLittlingMessageImpl(
-            RESIZE_ERROR,
-            BeLittlingSeverity.ERROR,
-            "Exception caught generating the output",
-            (Exception) values[0]);
+        {
+          Exception ex = (Exception) values[0];
+          return new BeLittlingMessageImpl(
+              RESIZE_ERROR, BeLittlingSeverity.ERROR, ex.getMessage(), ex);
+        }
       case NO_SIZER:
         return new BeLittlingMessageImpl(
             NO_SIZER, BeLittlingSeverity.ERROR, "No image sizer could be found");

@@ -22,7 +22,14 @@ public class LittleWorker {
   public LittleWorker(ImageSizer caller, long timeout, TimeUnit unit) {
     this.caller = caller;
     setTimeout(timeout, unit);
-    executor = Executors.newSingleThreadExecutor();
+    executor =
+        Executors.newSingleThreadExecutor(
+            runnable -> {
+              Thread thread = new Thread(runnable);
+              // Do not let this thread prevent the JVM from terminating
+              thread.setDaemon(true);
+              return thread;
+            });
   }
 
   public void setTimeout(long timeout, TimeUnit unit) {
@@ -48,19 +55,21 @@ public class LittleWorker {
           new BeLittlingMessageImpl(
               MessageConstants.EXECUTION_EXCEPTION,
               BeLittlingSeverity.ERROR,
-              "Exception in worker thread",
+              e.getCause().getMessage(),
               e.getCause()));
     } catch (TimeoutException e) {
       caller.addMessage(
           new BeLittlingMessageImpl(
               MessageConstants.TIMEOUT,
               BeLittlingSeverity.ERROR,
-              String.format("Operation timed out after %s %s", timeout, unit)));
+              String.format("Operation timed out after %s %s", timeout, unit),
+              e));
     }
     return result;
   }
 
   public List<Runnable> shutdownNow() {
+    caller = null;
     return executor.shutdownNow();
   }
 }

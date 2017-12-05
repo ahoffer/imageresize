@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BeLittlingResultImpl implements BeLittlingResult {
 
@@ -29,5 +30,18 @@ public class BeLittlingResultImpl implements BeLittlingResult {
   @Override
   public List<BeLittlingMessage> getMessages() {
     return messages;
+  }
+
+  public String toString() {
+    if (messages.isEmpty()) {
+      return "No Messages";
+    } else {
+      return messages
+          .stream()
+          // For now, I want to see the messages in the order they were added
+          // .sorted(Comparator.comparing(BeLittlingMessage::getSeverity).reversed())
+          .map(BeLittlingMessage::toString)
+          .collect(Collectors.joining(System.lineSeparator()));
+    }
   }
 }
