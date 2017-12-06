@@ -99,4 +99,8 @@ public interface ImageSizer {
   ImageSizer getNew();
 
   ImageSizer addMessage(BeLittlingMessage message);
+
+  ImageSizer setTimeoutSeconds(int seconds);
+
+  int getTimeoutSeconds();
 }

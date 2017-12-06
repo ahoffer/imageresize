@@ -8,6 +8,7 @@ import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
+import com.github.ahoffer.sizeimage.provider.LittleWorker;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
@@ -21,13 +22,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
@@ -51,6 +55,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 // Website with large ortho images: https://apollomapping.com/
 // Also: The Land Management Information Center, MN Planning
@@ -93,7 +98,7 @@ public class BeLittleBenchmark {
   //  //        "mars-crater-456mb.JP2" // NEVER FINISHES. VERY MESSED FILE!
   //  })
 
-  // COMPLIANCE TESTS
+  //   COMPLIANCE TESTS
   @Param({
     "p1_04.j2k",
     "file9.jp2",
@@ -128,6 +133,9 @@ public class BeLittleBenchmark {
     "file5.jp2",
     "file4.jp2"
   })
+
+  //  @Param({"p1_05.j2k"}) //Evil file that causes the JAI JPEG 2000 to process indefinitely
+  // without using up the heap
   String filename;
 
   static {
@@ -165,8 +173,6 @@ public class BeLittleBenchmark {
   //  })
   //  String filename;
 
-  InputStream source;
-
   // TODO:Could have a benchmark that just copies input stream to get a sense of IO overhead
   public static void main(String[] args) throws RunnerException, IOException {
 
@@ -175,64 +181,84 @@ public class BeLittleBenchmark {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
-            .forks(0)
+            .forks(1)
             .warmupIterations(0)
-            .measurementIterations(1)
+            .measurementIterations(3)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
             .addProfiler(GCProfiler.class)
             .result("results.csv")
+            .timeout(TimeValue.seconds(40))
             .build();
     new Runner(opt).run();
   }
 
+  LittleWorker worker;
+
   @Setup
-  public void setup() throws IOException {}
+  public void setup() throws IOException {
+    worker = new LittleWorker(30, TimeUnit.SECONDS);
+  }
 
   private BufferedInputStream getSourceStream() throws FileNotFoundException {
     return new BufferedInputStream(new FileInputStream(getSoureceFile()));
   }
 
-  //  @Benchmark
+  @Benchmark
   public void jaiJpeg2000Sizer() throws IOException {
-    lastDescription = "jpeg2000Sizer";
-    ImageSizer sizer = new JaiJpeg2000Sizer();
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
     if (isJpeg2000(getSoureceFile())) {
-      lastThumbnail =
-          sizer
-              .setOutputSize(thumbSize, thumbSize)
-              .setInput(getSourceStream())
-              .generate()
-              .getOutput()
-              .get();
+      ImageSizer sizer = new JaiJpeg2000Sizer();
+      runBenchmark(sizer);
     } else {
-      //      throw new RuntimeException("Do not create metrics for this test");
+      throw new RuntimeException("JPEG 2000 images only");
     }
   }
 
-  //  @Benchmark
-  public void scalr() throws IOException {
+  @Benchmark
+  public void scalr() throws Exception {
     lastDescription = "scalr";
-    lastThumbnail = Scalr.resize(ImageIO.read(getSourceStream()), thumbSize);
+    BufferedInputStream source = getSourceStream();
+    worker.doThis(
+        () -> {
+          lastThumbnail = Scalr.resize(ImageIO.read(source), thumbSize);
+          return null;
+        });
   }
 
-  //  @Benchmark
+  /**
+   * Keep the benchmarks from hanging. This can happen when reading certain JPEG 200 files, such as
+   * p1_05.j2k. For unknown reasons, JMH does not interrupt the method after the configured timeout
+   * has elapsed.
+   *
+   * @param callable
+   * @throws Exception
+   */
+  void doWithTimeOut(Callable<?> callable) throws Exception {
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Future<?> future = executor.submit(callable);
+    future.get(30L, TimeUnit.SECONDS);
+  }
+
+  @Benchmark
   public void basicSizer() throws IOException {
     runBenchmark(new BasicSizer());
   }
 
-  //  @Benchmark
-
-  public void thumbnailator() throws IOException {
+  @Benchmark
+  public void thumbnailator() throws Exception {
     lastDescription = "thumbnailator";
-    lastThumbnail =
-        Thumbnails.of(getSourceStream()).height(thumbSize).width(thumbSize).asBufferedImage();
+    worker.doThis(
+        () -> {
+          lastThumbnail =
+              Thumbnails.of(getSourceStream()).height(thumbSize).width(thumbSize).asBufferedImage();
+          return null;
+        });
   }
 
-  //  @Benchmark
+  @Benchmark
   public void magickSizer() throws IOException {
     lastDescription = "magickSizer";
     ImageSizer sizer = new MagickSizer();
@@ -248,8 +274,7 @@ public class BeLittleBenchmark {
     lastDescription = "samplingSizer";
   }
 
-  //  @Benchmark
-
+  @Benchmark
   public void openJeg2000Sizer() throws IOException {
 
     ImageSizer sizer = new OpenJpeg2000Sizer();
@@ -279,7 +304,7 @@ public class BeLittleBenchmark {
     lastThumbnail = null;
   }
 
-  //    @Benchmark
+  //  @Benchmark
   public void scalrTikaTransformer() throws IOException {
     lastDescription = "scalrTikaTransformer";
     Image input = ImageIO.read(getSourceStream());
@@ -306,13 +331,12 @@ public class BeLittleBenchmark {
 
   void runBenchmark(ImageSizer sizer) throws FileNotFoundException {
     lastDescription = sizer.getClass().getSimpleName();
-
-    BeLittlingResult result =
-        sizer
-            .setOutputSize(thumbSize, thumbSize)
-            .setInput(getSourceStream())
-            .addMessage(new BeLittlingMessageImpl("FILE", INFO, getSoureceFile().getName()))
-            .generate();
+    sizer
+        .setOutputSize(thumbSize, thumbSize)
+        .setInput(getSourceStream())
+        .addMessage(new BeLittlingMessageImpl("FILE", INFO, getSoureceFile().getName()))
+        .setTimeoutSeconds(30);
+    BeLittlingResult result = sizer.generate();
     if (result.getOutput().isPresent()) {
       lastThumbnail = result.getOutput().get();
     } else {
@@ -327,15 +351,9 @@ public class BeLittleBenchmark {
   @SuppressWarnings("unused")
   // Example of fast duplication of a file, or fast copy
   void copyFileUsingFileChannels(File source, File dest) throws IOException {
-    FileChannel inputChannel = null;
-    FileChannel outputChannel = null;
-    try {
-      inputChannel = new FileInputStream(source).getChannel();
-      outputChannel = new FileOutputStream(dest).getChannel();
+    try (FileChannel inputChannel = new FileInputStream(source).getChannel();
+        FileChannel outputChannel = new FileOutputStream(dest).getChannel()) {
       outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
-    } finally {
-      inputChannel.close();
-      outputChannel.close();
     }
   }
 

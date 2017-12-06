@@ -9,6 +9,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class SamplingSizer extends AbstractImageSizer {
@@ -17,23 +18,20 @@ public class SamplingSizer extends AbstractImageSizer {
 
   public BeLittlingResult generate() {
 
-    return doWithTimeout(
-        () -> {
-          BeLittlingResult results = null;
-          BufferedImage output = null;
-          stampNameOnResults();
-          if (endorse()) {
-            try {
-              output = getOutputImage();
-            } catch (IOException e) {
-              addMessage(messageFactory.make(RESIZE_ERROR, e));
-            } finally {
-              results = new BeLittlingResultImpl(output, messages);
-              cleanup();
-            }
-          }
-          return results;
-        });
+    BeLittlingResult results = null;
+    BufferedImage output = null;
+    stampNameOnResults();
+    if (endorse()) {
+      try {
+        output = getOutputImage();
+      } catch (IOException e) {
+        addMessage(messageFactory.make(RESIZE_ERROR, e));
+      } finally {
+        results = new BeLittlingResultImpl(output, messages);
+        cleanup();
+      }
+    }
+    return results;
   }
 
   //  BufferedImage getOutputImage() throws IOException {
@@ -88,11 +86,21 @@ public class SamplingSizer extends AbstractImageSizer {
               .compute();
     }
     imageParam.setSourceSubsampling(period, period, columnOffset, rowOffset);
-    BufferedImage input = reader.read(imageIndex, imageParam);
-    BufferedImage output =
-        Thumbnails.of(input).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
     addMessage(messageFactory.make(SAMPLE_PERIOD, period));
-    reader.dispose();
+    BufferedImage input = null;
+    try {
+      input = doWithTimeout(() -> reader.read(imageIndex, imageParam));
+    } catch (Exception e) {
+      //     Catch the IOException and debug it
+      e.printStackTrace();
+    } finally {
+      ((ImageInputStream) reader.getInput()).close();
+      reader.dispose();
+    }
+    BufferedImage output = null;
+    if (canProceed()) {
+      output = Thumbnails.of(input).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+    }
     return output;
   }
 }

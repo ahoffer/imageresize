@@ -48,7 +48,7 @@ public class IoTest {
 
   @Test
   public void testBasicSizer() {
-    doSize(new BasicSizer().setInput(data.vanillaJpeg_128x80_Stream));
+    belittleIt(new BasicSizer().setInput(data.vanillaJpeg_128x80_Stream));
   }
 
   // NOTE: Switched to getting a reader and letting the sizer manager it manage it.
@@ -57,18 +57,18 @@ public class IoTest {
   //  @Test(expected = StreamResetException.class)
   @Test
   public void testSamplingSizerWithJP2() {
-    //    doSize(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
-    doSize(new SamplingSizer().setInput(data.jpeg2000_128x80_Stream));
+    //    belittleIt(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
+    belittleIt(new SamplingSizer().setInput(data.jpeg2000_128x80_Stream));
   }
 
   @Test
   public void testSamplingSizer() {
-    doSize(new SamplingSizer().setInput(data.vanillaJpeg_300x200_Stream));
+    belittleIt(new SamplingSizer().setInput(data.vanillaJpeg_300x200_Stream));
   }
 
   @Test
   public void testJpeg2000ResolutionSizer() {
-    doSize(new JaiJpeg2000Sizer().setInput(data.jpeg2000_513x341_Stream));
+    belittleIt(new JaiJpeg2000Sizer().setInput(data.jpeg2000_513x341_Stream));
   }
 
   // @Test
@@ -92,7 +92,7 @@ public class IoTest {
     sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setInput(data.vanillaJpeg_128x80_Stream);
 
     assertThat(sizer.isAvailable(), equalTo(true));
-    doSize(sizer);
+    belittleIt(sizer);
   }
 
   @Test
@@ -103,11 +103,11 @@ public class IoTest {
         AbstractImageSizer.PATH_TO_EXECUTABLE,
         "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
     sizer.setInput(data.jpeg2000_513x341_Stream).setConfiguration(configuration);
-    doSize(sizer);
+    belittleIt(sizer);
   }
 
-  private void doSize(ImageSizer sizer) {
-    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS);
+  private void belittleIt(ImageSizer sizer) {
+    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setTimeoutSeconds(30);
     BeLittlingResult result = sizer.generate();
     BufferedImage output = result.getOutput().get();
     assertThat(output.getWidth(), equalTo(TestData.PIXELS));

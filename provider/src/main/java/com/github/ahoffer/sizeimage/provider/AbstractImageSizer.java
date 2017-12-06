@@ -25,6 +25,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
   public static final String WINDOWS_EXEC_NAME = "windowsExecName";
   public static final String NIX_EXEC_NAME = "nixExecName";
   public static final String TIMEOUT_SECONDS = "TIMEOUT_SECONDS";
+  public static final int DEFAULT_TIMEOUT_SECONDS = 30;
 
   public static final String MAX_WIDTH = "maxWidth";
   public static final String MAX_HEIGHT = "maxHeight";
@@ -155,16 +156,17 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return getWorker().doThis(callable);
   }
 
-  long getTimeoutSeconds() {
+  @Override
+  public int getTimeoutSeconds() {
     if (configuration == null) {
       addMessage(
           messageFactory.make(
               MessageConstants.UNCONFIGURED,
               "Object has no configuration. Using default timeout value."));
 
-      return 30L;
+      return DEFAULT_TIMEOUT_SECONDS;
     } else if (getConfiguration().containsKey(TIMEOUT_SECONDS)) {
-      return Long.parseLong(getConfiguration().get(TIMEOUT_SECONDS));
+      return Integer.parseInt(getConfiguration().get(TIMEOUT_SECONDS));
     } else {
       addMessage(
           messageFactory.make(
@@ -172,12 +174,19 @@ public abstract class AbstractImageSizer implements ImageSizer {
               "Object has configuration, but is missing "
                   + TIMEOUT_SECONDS
                   + ". Adding default value to the object's configuration"));
-      HashMap<String, String> cfg = new HashMap<>(getConfiguration());
-      cfg.put(TIMEOUT_SECONDS, "30");
-      setConfiguration(cfg);
+      setTimeoutSeconds(DEFAULT_TIMEOUT_SECONDS);
     }
 
     String timeout = getConfiguration().getOrDefault(TIMEOUT_SECONDS, "30");
-    return Long.parseLong(timeout);
+    return Integer.parseInt(timeout);
+  }
+
+  // TODO: Validate timeout >=0
+  @Override
+  public ImageSizer setTimeoutSeconds(int seconds) {
+    HashMap<String, String> cfg = new HashMap<>(getConfiguration());
+    cfg.put(TIMEOUT_SECONDS, String.valueOf(seconds));
+    setConfiguration(cfg);
+    return this;
   }
 }

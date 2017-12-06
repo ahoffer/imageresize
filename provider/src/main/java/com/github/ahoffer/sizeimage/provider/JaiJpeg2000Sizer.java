@@ -14,6 +14,9 @@ import net.coobird.thumbnailator.Thumbnails;
 @SuppressWarnings("squid:S2160")
 public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
+  // TODO: Make this configurable.
+  // TODO: Do not set it for images close to the target size, or else there will be too little
+  // information and the output image will be very blurry
   public static final double DEFAULT_BIT_PER_PIXEL = 0.3;
 
   static {
