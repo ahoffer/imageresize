@@ -28,10 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
@@ -67,14 +63,28 @@ import org.openjdk.jmh.runner.options.TimeValue;
 @State(Scope.Benchmark)
 public class BeLittleBenchmark {
 
+  public static final int TIMEOUT_SECONDS = 60;
+
   @Param({"128"})
   public int thumbSize;
 
-  //  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
-  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
+  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
+  //  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
   static String outputDir = inputDir + "output/";
   BufferedImage lastThumbnail;
   String lastDescription;
+
+  // LARGE FILES ( > 1 MB)
+  // Mixed
+  @Param({
+    "land-8mb.jpg",
+    "building-30mb.jpg",
+    "gettysburg-6mb.jp2",
+    "airplane-4mb.jp2",
+    "building-30mb.jpg",
+    "britain-108mb.jpg",
+    "paris-201mb.tiff"
+  })
 
   // LARGE FILES ( > 1 MB)
   // JPEG 2000
@@ -99,40 +109,40 @@ public class BeLittleBenchmark {
   //  })
 
   //   COMPLIANCE TESTS
-  @Param({
-    "p1_04.j2k",
-    "file9.jp2",
-    "file8.jp2",
-    "p1_05.j2k",
-    "p1_07.j2k",
-    "p1_06.j2k",
-    "p1_02.j2k",
-    "p1_03.j2k",
-    "p1_01.j2k",
-    "p0_09.j2k",
-    "p0_08.j2k",
-    "p0_06.j2k",
-    "p0_12.j2k",
-    "p0_13.j2k",
-    "p0_07.j2k",
-    "p0_11.j2k",
-    "p0_05.j2k",
-    "p0_04.j2k",
-    "p0_10.j2k",
-    "p0_14.j2k",
-    "p0_01.j2k",
-    "p0_15.j2k",
-    "p0_03.j2k",
-    "p0_16.j2k",
-    "p0_02.j2k",
-    "file1.jp2",
-    "file3.jp2",
-    "file2.jp2",
-    "file6.jp2",
-    "file7.jp2",
-    "file5.jp2",
-    "file4.jp2"
-  })
+  //  @Param({
+  //    "p1_04.j2k",
+  //    "file9.jp2",
+  //    "file8.jp2",
+  //    "p1_05.j2k",
+  //    "p1_07.j2k",
+  //    "p1_06.j2k",
+  //    "p1_02.j2k",
+  //    "p1_03.j2k",
+  //    "p1_01.j2k",
+  //    "p0_09.j2k",
+  //    "p0_08.j2k",
+  //    "p0_06.j2k",
+  //    "p0_12.j2k",
+  //    "p0_13.j2k",
+  //    "p0_07.j2k",
+  //    "p0_11.j2k",
+  //    "p0_05.j2k",
+  //    "p0_04.j2k",
+  //    "p0_10.j2k",
+  //    "p0_14.j2k",
+  //    "p0_01.j2k",
+  //    "p0_15.j2k",
+  //    "p0_03.j2k",
+  //    "p0_16.j2k",
+  //    "p0_02.j2k",
+  //    "file1.jp2",
+  //    "file3.jp2",
+  //    "file2.jp2",
+  //    "file6.jp2",
+  //    "file7.jp2",
+  //    "file5.jp2",
+  //    "file4.jp2"
+  //  })
 
   //  @Param({"p1_05.j2k"}) //Evil file that causes the JAI JPEG 2000 to process indefinitely
   // without using up the heap
@@ -201,13 +211,13 @@ public class BeLittleBenchmark {
     worker = new LittleWorker(30, TimeUnit.SECONDS);
   }
 
-  private BufferedInputStream getSourceStream() throws FileNotFoundException {
-    return new BufferedInputStream(new FileInputStream(getSoureceFile()));
+  @Benchmark
+  public void basicSizer() throws IOException {
+    runBenchmark(new BasicSizer());
   }
 
   @Benchmark
   public void jaiJpeg2000Sizer() throws IOException {
-
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
     if (isJpeg2000(getSoureceFile())) {
       ImageSizer sizer = new JaiJpeg2000Sizer();
@@ -218,47 +228,6 @@ public class BeLittleBenchmark {
   }
 
   @Benchmark
-  public void scalr() throws Exception {
-    lastDescription = "scalr";
-    BufferedInputStream source = getSourceStream();
-    worker.doThis(
-        () -> {
-          lastThumbnail = Scalr.resize(ImageIO.read(source), thumbSize);
-          return null;
-        });
-  }
-
-  /**
-   * Keep the benchmarks from hanging. This can happen when reading certain JPEG 200 files, such as
-   * p1_05.j2k. For unknown reasons, JMH does not interrupt the method after the configured timeout
-   * has elapsed.
-   *
-   * @param callable
-   * @throws Exception
-   */
-  void doWithTimeOut(Callable<?> callable) throws Exception {
-    ExecutorService executor = Executors.newSingleThreadExecutor();
-    Future<?> future = executor.submit(callable);
-    future.get(30L, TimeUnit.SECONDS);
-  }
-
-  @Benchmark
-  public void basicSizer() throws IOException {
-    runBenchmark(new BasicSizer());
-  }
-
-  @Benchmark
-  public void thumbnailator() throws Exception {
-    lastDescription = "thumbnailator";
-    worker.doThis(
-        () -> {
-          lastThumbnail =
-              Thumbnails.of(getSourceStream()).height(thumbSize).width(thumbSize).asBufferedImage();
-          return null;
-        });
-  }
-
-  @Benchmark
   public void magickSizer() throws IOException {
     lastDescription = "magickSizer";
     ImageSizer sizer = new MagickSizer();
@@ -266,12 +235,6 @@ public class BeLittleBenchmark {
     config.put(PATH_TO_EXECUTABLE, "/opt/local/bin");
     sizer.setConfiguration(config);
     runBenchmark(sizer);
-  }
-
-  @Benchmark
-  public void samplingSizer() throws IOException {
-    runBenchmark(new SamplingSizer());
-    lastDescription = "samplingSizer";
   }
 
   @Benchmark
@@ -286,22 +249,53 @@ public class BeLittleBenchmark {
     if (isJpeg2000(getSoureceFile())) {
       runBenchmark(sizer);
     } else {
-      //      throw new RuntimeException("Do not create metrics for this test");
+      throw new RuntimeException("JPEG 2000 images only");
     }
+  }
+
+  @Benchmark
+  public void samplingSizer() throws IOException {
+    runBenchmark(new SamplingSizer());
+  }
+
+  @Benchmark
+  public void scalr() throws Exception {
+    lastDescription = "scalr";
+    BufferedInputStream source = getSourceStream();
+    worker.doThis(
+        () -> {
+          lastThumbnail = Scalr.resize(ImageIO.read(source), thumbSize);
+          return null;
+        });
+  }
+
+  @Benchmark
+  public void thumbnailator() throws Exception {
+    lastDescription = "thumbnailator";
+    worker.doThis(
+        () -> {
+          lastThumbnail =
+              Thumbnails.of(getSourceStream()).height(thumbSize).width(thumbSize).asBufferedImage();
+          return null;
+        });
   }
 
   @TearDown
   public void teardown() throws IOException {
-    // Save thumbnail as a PNG in the output directory
+    saveThumbnailToOutputDir();
+    lastDescription = null;
+    lastThumbnail = null;
+  }
+
+  void saveThumbnailToOutputDir() throws IOException {
     String ext = FilenameUtils.getExtension(filename);
     String nameWithoutExt = filename.replaceAll("." + ext, "");
     if (lastThumbnail != null) {
-      File file = new File(outputDir + nameWithoutExt + "-" + lastDescription + "." + ext);
+      File file =
+          new File(String.format("%s%s-%s.%s", outputDir, nameWithoutExt, lastDescription, ext));
       file.mkdirs();
       ImageIO.write(lastThumbnail, "png", file);
     }
-    lastDescription = null;
-    lastThumbnail = null;
   }
 
   //  @Benchmark
@@ -324,7 +318,11 @@ public class BeLittleBenchmark {
     }
   }
 
-  private boolean isJpeg2000(File file) {
+  BufferedInputStream getSourceStream() throws FileNotFoundException {
+    return new BufferedInputStream(new FileInputStream(getSoureceFile()));
+  }
+
+  boolean isJpeg2000(File file) {
     String ext = FilenameUtils.getExtension(file.getName());
     return "jp2".equalsIgnoreCase(ext) || "j2k".equalsIgnoreCase(ext);
   }
@@ -335,7 +333,7 @@ public class BeLittleBenchmark {
         .setOutputSize(thumbSize, thumbSize)
         .setInput(getSourceStream())
         .addMessage(new BeLittlingMessageImpl("FILE", INFO, getSoureceFile().getName()))
-        .setTimeoutSeconds(30);
+        .setTimeoutSeconds(TIMEOUT_SECONDS);
     BeLittlingResult result = sizer.generate();
     if (result.getOutput().isPresent()) {
       lastThumbnail = result.getOutput().get();
