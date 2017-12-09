@@ -17,6 +17,7 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.NO_SIZER;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_FAILED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_INTERRUPTED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.REDUCTION_FACTOR;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESOLUTION_LEVELS;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERIOD;
@@ -100,9 +101,10 @@ public class MessageFactory {
         return new BeLittlingMessageImpl(UNCONFIGURED, WARNING, values[0].toString());
       case COULD_NOT_READ_IMAGE:
         return new BeLittlingMessageImpl(COULD_NOT_READ_IMAGE, ERROR, (Exception) values[0]);
-
       case COULD_NOT_CLOSE_STREAM:
         return new BeLittlingMessageImpl(COULD_NOT_CLOSE_STREAM, WARNING, (Exception) values[0]);
+      case REDUCTION_FACTOR:
+        return new BeLittlingMessageImpl(REDUCTION_FACTOR, INFO, values[0].toString());
 
       default:
         return makeUnrecognized(id);

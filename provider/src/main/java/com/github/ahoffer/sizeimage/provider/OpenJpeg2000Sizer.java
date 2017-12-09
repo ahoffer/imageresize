@@ -1,5 +1,6 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.*;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -32,6 +33,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     super.prepare();
     readMetaData();
     reductionFactor = getReductionFactor();
+    addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
   }
 
   void processInput() {
@@ -108,7 +110,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       addMessage(new BeLittlingMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
     }
     if (!metadata.isSucessfullyRead()) {
-      addMessage(messageFactory.make(MessageConstants.COULD_NOT_READ_METADATA));
+      addMessage(messageFactory.make(COULD_NOT_READ_METADATA));
     }
   }
 
@@ -123,11 +125,11 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
           addMessage(messageFactory.make(OPJ_FAILED, getStdError(process.getErrorStream())));
         }
       } catch (InterruptedException e) {
-        addMessage(messageFactory.make(MessageConstants.OS_PROCESS_INTERRUPTED));
+        addMessage(messageFactory.make(OS_PROCESS_INTERRUPTED));
       }
 
     } catch (IOException e) {
-      addMessage(messageFactory.make(MessageConstants.OS_PROCESS_FAILED, e));
+      addMessage(messageFactory.make(OS_PROCESS_FAILED, e));
     }
   }
 

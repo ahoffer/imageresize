@@ -1,5 +1,7 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.REDUCTION_FACTOR;
+
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
@@ -31,6 +33,8 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     super.prepare();
     readMetaData();
     reductionFactor = getReductionFactor();
+    addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
+
   }
 
   void generateOutput() {

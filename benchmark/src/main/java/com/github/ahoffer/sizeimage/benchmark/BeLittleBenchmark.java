@@ -63,7 +63,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 @State(Scope.Benchmark)
 public class BeLittleBenchmark {
 
-  public static final int TIMEOUT_SECONDS = 60;
+  public static final int TIMEOUT_SECONDS = 300;
 
   @Param({"128"})
   public int thumbSize;
@@ -76,26 +76,26 @@ public class BeLittleBenchmark {
 
   // LARGE FILES ( > 1 MB)
   // Mixed
-  @Param({
-    "land-8mb.jpg",
-    "building-30mb.jpg",
-    "gettysburg-6mb.jp2",
-    "airplane-4mb.jp2",
-    "building-30mb.jpg",
-    "britain-108mb.jpg",
-    "paris-201mb.tiff"
-  })
+  //  @Param({
+  //    "land-8mb.jpg",
+  //    "building-30mb.jpg",
+  //    "gettysburg-6mb.jp2",
+  //    "airplane-4mb.jp2",
+  //    "building-30mb.jpg",
+  //    "britain-108mb.jpg",
+  //    "paris-201mb.tiff"
+  //  })
 
   // LARGE FILES ( > 1 MB)
   // JPEG 2000
-  //  @Param({
-  //    "carrots-j2k-8mb.j2k",
-  //    "gettysburg-6mb.jp2",
-  //    "oslo-j2k-19mb.jp2",
-  //    "airplane-4mb.jp2",
-  //    "ortho-744mb.jp2",
-  //    "old-map-60mb.jp2"
-  //  })
+  @Param({
+    "carrots-j2k-8mb.j2k",
+    "gettysburg-6mb.jp2",
+    "oslo-j2k-19mb.jp2",
+    "airplane-4mb.jp2",
+    "ortho-744mb.jp2",
+    "old-map-60mb.jp2"
+  })
 
   // HUGE FILES > 100 MB
   // JPEG, JPEG 2000, PNG
@@ -192,8 +192,8 @@ public class BeLittleBenchmark {
     Options opt =
         new OptionsBuilder()
             .forks(1)
-            .warmupIterations(0)
-            .measurementIterations(3)
+            .warmupIterations(1)
+            .measurementIterations(4)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
@@ -211,12 +211,12 @@ public class BeLittleBenchmark {
     worker = new LittleWorker(30, TimeUnit.SECONDS);
   }
 
-  @Benchmark
+  //  @Benchmark
   public void basicSizer() throws IOException {
     runBenchmark(new BasicSizer());
   }
 
-  @Benchmark
+  //  @Benchmark
   public void jaiJpeg2000Sizer() throws IOException {
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
     if (isJpeg2000(getSoureceFile())) {
@@ -227,7 +227,7 @@ public class BeLittleBenchmark {
     }
   }
 
-  @Benchmark
+  //  @Benchmark
   public void magickSizer() throws IOException {
     lastDescription = "magickSizer";
     ImageSizer sizer = new MagickSizer();
@@ -253,12 +253,12 @@ public class BeLittleBenchmark {
     }
   }
 
-  @Benchmark
+  //  @Benchmark
   public void samplingSizer() throws IOException {
     runBenchmark(new SamplingSizer());
   }
 
-  @Benchmark
+  //  @Benchmark
   public void scalr() throws Exception {
     lastDescription = "scalr";
     BufferedInputStream source = getSourceStream();
@@ -269,7 +269,7 @@ public class BeLittleBenchmark {
         });
   }
 
-  @Benchmark
+  //  @Benchmark
   public void thumbnailator() throws Exception {
     lastDescription = "thumbnailator";
     worker.doThis(
