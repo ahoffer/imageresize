@@ -14,10 +14,10 @@ import java.util.concurrent.TimeoutException;
 /** Hide boiler plate code for running tasks */
 public class LittleWorker {
 
-  ExecutorService executor;
-  ImageSizer caller;
-  long timeout;
-  TimeUnit unit;
+  protected ExecutorService executor;
+  protected ImageSizer caller;
+  protected long timeout;
+  protected TimeUnit unit;
 
   public LittleWorker(long timeout, TimeUnit unit) {
     this(new NullImageSizer(), timeout, unit);
@@ -73,7 +73,6 @@ public class LittleWorker {
   }
 
   public List<Runnable> shutdownNow() {
-    caller = null;
     return executor.shutdownNow();
   }
 }

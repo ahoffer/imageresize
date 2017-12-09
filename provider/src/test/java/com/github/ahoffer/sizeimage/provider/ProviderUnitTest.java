@@ -86,16 +86,6 @@ public class ProviderUnitTest {
     sizer.setOutputSize(0, 1);
   }
 
-  @Ignore
-  @Test(expected = IllegalArgumentException.class)
-  public void testValidatingExtentsConfiguration() {
-    HashMap<String, String> config = new HashMap<>();
-    config.put(AbstractImageSizer.MAX_HEIGHT, "1");
-    config.put(AbstractImageSizer.MAX_WIDTH, "");
-    sizer.setConfiguration(config);
-    sizer.endorse();
-  }
-
   @Test
   public void testEqualityAndHashCode() {
     HashMap configurationOne = new HashMap();

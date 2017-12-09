@@ -1,13 +1,16 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.ERROR;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_HEIGHT;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_WIDTH;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNCONFIGURED;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
-import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
+import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,23 +32,22 @@ public abstract class AbstractImageSizer implements ImageSizer {
 
   public static final String MAX_WIDTH = "maxWidth";
   public static final String MAX_HEIGHT = "maxHeight";
-  protected Map<String, String> configuration = new HashMap<>();
-  protected InputStream inputStream;
-  protected List<BeLittlingMessage> messages = new LinkedList<>();
-  protected MessageFactory messageFactory = new MessageFactory();
+  Map<String, String> configuration = new HashMap<>();
+  InputStream inputStream;
+  List<BeLittlingMessage> messages = new LinkedList<>();
+  MessageFactory messageFactory = new MessageFactory();
   ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
-  protected LittleWorker worker;
+  LittleWorker worker;
+  BufferedImage output;
 
   @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
     }
-    if (other == null || getClass() != other.getClass()) {
-      return false;
-    }
-
-    return configuration.equals(((AbstractImageSizer) other).configuration);
+    return other != null
+        && getClass() == other.getClass()
+        && configuration.equals(((AbstractImageSizer) other).configuration);
   }
 
   protected void cleanup() {
@@ -56,6 +58,35 @@ public abstract class AbstractImageSizer implements ImageSizer {
       worker = null;
     }
   }
+
+  void processInput() {
+    // Do nothing. Subclasses may override.
+  }
+
+  public BeLittlingResult generate() {
+          try {
+ doWithTimeout(
+        () -> {
+            prepare();
+
+            if (canProceed()) {
+              processInput();
+            }
+            if (canProceed()) {
+              generateOutput();
+            }
+            return output;
+        });
+    } finally {
+      BeLittlingResult result = new BeLittlingResultImpl(output, messages);
+      cleanup();
+      return result;
+    }
+  }
+
+  void generateOutput() {
+    // Do nothing. Subclasses should override.
+  };
 
   @Override
   public int hashCode() {
@@ -86,12 +117,13 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   protected boolean canProceed() {
-    return messages
-        .stream()
-        .noneMatch(message -> message.getSeverity() == BeLittlingSeverity.ERROR);
+    return messages.stream().noneMatch(message -> message.getSeverity() == ERROR);
   }
 
-  protected boolean endorse() {
+  void prepare() {
+
+    stampNameOnResults();
+
     // TODO: Create a rule class to encapsulate the rules. It accepts a sizer and can call
     // TODO: the sizer's addMessage method. Probably use visitor pattern.
     if (getMaxWidth() < 1) {
@@ -101,16 +133,15 @@ public abstract class AbstractImageSizer implements ImageSizer {
       addMessage(messageFactory.make(BAD_HEIGHT, getMaxHeight()));
     }
     if (Objects.isNull(inputStream)) {
-      addMessage(messageFactory.make(MessageConstants.MISSING_INPUT_STREAM));
+      addMessage(messageFactory.make(MISSING_INPUT_STREAM));
     }
-    return canProceed();
   }
 
   public int getMaxWidth() {
     return getInteger(configuration.get(MAX_WIDTH));
   }
 
-  private int getInteger(String intString) {
+  int getInteger(String intString) {
     return Integer.valueOf(intString);
   }
 
@@ -161,8 +192,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     if (configuration == null) {
       addMessage(
           messageFactory.make(
-              MessageConstants.UNCONFIGURED,
-              "Object has no configuration. Using default timeout value."));
+              UNCONFIGURED, "Object has no configuration. Using default timeout value."));
 
       return DEFAULT_TIMEOUT_SECONDS;
     } else if (getConfiguration().containsKey(TIMEOUT_SECONDS)) {

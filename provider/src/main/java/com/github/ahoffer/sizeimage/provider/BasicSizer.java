@@ -2,28 +2,16 @@ package com.github.ahoffer.sizeimage.provider;
 
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
 
-import com.github.ahoffer.sizeimage.BeLittlingResult;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class BasicSizer extends AbstractImageSizer {
 
-  public BeLittlingResult generate() {
-    BufferedImage output = null;
-    stampNameOnResults();
-    if (endorse()) {
-      try {
-        output = getOutputImage();
-      } catch (IOException e) {
-        addMessage(messageFactory.make(RESIZE_ERROR, e));
-      }
+  void generateOutput() {
+    try {
+      output = Thumbnails.of(inputStream).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+    } catch (IOException e) {
+      addMessage(messageFactory.make(RESIZE_ERROR, e));
     }
-    return new BeLittlingResultImpl(output, messages);
-  }
-
-  BufferedImage getOutputImage() throws IOException {
-    return doWithTimeout(
-        () -> Thumbnails.of(inputStream).size(getMaxWidth(), getMaxHeight()).asBufferedImage());
   }
 }

@@ -25,6 +25,10 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
     this.throwable = throwable;
   }
 
+  public BeLittlingMessageImpl(String id, BeLittlingSeverity severity, Throwable throwable) {
+    this(id, severity, throwable.getMessage(), throwable);
+  }
+
   @Override
   public String getId() {
     return id;

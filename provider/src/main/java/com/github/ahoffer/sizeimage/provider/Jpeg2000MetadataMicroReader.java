@@ -109,6 +109,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   int minNumResolutionLevels;
   boolean isJpeg2000File;
   boolean codestreamBoxDetected;
+  boolean sucessfullyRead;
 
   /**
    * The constructor of the FileFormatReader
@@ -129,18 +130,18 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    *
    * @exception java.io.IOException stream reset failed
    */
-  public boolean read() throws IOException {
+  public void read() throws IOException {
 
     inputStream.mark(READ_LIMIT);
     try {
       read0();
     } catch (IOException e) {
-      return false;
+      sucessfullyRead = false;
     } finally {
       inputStream.reset();
     }
 
-    return true;
+    sucessfullyRead = true;
   }
 
   void read0() throws IOException {
@@ -464,5 +465,9 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
 
   public boolean isCodestreamBoxDetected() {
     return codestreamBoxDetected;
+  }
+
+  public boolean isSucessfullyRead() {
+    return sucessfullyRead;
   }
 }
