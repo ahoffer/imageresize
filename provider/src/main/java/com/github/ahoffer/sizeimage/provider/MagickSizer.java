@@ -69,8 +69,8 @@ public class MagickSizer extends AbstractImageSizer {
       command.run(op);
     } catch (InterruptedException | IM4JavaException | IOException e) {
       addMessage(messageFactory.make(RESIZE_ERROR, e));
-      output = outputConsumer.getImage();
     }
+    output = outputConsumer.getImage();
   }
 
   @Override

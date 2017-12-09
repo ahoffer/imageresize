@@ -64,9 +64,10 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   public BeLittlingResult generate() {
-          try {
- doWithTimeout(
-        () -> {
+    BeLittlingResult result = null;
+    try {
+      doWithTimeout(
+          () -> {
             prepare();
 
             if (canProceed()) {
@@ -76,12 +77,12 @@ public abstract class AbstractImageSizer implements ImageSizer {
               generateOutput();
             }
             return output;
-        });
+          });
     } finally {
-      BeLittlingResult result = new BeLittlingResultImpl(output, messages);
+      result = new BeLittlingResultImpl(output, messages);
       cleanup();
-      return result;
     }
+    return result;
   }
 
   void generateOutput() {

@@ -107,7 +107,7 @@ public class IoTest {
   }
 
   private void belittleIt(ImageSizer sizer) {
-    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setTimeoutSeconds(1000000);
+    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setTimeoutSeconds(30);
     BeLittlingResult result = sizer.generate();
     BufferedImage output = result.getOutput().get();
     assertThat(output.getWidth(), equalTo(TestData.PIXELS));
