@@ -4,14 +4,23 @@ import java.io.InputStream;
 import java.util.Map;
 
 /**
- * The ImageSizer interface is central to this library. Implementers of the interface can use any
- * strategy at all to resize an image. The expected functionality is:
+ * The ImageSizer interface is central class of this library. Implementers of the interface can use
+ * any method to resize an image. The responsibilities of an ImageSizer are
  *
  * <ul>
  *   <li>Set and get an input stream that represents the image to be re-sized
- *   <li>Set and get configuration values
- *   <li>Set and get desired output generate
- *   <li>Perform the sizing operation and provided the re-sized image
+ *   <li>Perform the sizing operation and provide the re-sized image, along with any messages the
+ *       generated during the process
+ *   <li>Allow other objects to add messages to the sizer during the process
+ *   <li>
+ *   <li>Set and get configuration values. At the interface level, the defined configurations are:
+ *       <ul>
+ *         <li>Desired width and height (in pixels) of resized image
+ *         <li>Desired height of resized image
+ *         <li>Maximum allowed wall clock time (in seconds) to resize an image. Operations exceeding
+ *             the allowed time should be cancelled
+ *       </ul>
+ *   <li>
  * </ul>
  *
  * For samples, see implementation included with this library.
@@ -90,17 +99,42 @@ public interface ImageSizer {
   }
 
   /**
-   * Create a new instance of the concrete implementor of the image sizer. For thread safety, create
-   * a new instance of sizer before using it.
+   * Create a new instance of the concrete implementor of the image sizer. ImageSizers are intended
+   * to prototype objects. To use a sizer, clone an existing sizer. The cloning function should
+   * preserve the configuration of the sizer, but not the transient/mutable objects, such as the
+   * input image and the messages associated with the sizer. Cloning ImageSizers promotes thread
+   * safety; a particular ImageSizer objects should only be accessed by a single thread.
    *
    * @return instance of a concrete image sizer
    */
-  // TODO: Tried using scope=prototype in blueprint withgetServiceObjects(), but always same inst.
+  // TODO: Tried using scope=prototype in blueprint. Then fetch it using getServiceObjects(), but
+  // always same instance. Work-around was to clone the ImageSizer before returning it to a
+  // consumer.
   ImageSizer getNew();
 
+  /**
+   * Allows cooperating objects the opportunity to add messages to the sizer about errors, potential
+   * problems, or information.
+   *
+   * @param message
+   * @return the image sizer
+   */
   ImageSizer addMessage(BeLittlingMessage message);
 
+  /**
+   * Prevent the ImageSizer run indefinitely. Limit its execution time to a certain number of
+   * seconds.
+   *
+   * @param seconds
+   * @return the image sizer
+   */
   ImageSizer setTimeoutSeconds(int seconds);
 
+  /**
+   * The number of seconds the ImageSizer should run before giving up and returning control to the
+   * caller.
+   *
+   * @return
+   */
   int getTimeoutSeconds();
 }
