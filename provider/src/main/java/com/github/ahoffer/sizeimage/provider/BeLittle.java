@@ -19,8 +19,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Central class for the BeLittle library. Encapsulates the configuration. The configuration
- * controls what sizers are preferred for certain image types. This class can also set a global
- * image generate that overrides anything
+ * controls what sizers are preferred for certain image types.
  */
 public class BeLittle {
 

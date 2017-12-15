@@ -34,7 +34,6 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     readMetaData();
     reductionFactor = getReductionFactor();
     addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
-
   }
 
   void generateOutput() {

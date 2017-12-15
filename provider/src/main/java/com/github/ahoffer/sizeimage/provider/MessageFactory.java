@@ -13,6 +13,7 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.COULD_NOT_R
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.DECODE_JPEG2000;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.NO_IMAGE_READER;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.NO_SIZER;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_FAILED;
@@ -105,6 +106,8 @@ public class MessageFactory {
         return new BeLittlingMessageImpl(COULD_NOT_CLOSE_STREAM, WARNING, (Exception) values[0]);
       case REDUCTION_FACTOR:
         return new BeLittlingMessageImpl(REDUCTION_FACTOR, INFO, values[0].toString());
+      case NO_IMAGE_READER:
+        return new BeLittlingMessageImpl(NO_IMAGE_READER, ERROR, "No compatible JAI reader found");
 
       default:
         return makeUnrecognized(id);

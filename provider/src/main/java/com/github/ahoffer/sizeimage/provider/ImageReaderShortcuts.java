@@ -4,7 +4,6 @@ import static javax.imageio.ImageIO.createImageInputStream;
 
 import com.github.ahoffer.sizeimage.provider.BeLittle.ImageReaderException;
 import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -39,20 +38,6 @@ public class ImageReaderShortcuts {
    */
   public void executeWithReader(InputStream inputStream, IoConsumer<ImageReader>... consumers) {
     executeWithReader(inputStream, true, consumers);
-  }
-
-  /**
-   * Consume the input stream to read its image.
-   *
-   * @param inputStream
-   * @param imageIndex
-   * @param imageParam
-   * @return
-   */
-  public BufferedImage read(InputStream inputStream, int imageIndex, ImageReadParam imageParam) {
-    final BufferedImage[] image = new BufferedImage[1];
-    executeWithReader(inputStream, false, reader -> image[0] = reader.read(imageIndex, imageParam));
-    return image[0];
   }
 
   /**
@@ -139,7 +124,7 @@ public class ImageReaderShortcuts {
             canDecode = next.canDecodeInput(iis);
             iis.reset();
           } catch (IOException e) {
-            // Why would a method called "canDecodeInput" declare a checked throwable?
+            // Why would a method called "canDecodeInput" declare a checked exception?
             // I guess an IOException here means "I cannot decode the input"
           }
 

@@ -46,10 +46,14 @@ public interface BeLittlingMessage {
   Optional<Throwable> getThrowable();
 
   /**
-   * Messages have three designtions: errors, warnings, and information. Informational messages
-   * provide facts aand context, such as what sizer was used, it's configuration, or start/finish
-   * time. Warnings indicate potential problems, sucha as missing configuration values. Errors are
+   * Messages have three designations: errors, warnings, and information. Informational messages
+   * provide facts and context, such as what sizer was used, it's configuration, or start/finish
+   * time. Warnings indicate potential problems, such as missing configuration values. Errors are
    * hard stops. They indicate an unrecoverable event.
+   *
+   * <p>This system is intended to be both replace the common patterns of for bubbling up exceptions
+   * to the object's client. Image processing involves a lot of IO. IOExceptions can be almost
+   * anywhere and can mean many different things.
    */
   enum BeLittlingSeverity {
     ERROR,

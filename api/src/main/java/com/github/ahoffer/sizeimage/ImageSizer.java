@@ -56,14 +56,16 @@ public interface ImageSizer {
   ImageSizer setInput(InputStream inputStream);
 
   /**
-   * Return the desired maximum width, in pixels.
+   * Return the desired maximum width, in pixels. Resized image may have smaller than the maximum
+   * width to preserve aspect ratio.
    *
-   * @return width in pixels
+   * @return maximum width of resized image, in pixels
    */
   int getMaxWidth();
 
   /**
-   * Return the desired maximum height, in pixels.
+   * Return the desired maximum height, in pixels. Resized image may have smaller than the maximum
+   * height to preserve aspect ratio.
    *
    * @return height in pixels
    */
