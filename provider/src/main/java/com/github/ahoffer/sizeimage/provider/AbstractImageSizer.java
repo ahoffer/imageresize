@@ -11,19 +11,15 @@ import com.github.ahoffer.sizeimage.BeLittlingMessage;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
 
 /**
  * The primary functionality for all ImageSizers is implemented int this class.
@@ -60,7 +56,6 @@ public abstract class AbstractImageSizer implements ImageSizer {
   InputStream inputStream;
   List<BeLittlingMessage> messages = new LinkedList<>();
   MessageFactory messageFactory = new MessageFactory();
-  ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
   BufferedImage output;
 
   // TODO: Are equals() and hashCode() still needed?
@@ -290,6 +285,12 @@ public abstract class AbstractImageSizer implements ImageSizer {
    * @param callable
    * @return return value of the callable
    */
+
+  //  TODO
+  // This is solution has a lot of overhead because it creates and shutsdown and executor for every
+  // task. In an environment where the system is processing thousands of images, this could become
+  // an issue. For high processing demands, the worker should d submit task to a thread pool. Not
+  // sure how to do that. Simplest thing would be to put a static var on worker class.
   <T> T doWithTimeout(Callable<T> callable) {
 
     LittleWorker worker = new LittleWorker(this, getTimeoutSeconds(), TimeUnit.SECONDS);
@@ -347,22 +348,5 @@ public abstract class AbstractImageSizer implements ImageSizer {
     cfg.put(TIMEOUT_SECONDS, String.valueOf(seconds));
     setConfiguration(cfg);
     return this;
-  }
-
-  ImageReader getFirstImageReader() {
-    Iterator<ImageReader> readers = null;
-    ImageReader reader = null;
-    try {
-      readers = ImageIO.getImageReaders(ImageIO.createImageInputStream(inputStream));
-    } catch (IOException e) {
-      // Do nothing
-    }
-    if (readers == null || !readers.hasNext()) {
-      addMessage(messageFactory.make(MessageConstants.NO_IMAGE_READER));
-
-    } else {
-      reader = readers.next();
-    }
-    return reader;
   }
 }

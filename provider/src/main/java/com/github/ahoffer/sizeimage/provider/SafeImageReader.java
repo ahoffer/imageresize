@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.imageio.ImageReadParam;
@@ -17,7 +19,7 @@ import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.lang3.Validate;
 
-public class SafeImageReader {
+public class SafeImageReader implements AutoCloseable {
   // Bytes in a stream will be buffered when read, up the the read limit.
   // Those bytes will be restored if something "happens" to the original bytes.
   // The goal is to allow the reader to read an image file's metadata and then
@@ -30,15 +32,18 @@ public class SafeImageReader {
   ImageReaderSpi imageReaderSpi;
   InputStream inputStream;
   ImageReadParam readParam;
-  int imageIdx;
+  protected int imageIndex;
 
   public SafeImageReader(InputStream inputStream) {
-    imageIdx = 0;
-
-    this.inputStream = inputStream;
     Validate.notNull(inputStream);
     Validate.isTrue(inputStream.markSupported());
+    this.inputStream = inputStream;
     inputStream.mark(READLIMIT);
+    setImageIndex(0);
+  }
+
+  public List<String> getMimeTypes() {
+    return Arrays.asList(getImageReaderSpi().getMIMETypes());
   }
 
   public void dispose() {
@@ -58,19 +63,9 @@ public class SafeImageReader {
     }
   }
 
-  public Optional<BufferedImage> read() {
-    BufferedImage img = null;
-    try {
-      img = getReader().read(imageIdx, getImageReadParam());
-    } catch (IOException e) {
-      // Bummer
-    }
-    return Optional.ofNullable(img);
-  }
-
   public Optional<Integer> getWidth() {
     try {
-      return Optional.of(getReader().getWidth(imageIdx));
+      return Optional.of(getReader().getWidth(getImageIndex()));
     } catch (IOException e) {
       return Optional.empty();
     }
@@ -78,10 +73,20 @@ public class SafeImageReader {
 
   public Optional<Integer> getHeight() {
     try {
-      return Optional.of(getReader().getHeight(imageIdx));
+      return Optional.of(getReader().getHeight(getImageIndex()));
     } catch (IOException e) {
       return Optional.empty();
     }
+  }
+
+  public Optional<BufferedImage> read() {
+    BufferedImage img = null;
+    try {
+      img = getReader().read(getImageIndex(), getImageReadParam());
+    } catch (IOException e) {
+      // Bummer
+    }
+    return Optional.ofNullable(img);
   }
 
   public boolean setSourceSubsampling(int sourceXSubsampling, int sourceYSubsampling) {
@@ -96,27 +101,6 @@ public class SafeImageReader {
       // Do nothing. If there is a hard failure, it will happen when a getter is called.
     }
     return true;
-  }
-
-  /**
-   * Return an ImageReaderSpi or null if none could be found. Some formats, are not part of the base
-   * installation. More commonly, there is something wrong with the input stream.
-   *
-   * @return an SPI compatible with the input image
-   */
-  ImageReaderSpi getImageReaderSpi() {
-    if (imageReaderSpi == null) {
-      imageReaderSpi = createImageReaderSpi();
-    }
-    return imageReaderSpi;
-  }
-
-  ImageReader getReader() throws IOException {
-    if (reader == null) {
-      reader = getImageReaderSpi().createReaderInstance();
-      reader.setInput(getImageInputStream());
-    }
-    return reader;
   }
 
   ImageReadParam getImageReadParam() throws IOException {
@@ -170,11 +154,45 @@ public class SafeImageReader {
     return iis;
   }
 
+  /**
+   * Return an ImageReaderSpi or null if none could be found. Some formats, are not part of the base
+   * installation. More commonly, there is something wrong with the input stream.
+   *
+   * @return an SPI compatible with the input image
+   */
+  ImageReaderSpi getImageReaderSpi() {
+    if (imageReaderSpi == null) {
+      imageReaderSpi = createImageReaderSpi();
+    }
+    return imageReaderSpi;
+  }
+
+  ImageReader getReader() throws IOException {
+    if (reader == null) {
+      reader = getImageReaderSpi().createReaderInstance();
+      reader.setInput(getImageInputStream());
+    }
+    return reader;
+  }
+
   void resetInputStream() {
     try {
       inputStream.reset();
     } catch (IOException e) {
       throw new StreamResetException(e);
     }
+  }
+
+  @Override
+  public void close() {
+    dispose();
+  }
+
+  public int getImageIndex() {
+    return imageIndex;
+  }
+
+  public void setImageIndex(int imageIndex) {
+    this.imageIndex = imageIndex;
   }
 }

@@ -24,6 +24,7 @@ public class SamplingSizer extends AbstractImageSizer {
 
   @Override
   void prepare() {
+    super.prepare();
     reader = new SafeImageReader(inputStream);
     Optional<Integer> inputHeight = reader.getHeight();
     Optional<Integer> inputWidth = reader.getWidth();
@@ -57,6 +58,7 @@ public class SamplingSizer extends AbstractImageSizer {
 
   @Override
   void processInput() {
+    super.processInput();
     reader.setSourceSubsampling(samplingPeriod, samplingPeriod);
     addMessage(messageFactory.make(SAMPLE_PERIOD, samplingPeriod));
     Optional<BufferedImage> result = reader.read();

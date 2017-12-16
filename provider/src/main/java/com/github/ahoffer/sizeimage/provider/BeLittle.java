@@ -31,7 +31,6 @@ public class BeLittle {
   private int maxWidth;
   private int maxHeight;
   private Map<String, List<ImageSizer>> configuration = new HashMap<>();
-  private ImageReaderShortcuts shortcuts = new ImageReaderShortcuts();
   private MessageFactory messageFactory = new MessageFactory();
 
   public ImageSizerCollection getSizersFor(String inputMimeType) {
@@ -94,9 +93,12 @@ public class BeLittle {
     return getMaxWidth() > 0 && getMaxHeight() > 0;
   }
 
-  @SuppressWarnings("unused")
   public ImageSizerCollection getSizersFor(InputStream inputStream) throws StreamResetException {
-    Optional<String> mimeType = shortcuts.getMimeTypes(inputStream).stream().findFirst();
+    Optional<String> mimeType;
+    try (SafeImageReader tempReader = new SafeImageReader(inputStream)) {
+      mimeType = tempReader.getMimeTypes().stream().findFirst();
+    }
+
     return getSizersFor(mimeType.orElse(getUnknownMimeType()));
   }
 
