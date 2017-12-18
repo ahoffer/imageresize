@@ -74,6 +74,7 @@ public class BeLittleBenchmark {
 
   @Param({"128"})
   public int thumbSize;
+
   BufferedImage lastThumbnail;
   String lastDescription;
   // LARGE FILES ( > 1 MB)
@@ -85,7 +86,11 @@ public class BeLittleBenchmark {
     "airplane-4mb.jp2",
     "building-30mb.jpg",
     "britain-108mb.jpg",
-    "paris-201mb.tiff"
+    "paris-201mb.tiff",
+    "oslo-j2k-19mb.jp2",
+    "ortho-744mb.jp2",
+    "seattle-300mb.tif",
+    "salt-lake-1gb.png"
   })
 
   // LARGE FILES ( > 1 MB)
@@ -190,9 +195,9 @@ public class BeLittleBenchmark {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
-            .forks(0)
-            .warmupIterations(0)
-            .measurementIterations(1)
+            .forks(1)
+            .warmupIterations(1)
+            .measurementIterations(4)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
@@ -219,7 +224,7 @@ public class BeLittleBenchmark {
     worker = new LittleWorker(30, TimeUnit.SECONDS);
   }
 
-  @Benchmark
+  //  @Benchmark
   public void basicSizer() throws IOException {
     runBenchmark(new BasicSizer());
   }
