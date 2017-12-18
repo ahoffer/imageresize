@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
@@ -26,7 +27,7 @@ public class SafeImageReader implements AutoCloseable {
   // allow the entire image to be decoded later.
   // TODO: I have not idea if 8K is big enough. It seems HUGE, iff all the image's metadata
   // todo: is at the begining of the stream.
-  public static final int READLIMIT = 1024 * 8;
+  public static final int READLIMIT = 1024 * 4;
   ImageInputStream iis;
   ImageReader reader;
   ImageReaderSpi imageReaderSpi;
@@ -50,16 +51,22 @@ public class SafeImageReader implements AutoCloseable {
     //       http://info.michael-simons.eu/2012/01/25/the-dangers-of-javas-imageio/
     //       "ImageReader caches some data in files. It is essential to dispose the reader
     //       and the underlying ImageInputStream if it’s not needed anymore..."
+    closeCurrentIis();
+
+    if (reader != null) {
+      reader.dispose();
+    }
+  }
+
+  private void closeCurrentIis() {
     if (iis != null) {
       try {
         iis.close();
       } catch (IOException e) {
         // Failed to close, but nothing can be done about it.
+      } finally {
+        iis = null;
       }
-    }
-
-    if (reader != null) {
-      reader.dispose();
     }
   }
 
@@ -121,7 +128,6 @@ public class SafeImageReader implements AutoCloseable {
       while (imageServiceProviders.hasNext()) {
         next = imageServiceProviders.next();
         try {
-          getImageInputStream().reset();
           canDecode = next.canDecodeInput(getImageInputStream());
           getImageInputStream().reset();
         } catch (IOException e) {
@@ -135,6 +141,9 @@ public class SafeImageReader implements AutoCloseable {
       }
 
     } finally {
+      // Not sure why, but the  IIS stream cannot be used after finding the SPI. The methods reset()
+      // and seek(0) do not put the stream in valid state to read height and width.
+      closeCurrentIis();
       resetInputStream();
     }
     Validate.isTrue(
@@ -170,7 +179,8 @@ public class SafeImageReader implements AutoCloseable {
   ImageReader getReader() throws IOException {
     if (reader == null) {
       reader = getImageReaderSpi().createReaderInstance();
-      reader.setInput(getImageInputStream());
+      //      reader.setInput(getImageInputStream());
+      reader.setInput(ImageIO.createImageInputStream(inputStream));
     }
     return reader;
   }

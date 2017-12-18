@@ -7,20 +7,13 @@ import static org.junit.Assert.assertThat;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Optional;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
-import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.io.FilenameUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class IoTest {
@@ -120,19 +113,6 @@ public class IoTest {
   }
 
   @Test
-  public void testImageIO() throws IOException {
-    ImageInputStream imgStream =
-        ImageIO.createImageInputStream(getData().vanillaJpeg_128x80_Stream);
-    ImageIO.getImageReaders(imgStream);
-    Iterator<ImageReader> readers = ImageIO.getImageReaders(imgStream);
-    ImageReader reader = readers.next();
-    reader.setInput(imgStream);
-    BufferedImage image = reader.read(0);
-    int height = image.getHeight();
-    BufferedImage image2 = reader.read(0);
-  }
-
-  @Test
   public void testReader() throws IOException {
     SafeImageReader reader = new SafeImageReader(getData().vanillaJpeg_128x80_Stream);
     Optional<Integer> a = reader.getWidth();
@@ -141,21 +121,8 @@ public class IoTest {
     assertThat("a", a.isPresent(), is(true));
     assertThat("b", b.isPresent(), is(true));
     assertThat("c", c.isPresent(), is(true));
+    reader.read();
     reader.dispose();
-  }
-
-  @Ignore
-  @Test
-  public void experiment() throws IOException {
-    ImageInputStream input =
-        ImageIO.createImageInputStream(
-            new File("/Users/aaronhoffer/data/sample-images/gettysburg.jp2"));
-    ImageReader reader = new J2KImageReaderSpi().createReaderInstance(null);
-    reader.setInput(input);
-    J2KImageReadParam param = (J2KImageReadParam) reader.getDefaultReadParam();
-    param.setResolution(10);
-    BufferedImage image = reader.read(0, param);
-    image.getHeight();
   }
 
   TestData getData() throws IOException {

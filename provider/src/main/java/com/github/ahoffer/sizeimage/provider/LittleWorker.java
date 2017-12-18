@@ -1,5 +1,7 @@
 package com.github.ahoffer.sizeimage.provider;
 
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.*;
+
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import java.util.List;
@@ -50,21 +52,18 @@ public class LittleWorker {
       Thread.currentThread().interrupt();
       caller.addMessage(
           new BeLittlingMessageImpl(
-              MessageConstants.THREAD_INTERRUPTED,
+              THREAD_INTERRUPTED,
               BeLittlingSeverity.ERROR,
               "Caught InterruptedException. No automatic retry.",
               e));
     } catch (ExecutionException e) {
       caller.addMessage(
           new BeLittlingMessageImpl(
-              MessageConstants.EXECUTION_EXCEPTION,
-              BeLittlingSeverity.ERROR,
-              e.getMessage(),
-              e.getCause()));
+              EXECUTION_EXCEPTION, BeLittlingSeverity.ERROR, e.getMessage(), e.getCause()));
     } catch (TimeoutException e) {
       caller.addMessage(
           new BeLittlingMessageImpl(
-              MessageConstants.TIMEOUT,
+              TIMEOUT,
               BeLittlingSeverity.ERROR,
               String.format("Operation timed out after %s %s", timeout, unit),
               e));
