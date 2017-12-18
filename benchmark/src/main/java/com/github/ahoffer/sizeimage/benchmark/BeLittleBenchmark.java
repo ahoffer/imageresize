@@ -64,16 +64,18 @@ import org.openjdk.jmh.runner.options.TimeValue;
 public class BeLittleBenchmark {
 
   public static final int TIMEOUT_SECONDS = 300;
-
-  @Param({"128"})
-  public int thumbSize;
-
   static String inputDir = "/Users/aaronhoffer/data/sample-images/";
   //  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
   static String outputDir = inputDir + "output/";
+
+  static {
+    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
+  }
+
+  @Param({"128"})
+  public int thumbSize;
   BufferedImage lastThumbnail;
   String lastDescription;
-
   // LARGE FILES ( > 1 MB)
   // Mixed
   @Param({
@@ -147,10 +149,6 @@ public class BeLittleBenchmark {
   //  @Param({"p1_05.j2k"}) //Evil file that causes the JAI JPEG 2000 to process indefinitely
   // without using up the heap
   String filename;
-
-  static {
-    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
-  }
   // Vanilla JPEG FILES
   // LARGE FILES ( > 1 MB)
   //  @Param({
@@ -182,6 +180,7 @@ public class BeLittleBenchmark {
   //    "palace.j2k"
   //  })
   //  String filename;
+  LittleWorker worker;
 
   // TODO:Could have a benchmark that just copies input stream to get a sense of IO overhead
   public static void main(String[] args) throws RunnerException, IOException {
@@ -204,19 +203,28 @@ public class BeLittleBenchmark {
     new Runner(opt).run();
   }
 
-  LittleWorker worker;
+  @SuppressWarnings("unused")
+  public static String getFilenames(String dir) throws IOException {
+    return Files.list(Paths.get(dir))
+        .map(Path::toFile)
+        .filter(File::isFile)
+        .filter(file -> !file.getName().equals(".DS_Store"))
+        .map(File::getName)
+        .map(s -> String.format("\"%s\"", s))
+        .collect(Collectors.joining(","));
+  }
 
   @Setup
   public void setup() throws IOException {
     worker = new LittleWorker(30, TimeUnit.SECONDS);
   }
 
-  //  @Benchmark
+  @Benchmark
   public void basicSizer() throws IOException {
     runBenchmark(new BasicSizer());
   }
 
-  //  @Benchmark
+  @Benchmark
   public void jaiJpeg2000Sizer() throws IOException {
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
     if (isJpeg2000(getSoureceFile())) {
@@ -353,16 +361,5 @@ public class BeLittleBenchmark {
         FileChannel outputChannel = new FileOutputStream(dest).getChannel()) {
       outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
     }
-  }
-
-  @SuppressWarnings("unused")
-  public static String getFilenames(String dir) throws IOException {
-    return Files.list(Paths.get(dir))
-        .map(Path::toFile)
-        .filter(File::isFile)
-        .filter(file -> !file.getName().equals(".DS_Store"))
-        .map(File::getName)
-        .map(s -> String.format("\"%s\"", s))
-        .collect(Collectors.joining(","));
   }
 }

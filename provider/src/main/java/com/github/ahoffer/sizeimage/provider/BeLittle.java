@@ -65,7 +65,6 @@ public class BeLittle {
             .map(this::copyAndInitialize)
             .collect(Collectors.toList());
 
-    // Recommend any sizers configured for the input MIME type. If none, use the wildcard sizers.
     List<ImageSizer> recommendations = new ArrayList<>();
     recommendations.addAll(matching);
     recommendations.addAll(wildcard);
@@ -160,12 +159,6 @@ public class BeLittle {
 
   public static class StreamResetException extends RuntimeException {
     StreamResetException(Throwable t) {
-      super(t);
-    }
-  }
-
-  public static class ImageReaderException extends RuntimeException {
-    ImageReaderException(Throwable t) {
       super(t);
     }
   }
