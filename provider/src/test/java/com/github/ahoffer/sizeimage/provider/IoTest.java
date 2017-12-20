@@ -90,7 +90,7 @@ public class IoTest {
   void belittleIt(ImageSizer sizer) {
     sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS).setTimeoutSeconds(90);
     BeLittlingResult result = sizer.generate();
-    //    System.err.println("\nResult\n" + result);
+    System.err.println("\nResult\n" + result);
     BufferedImage output = result.getOutput().get();
     assertThat(output.getWidth(), equalTo(TestData.PIXELS));
     assertThat(output.getHeight(), org.hamcrest.Matchers.lessThanOrEqualTo(TestData.PIXELS));

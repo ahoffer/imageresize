@@ -1,6 +1,8 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.*;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXECUTION_EXCEPTION;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.THREAD_INTERRUPTED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.TIMEOUT;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.ImageSizer;
@@ -14,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /** Hide boiler plate code for running tasks */
-public class LittleWorker {
+public class LittleWorker implements AutoCloseable {
 
   protected ExecutorService executor;
   protected ImageSizer caller;
@@ -73,5 +75,10 @@ public class LittleWorker {
 
   public List<Runnable> shutdownNow() {
     return executor.shutdownNow();
+  }
+
+  @Override
+  public void close() throws Exception {
+    shutdownNow();
   }
 }

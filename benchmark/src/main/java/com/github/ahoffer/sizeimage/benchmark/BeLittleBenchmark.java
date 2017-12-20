@@ -64,9 +64,15 @@ import org.openjdk.jmh.runner.options.TimeValue;
 public class BeLittleBenchmark {
 
   public static final int TIMEOUT_SECONDS = 300;
-  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
+  String inputDir;
+  String magickPath;
+  String outputDir;
+  String opjPath;
+  BufferedImage lastThumbnail;
+  String lastDescription;
+
   //  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
-  static String outputDir = inputDir + "output/";
+  //  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
 
   static {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
@@ -74,9 +80,6 @@ public class BeLittleBenchmark {
 
   @Param({"128"})
   public int thumbSize;
-
-  BufferedImage lastThumbnail;
-  String lastDescription;
   // LARGE FILES ( > 1 MB)
   // Mixed
   @Param({
@@ -154,38 +157,37 @@ public class BeLittleBenchmark {
   //  @Param({"p1_05.j2k"}) //Evil file that causes the JAI JPEG 2000 to process indefinitely
   // without using up the heap
   String filename;
-  // Vanilla JPEG FILES
-  // LARGE FILES ( > 1 MB)
-  //  @Param({
-  //    "crowd-3mb.jpg",
-  //    "land-8mb.jpg",
-  //    "city-and-land-15mb.jpg",
-  //    "mountains-20mb.jpg",
-  //    "building-30mb.jpg",
-  //    "australia-250mb.png",
+  //  })
   //    "salt-lake-340mb.jpg"
-  //  })
-
-  // HUGE FILES > 100 MB
   //    "australia-250mb.png",
-  //    "salt-lake-340mb.jpg",
-  //    "salm-1gb.jp2",
-  //  "mars-crater-456mb.JP2"
-
-  //   SINGLE FILE
-  //  @Param({"tank.jpg"})
-  //  String filename;
-
-  // SMALL FILES ( < 1 MB)
+  //    "building-30mb.jpg",
+  //    "mountains-20mb.jpg",
+  //    "city-and-land-15mb.jpg",
+  //    "land-8mb.jpg",
+  //    "crowd-3mb.jpg",
   //  @Param({
-  //    "unicorn-rainbow-57kb.gif",
-  //    "land-100kb.jpg",
-  //    "city-300kb.jpg",
-  //    "parliament-60kb.jpg",
-  //    "palace.j2k"
-  //  })
+  // LARGE FILES ( > 1 MB)
+  // Vanilla JPEG FILES
+
+  //  "mars-crater-456mb.JP2"
+  //    "salm-1gb.jp2",
+  //    "salt-lake-340mb.jpg",
+  //    "australia-250mb.png",
+  // HUGE FILES > 100 MB
+
   //  String filename;
-  LittleWorker worker;
+  //  @Param({"tank.jpg"})
+  //   SINGLE FILE
+
+  //  String filename;
+  //  })
+  //    "palace.j2k"
+  //    "parliament-60kb.jpg",
+  //    "city-300kb.jpg",
+  //    "land-100kb.jpg",
+  //    "unicorn-rainbow-57kb.gif",
+  //  @Param({
+  // SMALL FILES ( < 1 MB)
 
   // TODO:Could have a benchmark that just copies input stream to get a sense of IO overhead
   public static void main(String[] args) throws RunnerException, IOException {
@@ -208,6 +210,16 @@ public class BeLittleBenchmark {
     new Runner(opt).run();
   }
 
+  @Setup
+  public void setup() {
+
+    inputDir = System.getProperty("inputDir", "./sample-images/");
+    outputDir = inputDir + "output/";
+    opjPath =
+        System.getProperty("opjPath", "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
+    magickPath = System.getProperty("magickPath", "/opt/local/bin");
+  }
+
   @SuppressWarnings("unused")
   public static String getFilenames(String dir) throws IOException {
     return Files.list(Paths.get(dir))
@@ -217,11 +229,6 @@ public class BeLittleBenchmark {
         .map(File::getName)
         .map(s -> String.format("\"%s\"", s))
         .collect(Collectors.joining(","));
-  }
-
-  @Setup
-  public void setup() throws IOException {
-    worker = new LittleWorker(30, TimeUnit.SECONDS);
   }
 
   //  @Benchmark
@@ -245,7 +252,7 @@ public class BeLittleBenchmark {
     lastDescription = "magickSizer";
     ImageSizer sizer = new MagickSizer();
     Map<String, String> config = new HashMap<>();
-    config.put(PATH_TO_EXECUTABLE, "/opt/local/bin");
+    config.put(PATH_TO_EXECUTABLE, magickPath);
     sizer.setConfiguration(config);
     runBenchmark(sizer);
   }
@@ -255,7 +262,7 @@ public class BeLittleBenchmark {
 
     ImageSizer sizer = new OpenJpeg2000Sizer();
     HashMap<String, String> configuration = new HashMap<>();
-    configuration.put(PATH_TO_EXECUTABLE, "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
+    configuration.put(PATH_TO_EXECUTABLE, opjPath);
     sizer.setConfiguration(configuration);
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
@@ -275,22 +282,29 @@ public class BeLittleBenchmark {
   public void scalr() throws Exception {
     lastDescription = "scalr";
     BufferedInputStream source = getSourceStream();
-    worker.doThis(
-        () -> {
-          lastThumbnail = Scalr.resize(ImageIO.read(source), thumbSize);
-          return null;
-        });
+    try (LittleWorker worker = getWorker()) {
+      worker.doThis(
+          () -> {
+            lastThumbnail = Scalr.resize(ImageIO.read(source), thumbSize);
+            return null;
+          });
+    }
   }
 
   @Benchmark
   public void thumbnailator() throws Exception {
     lastDescription = "thumbnailator";
-    worker.doThis(
-        () -> {
-          lastThumbnail =
-              Thumbnails.of(getSourceStream()).height(thumbSize).width(thumbSize).asBufferedImage();
-          return null;
-        });
+    try (LittleWorker worker = getWorker()) {
+      worker.doThis(
+          () -> {
+            lastThumbnail =
+                Thumbnails.of(getSourceStream())
+                    .height(thumbSize)
+                    .width(thumbSize)
+                    .asBufferedImage();
+            return null;
+          });
+    }
   }
 
   @TearDown
@@ -326,7 +340,6 @@ public class BeLittleBenchmark {
       lastThumbnail = Scalr.resize(output, thumbSize);
     } catch (NullPointerException e) {
       String msg = "Failed to read " + getSoureceFile().getName();
-      System.err.println(msg);
       throw new RuntimeException(msg);
     }
   }
@@ -342,17 +355,24 @@ public class BeLittleBenchmark {
 
   void runBenchmark(ImageSizer sizer) throws FileNotFoundException {
     lastDescription = sizer.getClass().getSimpleName();
+    String fileName = getSoureceFile().getName();
     sizer
         .setOutputSize(thumbSize, thumbSize)
         .setInput(getSourceStream())
-        .addMessage(new BeLittlingMessageImpl("FILE", INFO, getSoureceFile().getName()))
+        .addMessage(new BeLittlingMessageImpl("FILE", INFO, fileName))
         .setTimeoutSeconds(TIMEOUT_SECONDS);
-    BeLittlingResult result = sizer.generate();
-    if (result.getOutput().isPresent()) {
-      lastThumbnail = result.getOutput().get();
-    } else {
-      System.err.println(System.lineSeparator() + result);
+    BeLittlingResult result = null;
+    try {
+      result = sizer.generate();
+      if (result.getOutput().isPresent()) {
+        lastThumbnail = result.getOutput().get();
+      }
+    } catch (Exception e) {
+      // Write out messages something even if heap overflow or other fault
+      System.err.println(String.format("\nSIZER, %s\nFILE, %s", lastDescription, fileName));
+      throw e;
     }
+    System.err.println(System.lineSeparator() + result);
   }
 
   File getSoureceFile() {
@@ -366,5 +386,9 @@ public class BeLittleBenchmark {
         FileChannel outputChannel = new FileOutputStream(dest).getChannel()) {
       outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
     }
+  }
+
+  LittleWorker getWorker() {
+    return new LittleWorker(TIMEOUT_SECONDS, TimeUnit.SECONDS);
   }
 }
