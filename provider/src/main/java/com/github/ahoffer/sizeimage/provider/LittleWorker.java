@@ -6,6 +6,8 @@ import static com.github.ahoffer.sizeimage.provider.MessageConstants.TIMEOUT;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -46,6 +48,7 @@ public class LittleWorker implements AutoCloseable {
   }
 
   public <T> T doThis(Callable<T> supplier) {
+    Instant start = Instant.now();
     Future<T> future = executor.submit(supplier);
     T result = null;
     try {
@@ -70,6 +73,10 @@ public class LittleWorker implements AutoCloseable {
               String.format("Operation timed out after %s %s", timeout, unit),
               e));
     }
+    Instant stop = Instant.now();
+    caller.addMessage(
+        new BeLittlingMessageImpl(
+            "WALL_CLOCK", BeLittlingSeverity.INFO, Duration.between(start, stop).toString()));
     return result;
   }
 

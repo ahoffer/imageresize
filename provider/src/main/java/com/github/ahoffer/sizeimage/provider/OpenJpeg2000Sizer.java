@@ -1,7 +1,10 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.*;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.COULD_NOT_READ_METADATA;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_FAILED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_INTERRUPTED;
+import static com.github.ahoffer.sizeimage.provider.MessageConstants.REDUCTION_FACTOR;
 import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -28,6 +31,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   int reductionFactor;
   File inputFile;
   Path outputFile;
+  private Process process;
 
   void prepare() {
     super.prepare();
@@ -116,7 +120,6 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
 
   void startProcess(ProcessBuilder processBuilder) {
     int returnCode;
-    Process process;
     try {
       process = processBuilder.start();
       try {
@@ -198,5 +201,13 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       return "<COULD NOT READ ERR STREAM>";
     }
     return builder.toString();
+  }
+
+  @Override
+  void cleanup() {
+    super.cleanup();
+    if (process.isAlive()) {
+      process.destroy();
+    }
   }
 }

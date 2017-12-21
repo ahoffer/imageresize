@@ -24,6 +24,7 @@ public class SamplingSizer extends AbstractImageSizer {
 
   @Override
   void prepare() {
+
     super.prepare();
     reader = new SafeImageReader(inputStream);
     Optional<Integer> inputHeight = reader.getHeight();

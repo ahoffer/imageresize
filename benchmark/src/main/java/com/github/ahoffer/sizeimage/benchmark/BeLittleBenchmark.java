@@ -13,6 +13,7 @@ import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.tiff.TIFFImageReaderSpi;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -51,7 +52,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.TimeValue;
 
 // Website with large ortho images: https://apollomapping.com/
 // Also: The Land Management Information Center, MN Planning
@@ -72,11 +72,6 @@ public class BeLittleBenchmark {
   String lastDescription;
 
   //  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
-  //  static String inputDir = "/Users/aaronhoffer/data/sample-images/";
-
-  static {
-    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
-  }
 
   @Param({"128"})
   public int thumbSize;
@@ -197,27 +192,35 @@ public class BeLittleBenchmark {
     String simpleName = BeLittleBenchmark.class.getSimpleName();
     Options opt =
         new OptionsBuilder()
-            .forks(1)
-            .warmupIterations(1)
-            .measurementIterations(4)
+            .forks(0)
+            .warmupIterations(0)
+            .measurementIterations(1)
             .include(simpleName)
             .resultFormat(ResultFormatType.NORMALIZED_CSV)
             .addProfiler(NaiveHeapSizeProfiler.class)
             .addProfiler(GCProfiler.class)
             .result("results.csv")
-            .timeout(TimeValue.seconds(40))
             .build();
     new Runner(opt).run();
   }
 
   @Setup
   public void setup() {
+    // Register image reader service providers in setup() because this method will be run when JMH
+    // spins up a new VM. If these are declared in a static block, the forked VM won't know about
+    // them.
 
-    inputDir = System.getProperty("inputDir", "./sample-images/");
+    // For unknowns reasons, ImageIO.scanForPlugins() does not register available service providers.
+    // Register them explicitly.
+
+    IIORegistry.getDefaultInstance().registerServiceProvider(new TIFFImageReaderSpi());
+    IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
+
+    inputDir = System.getProperty("inputDir", "/Users/aaronhoffer/data/sample-images/");
     outputDir = inputDir + "output/";
     opjPath =
         System.getProperty("opjPath", "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
-    magickPath = System.getProperty("magickPath", "/opt/local/bin");
+    magickPath = System.getProperty("magickPath", "/opt/local/bin/");
   }
 
   @SuppressWarnings("unused")
@@ -361,7 +364,8 @@ public class BeLittleBenchmark {
         .setInput(getSourceStream())
         .addMessage(new BeLittlingMessageImpl("FILE", INFO, fileName))
         .setTimeoutSeconds(TIMEOUT_SECONDS);
-    BeLittlingResult result = null;
+    BeLittlingResult result;
+    String failureMessage = String.format("\nSIZER, %s\nFILE, %s", lastDescription, fileName);
     try {
       result = sizer.generate();
       if (result.getOutput().isPresent()) {
@@ -369,7 +373,7 @@ public class BeLittleBenchmark {
       }
     } catch (Exception e) {
       // Write out messages something even if heap overflow or other fault
-      System.err.println(String.format("\nSIZER, %s\nFILE, %s", lastDescription, fileName));
+      System.err.println(failureMessage);
       throw e;
     }
     System.err.println(System.lineSeparator() + result);

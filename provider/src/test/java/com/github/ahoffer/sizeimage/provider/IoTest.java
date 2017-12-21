@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import javax.imageio.spi.IIORegistry;
 import org.apache.commons.io.FilenameUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class IoTest {
@@ -34,12 +35,14 @@ public class IoTest {
   // J2K reader tries to read the ENTIRE image to get the header. A simple mark/reset will not
   // work unless the image file is actually mark than the read limit.
   //  @Test(expected = StreamResetException.class)
+  @Ignore
   @Test
   public void testSamplingSizerWithJP2() throws IOException {
     //    belittleIt(new SamplingSizer().setInput(data.jpeg2000_513x341_Stream));
     belittleIt(new SamplingSizer().setInput(getData().jpeg2000_128x80_Stream));
   }
 
+  @Ignore
   @Test
   public void testSamplingSizer() throws IOException {
     belittleIt(new SamplingSizer().setInput(getData().vanillaJpeg_300x200_Stream));

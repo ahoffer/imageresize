@@ -48,6 +48,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     try {
       // TODO: ortho-744mb.jp2 comes back with a reduction factor of 0? Is that really how the thing
       // is encoded or is there something wrong with the metadata reader?
+      // UPDATE: There is no dimension information in the header or codestream boxes.
       metadata = new Jpeg2000MetadataMicroReader(inputStream);
       metadata.read();
     } catch (IOException e) {
