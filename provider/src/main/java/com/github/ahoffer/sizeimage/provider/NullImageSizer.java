@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @return
  */
-class NullImageSizer implements ImageSizer {
+public class NullImageSizer implements ImageSizer {
 
   @Override
   public Map<String, String> getConfiguration() {

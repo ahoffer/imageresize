@@ -136,7 +136,7 @@ public interface ImageSizer {
    * The number of seconds the ImageSizer should run before giving up and returning control to the
    * caller.
    *
-   * @return
+   * @return seconds
    */
   int getTimeoutSeconds();
 }

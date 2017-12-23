@@ -1,8 +1,8 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.support;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXECUTION_EXCEPTION;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.THREAD_INTERRUPTED;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.TIMEOUT;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.EXECUTION_EXCEPTION;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.THREAD_INTERRUPTED;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.TIMEOUT;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.ImageSizer;
@@ -24,10 +24,6 @@ public class LittleWorker implements AutoCloseable {
   protected ImageSizer caller;
   protected long timeout;
   protected TimeUnit unit;
-
-  public LittleWorker(long timeout, TimeUnit unit) {
-    this(new NullImageSizer(), timeout, unit);
-  }
 
   public LittleWorker(ImageSizer caller, long timeout, TimeUnit unit) {
     this.caller = caller;

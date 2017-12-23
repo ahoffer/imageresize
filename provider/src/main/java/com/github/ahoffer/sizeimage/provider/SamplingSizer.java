@@ -1,11 +1,14 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.COULD_NOT_READ_IMAGE;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.SAMPLE_PERIOD;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.COULD_NOT_READ_IMAGE;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.SAMPLE_PERIOD;
 
+import com.github.ahoffer.imagereader.SaferImageReader;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
+import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.support.ComputeSubSamplingPeriod;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Optional;
@@ -14,7 +17,7 @@ import net.coobird.thumbnailator.Thumbnails;
 public class SamplingSizer extends AbstractImageSizer {
 
   public static final String SAMPLING_PERIOD_KEY = "samplingPeriod";
-  SafeImageReader reader;
+  SaferImageReader reader;
   private Integer samplingPeriod;
   private BufferedImage input;
 
@@ -26,7 +29,7 @@ public class SamplingSizer extends AbstractImageSizer {
   void prepare() {
 
     super.prepare();
-    reader = new SafeImageReader(inputStream);
+    reader = new SaferImageReader(inputStream);
     Optional<Integer> inputHeight = reader.getHeight();
     Optional<Integer> inputWidth = reader.getWidth();
     if (!(inputHeight.isPresent() && inputWidth.isPresent())) {
@@ -51,8 +54,8 @@ public class SamplingSizer extends AbstractImageSizer {
     } else {
       samplingPeriod =
           new ComputeSubSamplingPeriod()
-              .setInputWidthHeight(inputWidth.get(), inputHeight.get())
-              .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+              .setInputSize(inputWidth.get(), inputHeight.get())
+              .setOutputSize(getMaxWidth(), getMaxHeight())
               .compute();
     }
   }

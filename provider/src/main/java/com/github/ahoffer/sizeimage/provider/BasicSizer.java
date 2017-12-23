@@ -1,6 +1,6 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
 import java.io.IOException;
 import net.coobird.thumbnailator.Thumbnails;

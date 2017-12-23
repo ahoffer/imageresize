@@ -1,15 +1,18 @@
 package com.github.ahoffer.sizeimage.provider;
 
 import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.ERROR;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_HEIGHT;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.BAD_WIDTH;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.MISSING_INPUT_STREAM;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.SIZER_NAME;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNCONFIGURED;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.BAD_HEIGHT;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.BAD_WIDTH;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.MISSING_INPUT_STREAM;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.SIZER_NAME;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.UNCONFIGURED;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.support.BeLittlingResultImpl;
+import com.github.ahoffer.sizeimage.support.LittleWorker;
+import com.github.ahoffer.sizeimage.support.MessageFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.Collections;
@@ -20,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.SystemUtils;
 
 /**
  * The primary functionality for all ImageSizers is implemented int this class.
@@ -44,9 +48,8 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractImageSizer implements ImageSizer {
 
   // TODO: Parking these constants here until there is a better place for them
-  public static final String PATH_TO_EXECUTABLE = "pathToIExecutable";
-  public static final String WINDOWS_EXEC_NAME = "windowsExecName";
-  public static final String NIX_EXEC_NAME = "nixExecName";
+  public static final String WINDOWS_SEARCH_PATH = "WINDOWS_SEARCH_PATH";
+  public static final String POSIX_SEARCH_PATH = "POSIX_SEARCH_PATH";
   public static final String TIMEOUT_SECONDS = "TIMEOUT_SECONDS";
   public static final int DEFAULT_TIMEOUT_SECONDS = 30;
   public static final String MAX_WIDTH = "maxWidth";
@@ -348,5 +351,12 @@ public abstract class AbstractImageSizer implements ImageSizer {
     cfg.put(TIMEOUT_SECONDS, String.valueOf(seconds));
     setConfiguration(cfg);
     return this;
+  }
+
+  /** @return Searhc path string if configured, else empty string */
+  public String getSearchPath() {
+    return SystemUtils.IS_OS_WINDOWS
+        ? getConfiguration().getOrDefault(WINDOWS_SEARCH_PATH, "")
+        : getConfiguration().getOrDefault(POSIX_SEARCH_PATH, "");
   }
 }

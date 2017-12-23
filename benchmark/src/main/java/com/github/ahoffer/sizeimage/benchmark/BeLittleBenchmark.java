@@ -6,12 +6,13 @@ import static com.github.ahoffer.sizeimage.provider.AbstractImageSizer.PATH_TO_E
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
-import com.github.ahoffer.sizeimage.provider.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
-import com.github.ahoffer.sizeimage.provider.LittleWorker;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
+import com.github.ahoffer.sizeimage.provider.NullImageSizer;
 import com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.SamplingSizer;
+import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.support.LittleWorker;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import com.twelvemonkeys.imageio.plugins.tiff.TIFFImageReaderSpi;
 import java.awt.Graphics2D;
@@ -393,6 +394,6 @@ public class BeLittleBenchmark {
   }
 
   LittleWorker getWorker() {
-    return new LittleWorker(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    return new LittleWorker(new NullImageSizer(), TIMEOUT_SECONDS, TimeUnit.SECONDS);
   }
 }

@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.support;
 
 public class ComputeResolutionLevel extends Computation {
 

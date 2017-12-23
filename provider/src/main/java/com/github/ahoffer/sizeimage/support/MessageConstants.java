@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.support;
 
 // TODO: Should this be int he API module? I don't think so but it is worth getting some opinions
 // NOTE: Did not make this an enumeration because it is not possible to extending enumerations

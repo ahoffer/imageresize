@@ -1,12 +1,14 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.DECODE_JPEG2000;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.DECODE_JPEG2000;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.github.ahoffer.imagereader.SaferImageReader;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -69,7 +71,7 @@ public class IoTest {
   public void testMagickSizer() throws IOException {
     ImageSizer sizer = new MagickSizer();
     HashMap configuration = new HashMap();
-    configuration.put(AbstractImageSizer.PATH_TO_EXECUTABLE, TEST_PATH_TO_MAGICK_EXEC);
+    configuration.put(AbstractImageSizer.POSIX_SEARCH_PATH, TEST_PATH_TO_MAGICK_EXEC);
     sizer.setConfiguration(configuration);
     sizer
         .setOutputSize(TestData.PIXELS, TestData.PIXELS)
@@ -84,7 +86,7 @@ public class IoTest {
     ImageSizer sizer = new OpenJpeg2000Sizer();
     HashMap<String, String> configuration = new HashMap<>();
     configuration.put(
-        AbstractImageSizer.PATH_TO_EXECUTABLE,
+        AbstractImageSizer.POSIX_SEARCH_PATH,
         "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
     sizer.setInput(getData().jpeg2000_513x341_Stream).setConfiguration(configuration);
     belittleIt(sizer);
@@ -106,18 +108,18 @@ public class IoTest {
     smaller.read();
     assertThat(smaller.getWidth(), is(128));
     assertThat(smaller.getHeight(), is(80));
-    assertThat(smaller.minNumResolutionLevels, is(5));
+    assertThat(smaller.getMinNumResolutionLevels(), is(5));
     Jpeg2000MetadataMicroReader larger =
         new Jpeg2000MetadataMicroReader(getData().jpeg2000_513x341_Stream);
     larger.read();
     assertThat(larger.getWidth(), is(513));
     assertThat(larger.getHeight(), is(341));
-    assertThat(smaller.minNumResolutionLevels, is(5));
+    assertThat(smaller.getMinNumResolutionLevels(), is(5));
   }
 
   @Test
   public void testReader() throws IOException {
-    SafeImageReader reader = new SafeImageReader(getData().vanillaJpeg_128x80_Stream);
+    SaferImageReader reader = new SaferImageReader(getData().vanillaJpeg_128x80_Stream);
     Optional<Integer> a = reader.getWidth();
     Optional<Integer> b = reader.getHeight();
     Optional<BufferedImage> c = reader.read();

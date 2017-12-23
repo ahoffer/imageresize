@@ -1,14 +1,18 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.COULD_NOT_READ_METADATA;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.OPJ_FAILED;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_FAILED;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.OS_PROCESS_INTERRUPTED;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.REDUCTION_FACTOR;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.COULD_NOT_READ_METADATA;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.OPJ_FAILED;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.OS_PROCESS_FAILED;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.OS_PROCESS_INTERRUPTED;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.REDUCTION_FACTOR;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
+import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.support.ComputeResolutionLevel;
+import com.github.ahoffer.sizeimage.support.ExecutableFile;
+import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import net.coobird.thumbnailator.Thumbnails;
-import org.apache.commons.lang3.SystemUtils;
 
 public class OpenJpeg2000Sizer extends AbstractImageSizer {
 
@@ -32,6 +35,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   File inputFile;
   Path outputFile;
   private Process process;
+  ExecutableFile executable;
 
   void prepare() {
     super.prepare();
@@ -52,8 +56,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
       String tempDir = inputFile.getParent();
       outputFile = Paths.get(tempDir, "out" + UUID.randomUUID() + OUTPUT_FORMAT_EXT);
 
-      // TODO 1: Use the channel copy. It should be faster
-      // TODO 2: Add check on bytes written. If bytes read < 1, it is an error.
+      // TODO Add check on bytes written. If bytes read < 1, it is an error.
       bytesWritten = java.nio.file.Files.copy(inputStream, inputFile.toPath(), REPLACE_EXISTING);
     } catch (IOException e) {
       addMessage(messageFactory.make(UNABLE_TO_CREATE_TEMP_FILE));
@@ -61,12 +64,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   }
 
   void generateOutput() {
-    ProcessBuilder processBuilder =
-        getProcessBuilderForDecompress(
-            getExecFile().getPath(),
-            String.valueOf(reductionFactor),
-            inputFile.toString(),
-            outputFile.toString());
+    ProcessBuilder processBuilder = getProcessBuilderForDecompress();
     startProcess(processBuilder);
 
     if (canProceed()) {
@@ -136,41 +134,44 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     }
   }
 
-  ProcessBuilder getProcessBuilderForDecompress(
-      String execPath, String rFactor, String inputFilePath, String outputFilePath) {
+  ProcessBuilder getProcessBuilderForDecompress() {
     // TODO play around with Quality Layers -l "
     // Include space after options
     return new ProcessBuilder(
-            execPath,
+            getExecutable().getPath(),
             "-r",
-            rFactor,
+            String.valueOf(reductionFactor),
             "-threads",
             "ALL_CPUS",
             "-i",
-            inputFilePath,
+            inputFile.toString(),
             "-o",
-            outputFilePath)
+            outputFile.toString())
         .redirectErrorStream(false);
   }
 
   int getReductionFactor() {
     return new ComputeResolutionLevel()
-        .setMaxResolutionlevels(metadata.getMinNumbeResolutionLevels())
-        .setInputWidthHeight(metadata.getWidth(), metadata.getHeight())
-        .setOutputWidthHeight(getMaxWidth(), getMaxHeight())
+        .setMaxResolutionlevels(metadata.getMinNumResolutionLevels())
+        .setInputSize(metadata.getWidth(), metadata.getHeight())
+        .setOutputSize(getMaxWidth(), getMaxHeight())
         .compute();
   }
 
   @Override
   public boolean isAvailable() {
-    return getExecFile().canExecute();
+    return getExecutable().canExecute();
   }
 
-  File getExecFile() {
-    return new File(
-        // Pull the "get configuration" code out and add a WARNING message if not present.
-        configuration.getOrDefault(PATH_TO_EXECUTABLE, ""),
-        SystemUtils.IS_OS_WINDOWS ? "opj_decompress.exe" : "opj_decompress");
+  ExecutableFile getExecutable() {
+    if (executable == null) {
+      executable = new ExecutableFile();
+      executable.setWindowsSearchPath(configuration.get(WINDOWS_SEARCH_PATH));
+      executable.setPosixSearchPath(configuration.get(POSIX_SEARCH_PATH));
+      executable.setWindowsExecutableName("opj_decompress.exe");
+      executable.setPosixExecutableName("opj_decompress");
+    }
+    return executable;
   }
 
   // TODO: Make this configurable?

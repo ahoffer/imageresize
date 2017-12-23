@@ -40,7 +40,7 @@
  * Copyright (c) 1999/2000 JJ2000 Partners.
  * */
 
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.support;
 
 import com.github.jaiimageio.jpeg2000.impl.Box;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReadParamJava;
@@ -454,7 +454,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
     }
   }
 
-  public int getMinNumbeResolutionLevels() {
+  public int getMinNumResolutionLevels() {
 
     return minNumResolutionLevels;
   }

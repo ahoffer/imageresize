@@ -2,8 +2,12 @@ package com.github.ahoffer.sizeimage.provider;
 
 import static java.util.Collections.EMPTY_LIST;
 
+import com.github.ahoffer.imagereader.SaferImageReader;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.support.BeLittlingResultImpl;
+import com.github.ahoffer.sizeimage.support.MessageConstants;
+import com.github.ahoffer.sizeimage.support.MessageFactory;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,6 +80,7 @@ public class BeLittle {
     coll.setWildcards(wildcard);
     coll.setMatching(matching);
     coll.setRecommendations(recommendations);
+
     coll.setRecommended(recommendations.stream().findFirst().map(this::copyAndInitialize));
     return coll;
   }
@@ -94,7 +99,7 @@ public class BeLittle {
 
   public ImageSizerCollection getSizersFor(InputStream inputStream) throws StreamResetException {
     Optional<String> mimeType;
-    try (SafeImageReader tempReader = new SafeImageReader(inputStream)) {
+    try (SaferImageReader tempReader = new SaferImageReader(inputStream)) {
       mimeType = tempReader.getMimeTypes().stream().findFirst();
     }
 
@@ -158,7 +163,7 @@ public class BeLittle {
   }
 
   public static class StreamResetException extends RuntimeException {
-    StreamResetException(Throwable t) {
+    public StreamResetException(Throwable t) {
       super(t);
     }
   }

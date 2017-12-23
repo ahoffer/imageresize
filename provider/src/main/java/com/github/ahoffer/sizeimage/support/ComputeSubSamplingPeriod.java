@@ -1,6 +1,6 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.support;
 
-class ComputeSubSamplingPeriod extends Computation {
+public class ComputeSubSamplingPeriod extends Computation {
 
   public static final int NO_SUBSAMPLING = 1;
 

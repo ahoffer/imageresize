@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.support;
 
 public abstract class Computation {
   public Computation() {
@@ -12,13 +12,13 @@ public abstract class Computation {
   int outputWidth;
   int outputHeight;
 
-  public Computation setInputWidthHeight(int inputWidth, int inputHeight) {
+  public Computation setInputSize(int inputWidth, int inputHeight) {
     this.inputWidth = inputWidth;
     this.inputHeight = inputHeight;
     return this;
   }
 
-  public Computation setOutputWidthHeight(int outputWidth, int outputHeight) {
+  public Computation setOutputSize(int outputWidth, int outputHeight) {
     this.outputWidth = outputWidth;
     this.outputHeight = outputHeight;
     return this;

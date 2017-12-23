@@ -1,7 +1,7 @@
 package com.github.ahoffer.sizeimage.provider;
 
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.EXTERNAL_EXECUTABLE;
-import static com.github.ahoffer.sizeimage.provider.MessageConstants.RESIZE_ERROR;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.EXTERNAL_EXECUTABLE;
+import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +79,8 @@ public class MagickSizer extends AbstractImageSizer {
   }
 
   protected String getExecPath() {
-    return configuration.get(PATH_TO_EXECUTABLE);
+//    return configuration.get(PATH_TO_EXECUTABLE);
+    return null;
   }
 
   protected File getExecFile() {
