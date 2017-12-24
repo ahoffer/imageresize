@@ -13,7 +13,6 @@ import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Optional;
 import javax.imageio.spi.IIORegistry;
 import org.apache.commons.io.FilenameUtils;
@@ -70,11 +69,10 @@ public class IoTest {
 
   @Test
   public void testMagickSizer() throws IOException {
-    ImageSizer sizer = new MagickSizer();
-    HashMap configuration = new HashMap();
-    configuration.put(AbstractImageSizer.POSIX_SEARCH_PATH, TEST_PATH_TO_MAGICK_EXEC);
-    sizer.setConfiguration(configuration);
+    ExternalProcessSizer sizer = new MagickSizer();
+    FuzzyFile executable = new FuzzyFile("/opt/local/bin/", "convert", "./", "convert.exe");
     sizer
+        .setExecutable(executable)
         .setOutputSize(TestData.PIXELS, TestData.PIXELS)
         .setInput(getData().vanillaJpeg_128x80_Stream);
 

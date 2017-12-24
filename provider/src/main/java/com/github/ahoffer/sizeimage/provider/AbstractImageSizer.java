@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.SystemUtils;
 
 /**
  * The primary functionality for all ImageSizers is implemented int this class.
@@ -48,8 +47,6 @@ import org.apache.commons.lang3.SystemUtils;
 public abstract class AbstractImageSizer implements ImageSizer {
 
   // TODO: Parking these constants here until there is a better place for them
-  public static final String WINDOWS_SEARCH_PATH = "WINDOWS_SEARCH_PATH";
-  public static final String POSIX_SEARCH_PATH = "POSIX_SEARCH_PATH";
   public static final String TIMEOUT_SECONDS = "TIMEOUT_SECONDS";
   public static final int DEFAULT_TIMEOUT_SECONDS = 30;
   public static final String MAX_WIDTH = "maxWidth";
@@ -272,13 +269,6 @@ public abstract class AbstractImageSizer implements ImageSizer {
     addMessage(messageFactory.make(SIZER_NAME, this.getClass().getSimpleName()));
   }
 
-  /** Custom exception thrown when this object cannot be cloned */
-  public class CopyObjectException extends RuntimeException {
-    CopyObjectException(Throwable cause) {
-      super(cause);
-    }
-  }
-
   /**
    * Execute a Consumer function (i.e. a Callable) and return its value. The execution is blocking
    * (synchronous). If the operation does not complete in the give amount of time, a message with
@@ -353,10 +343,10 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return this;
   }
 
-  /** @return Searhc path string if configured, else empty string */
-  public String getSearchPath() {
-    return SystemUtils.IS_OS_WINDOWS
-        ? getConfiguration().getOrDefault(WINDOWS_SEARCH_PATH, "")
-        : getConfiguration().getOrDefault(POSIX_SEARCH_PATH, "");
+  /** Custom exception thrown when this object cannot be cloned */
+  public class CopyObjectException extends RuntimeException {
+    CopyObjectException(Throwable cause) {
+      super(cause);
+    }
   }
 }

@@ -11,7 +11,7 @@ import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 import org.im4java.process.Pipe;
 
-public class MagickSizer extends AbstractImageSizer {
+public class MagickSizer extends ExternalProcessSizer {
 
   /**
    * JPEG compresses well, but is designed for large real world images, not small thumbnails. It
@@ -24,7 +24,7 @@ public class MagickSizer extends AbstractImageSizer {
    * <p>PNG is a good format for thumbnails. It has a good compression and internal format styles.
    * It is non-lossy, and can display many colors. It is slow to encode.
    *
-   * <p>BMP is fast tot encode and smaller than a pixel map
+   * <p>BMP is fast to encode and smaller than a pixel map
    */
   public static final String DEFAULT_OUTPUT_FORMAT = "bmp";
 
@@ -75,17 +75,5 @@ public class MagickSizer extends AbstractImageSizer {
   @Override
   public boolean isAvailable() {
     return getExecutable().canExecute();
-  }
-
-  FuzzyFile getExecutable() {
-    //    if (executable == null) {
-    //      executable = new FuzzyFile();
-    //      executable.setWindowsSearchPath(configuration.get(WINDOWS_SEARCH_PATH));
-    //      executable.setPosixSearchPath(configuration.get(POSIX_SEARCH_PATH));
-    //      executable.setWindowsExecutableName("convert.exe");
-    //      executable.setPosixExecutableName("convert");
-    //    }
-    //    return executable;
-    return null;
   }
 }
