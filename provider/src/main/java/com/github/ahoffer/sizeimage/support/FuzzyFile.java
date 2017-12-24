@@ -1,5 +1,6 @@
 package com.github.ahoffer.sizeimage.support;
 
+import com.sun.istack.internal.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -10,7 +11,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SystemUtils;
 
-public class ExecutableFile {
+/**
+ * You're out there. Somewhere. On a shell environment PATH variable. Maybe, anyway. Abstract away
+ * the the platform file system dependency, at least at the high level (Windows or non-Windows)
+ */
+public class FuzzyFile {
 
   String posixSearchPath;
   String windowsSearchPath;
@@ -19,7 +24,9 @@ public class ExecutableFile {
   List<Path> searchPathObjects;
   File file;
   boolean isInitialized;
-
+  // TODO: Maybe this abstraction let's me decouple the non-java sizers from the vagaries of
+  // filesystems. The idea is to create "a fuzzy file INDEPENDENTLY of the sizer and just pass the
+  // thing to the sizer.
   void initialize() {
     String[] items =
         isWindows() ? getWindowsSearchPath().split(";") : getPosixSearchPath().split(":");
@@ -39,28 +46,22 @@ public class ExecutableFile {
   }
 
   public boolean canExecute() {
-    if (!isInitialized) {
-      initialize();
-    }
-    return file != null && file.canExecute();
+    return exists() && getFile().canExecute();
+  }
+
+  public boolean exists() {
+    return getFile() != null && getFile().exists();
   }
 
   public String getPath() {
-    if (!isInitialized) {
-      initialize();
-    }
-    if (file != null) {
+    if (getFile() != null) {
       try {
-        return file.getCanonicalPath();
+        return getFile().getCanonicalPath();
       } catch (IOException e) {
         return null;
       }
     }
     return null;
-  }
-
-  boolean canExecute(File e) {
-    return e.canExecute();
   }
 
   boolean isWindows() {
@@ -83,11 +84,11 @@ public class ExecutableFile {
     this.windowsSearchPath = windowsSearchPath;
   }
 
-  public List<Path> getSearchPathObjects() {
+  List<Path> getSearchPathObjects() {
     return searchPathObjects;
   }
 
-  public void setSearchPathObjects(List<Path> searchPathObjects) {
+  void setSearchPathObjects(List<Path> searchPathObjects) {
     this.searchPathObjects = searchPathObjects;
   }
 
@@ -109,5 +110,18 @@ public class ExecutableFile {
 
   public String getExecutableName() {
     return isWindows() ? getWindowsExecutableName() : getPosixExecutableName();
+  }
+
+  /** @return the directory of the file */
+  public String getParent() {
+    return getFile().getParent();
+  }
+
+  @Nullable
+  File getFile() {
+    if (!isInitialized) {
+      initialize();
+    }
+    return file;
   }
 }

@@ -11,7 +11,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.support.ComputeResolutionLevel;
-import com.github.ahoffer.sizeimage.support.ExecutableFile;
+import com.github.ahoffer.sizeimage.support.FuzzyFile;
 import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,7 +35,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   File inputFile;
   Path outputFile;
   private Process process;
-  ExecutableFile executable;
+  FuzzyFile executable;
 
   void prepare() {
     super.prepare();
@@ -163,9 +163,9 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     return getExecutable().canExecute();
   }
 
-  ExecutableFile getExecutable() {
+  FuzzyFile getExecutable() {
     if (executable == null) {
-      executable = new ExecutableFile();
+      executable = new FuzzyFile();
       executable.setWindowsSearchPath(configuration.get(WINDOWS_SEARCH_PATH));
       executable.setPosixSearchPath(configuration.get(POSIX_SEARCH_PATH));
       executable.setWindowsExecutableName("opj_decompress.exe");
@@ -173,14 +173,6 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
     }
     return executable;
   }
-
-  // TODO: Make this configurable?
-  // todo: I'd rather have people use the given name of the executable and not rename it.
-  //  protected String getExecName() {
-  //    return SystemUtils.IS_OS_WINDOWS
-  //        ? configuration.get(WINDOWS_EXEC_NAME_KEY)
-  //        : configuration.get(NIX_EXEC_NAME_KEY);
-  //  }
 
   String getStdError(InputStream inputStream) {
     StringBuilder builder = new StringBuilder();

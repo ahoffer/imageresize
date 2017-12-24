@@ -3,9 +3,8 @@ package com.github.ahoffer.sizeimage.provider;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
-import java.io.File;
+import com.github.ahoffer.sizeimage.support.FuzzyFile;
 import java.io.IOException;
-import org.apache.commons.lang3.SystemUtils;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -33,7 +32,7 @@ public class MagickSizer extends AbstractImageSizer {
   public static final String STD_IN = "-";
   public static final String STD_OUT = ":-";
 
-  File imgMagick;
+  FuzzyFile executable;
 
   void prepare() {
     super.prepare();
@@ -64,7 +63,7 @@ public class MagickSizer extends AbstractImageSizer {
     op.addImage(outputFormatDirectedToStandardOut);
     command.setOutputConsumer(outputConsumer);
 
-    command.setSearchPath(getExecPath());
+    command.setSearchPath(getExecutable().getParent());
     try {
       command.run(op);
     } catch (InterruptedException | IM4JavaException | IOException e) {
@@ -75,22 +74,17 @@ public class MagickSizer extends AbstractImageSizer {
 
   @Override
   public boolean isAvailable() {
-    return getExecFile().canExecute();
+    return getExecutable().canExecute();
   }
 
-  protected String getExecPath() {
-//    return configuration.get(PATH_TO_EXECUTABLE);
-    return null;
-  }
-
-  protected File getExecFile() {
-    if (imgMagick == null) {
-      imgMagick = new File(getExecPath(), getExecName());
+  FuzzyFile getExecutable() {
+    if (executable == null) {
+      executable = new FuzzyFile();
+      executable.setWindowsSearchPath(configuration.get(WINDOWS_SEARCH_PATH));
+      executable.setPosixSearchPath(configuration.get(POSIX_SEARCH_PATH));
+      executable.setWindowsExecutableName("convert.exe");
+      executable.setPosixExecutableName("convert");
     }
-    return imgMagick;
-  }
-
-  protected String getExecName() {
-    return SystemUtils.IS_OS_WINDOWS ? "convert.exe" : "convert";
+    return executable;
   }
 }
