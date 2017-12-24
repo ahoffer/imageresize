@@ -150,7 +150,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
 
   int getReductionFactor() {
     return new ComputeResolutionLevel()
-        .setMaxResolutionlevels(metadata.getMinNumResolutionLevels())
+        .setMaxResolutionLevels(metadata.getMinNumResolutionLevels())
         .setInputSize(metadata.getWidth(), metadata.getHeight())
         .setOutputSize(getMaxWidth(), getMaxHeight())
         .compute();

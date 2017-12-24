@@ -23,20 +23,59 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Central class for the BeLittle library. Encapsulates the configuration. The configuration
- * controls what sizers are preferred for certain image types.
+ * controls what ImageSizers are preferred for certain image types.
  */
 public class BeLittle {
 
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(BeLittle.class);
 
+  /**
+   * The character '*' is the wildcard and will match an image type. Think of wildcard sizers as
+   * "defaults" or a "fallback". If there is no configuration for a particular image type, the
+   * BeLittle attempts to use a wildcard sizer to resize the image. Alternatively, if the sizer that
+   * do match an image type fail to resize the image, the wildcard sizers should be used to generate
+   * the image. Therefore, wildcard sizers should be selected to be broadly applicable to many image
+   * types. Good choices for wildcard sizers are MagickSizer, SamplingSizer, and BasicSizer.
+   */
   String MATCH_ANY = "*";
-  String UNKNOWN_MIME_TYPE = "application/octet-stream";
-  private int maxWidth;
-  private int maxHeight;
-  private Map<String, List<ImageSizer>> configuration = new HashMap<>();
-  private MessageFactory messageFactory = new MessageFactory();
 
+  /**
+   * TODO: Not sure if we still need this. Can't recall why I wanted this and the wildcard. BeLittle
+   * can be configured with sizers to match an unknown image type.
+   */
+  String UNKNOWN_MIME_TYPE = "application/octet-stream";
+
+  /**
+   * Users can set (maximum) desired width and (maximum) desired height of output images by setting
+   * both values. If both values are set, BeLittle will override (replace) the desired width and
+   * desired height values configured for individual ImageSizer.
+   */
+  int maxWidth;
+
+  /**
+   * Users can set (maximum) desired width and (maximum) desired height of output images by setting
+   * both values. If both values are set, BeLittle will override (replace) the desired width and
+   * desired height values configured for individual ImageSizer.
+   */
+  int maxHeight;
+
+  /**
+   * The configuration data structure is the heard of the BeLittle class. It represents its
+   * data-drive, user-configured behavior.
+   */
+  Map<String, List<ImageSizer>> configuration = new HashMap<>();
+
+  /** Helper class to generate messages to be added to ImageSizers. */
+  MessageFactory messageFactory = new MessageFactory();
+
+  /**
+   * This method is the primary public object for finding the ImageSizers that should be used for a
+   * particular image type. See the ImageSizerCollection class for more information.
+   *
+   * @param inputMimeType
+   * @return
+   */
   public ImageSizerCollection getSizersFor(String inputMimeType) {
     ImageSizerCollection coll = new ImageSizerCollection();
 
@@ -85,7 +124,15 @@ public class BeLittle {
     return coll;
   }
 
-  private ImageSizer copyAndInitialize(ImageSizer sizer) {
+  /**
+   * ImageSizer are meant to be used in a single thread, and, unless care is taken, to be used only
+   * once. This method clones a prototype ImageSizer and sets its desired width and height, if
+   * appropriate.
+   *
+   * @param sizer
+   * @return copy of an image sizer
+   */
+  ImageSizer copyAndInitialize(ImageSizer sizer) {
     ImageSizer newSizer = sizer.getNew();
     if (isOutputSizeSet()) {
       newSizer.setOutputSize(getMaxWidth(), getMaxHeight());
@@ -93,11 +140,25 @@ public class BeLittle {
     return newSizer;
   }
 
-  protected boolean isOutputSizeSet() {
+  /**
+   * This object is considered to be configured for a default width and height if BOTH values are
+   * greater than zero.
+   *
+   * @return true is the desired width and height are configured for the BeLittle object.
+   */
+  boolean isOutputSizeSet() {
     return getMaxWidth() > 0 && getMaxHeight() > 0;
   }
 
-  public ImageSizerCollection getSizersFor(InputStream inputStream) throws StreamResetException {
+  /**
+   * Similar to getSizerFor(mimeType), expect that it accepts an input stream representing an image.
+   * It will attempt to extract the MIME type from the stream and reset the stream to its original
+   * position.
+   *
+   * @param inputStream
+   * @return
+   */
+  public ImageSizerCollection getSizersFor(InputStream inputStream) {
     Optional<String> mimeType;
     try (SaferImageReader tempReader = new SaferImageReader(inputStream)) {
       mimeType = tempReader.getMimeTypes().stream().findFirst();
@@ -106,10 +167,24 @@ public class BeLittle {
     return getSizersFor(mimeType.orElse(getUnknownMimeType()));
   }
 
-  private String getUnknownMimeType() {
+  /**
+   * Can't remember what this was all about
+   *
+   * @return the defacto unknown MIME type, application/octet-stream
+   */
+  String getUnknownMimeType() {
     return UNKNOWN_MIME_TYPE;
   }
 
+  /**
+   * Unlike the image sizers themselves, the BeLittle class is a singleton and is expected to be
+   * accessed by multiple, perhaps competing threads. Getting and settings its configuration should
+   * be atomic operations. For now, it seems sufficient to synchronized the getters and setters.
+   * Setting a configuration should be done rarely and is usually done once, at startup, by a
+   * dependency injection library.
+   *
+   * @return
+   */
   @SuppressWarnings("unused")
   public synchronized Map<String, List<ImageSizer>> getConfiguration() {
     return Collections.unmodifiableMap(configuration);

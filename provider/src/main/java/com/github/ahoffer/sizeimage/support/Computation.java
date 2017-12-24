@@ -1,16 +1,23 @@
 package com.github.ahoffer.sizeimage.support;
 
+/**
+ * This class represents some calculation needed to resize and image. It exists to remove duplicate
+ * code and to separate out the logic of the calculation away from the ImageSizer class. At the
+ * abstract level, it knows the width and height of the input image and the desired (maximum) width
+ * and (maximum) height of the output image. Subclasses use this information as part of a specific
+ * calculation needed by one or more image sizer.
+ */
 public abstract class Computation {
-  public Computation() {
-    outputHeight = 256;
-    outputWidth = 256;
-  }
-
   public static final double LOG_OF_2 = Math.log(2);
   int inputWidth;
   int inputHeight;
   int outputWidth;
   int outputHeight;
+
+  public Computation() {
+    outputHeight = 256;
+    outputWidth = 256;
+  }
 
   public Computation setInputSize(int inputWidth, int inputHeight) {
     this.inputWidth = inputWidth;

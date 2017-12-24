@@ -61,8 +61,13 @@ import jj2000.j2k.util.ISRandomAccessIO;
 /**
  * Hack-up of the FileFormatReader class for Jpeg20000. All the fields in class are private and
  * cannot inherited by subclasses. Many methods were touching those variables, but the changes are
- * not visible to a subclass. Easier just copy/paste the code and make necessary changes. The
- * Jpeg2000 is not under active development, so copy/paste should not cause maintenance problems
+ * not visible to a subclass. Easier just copy/paste the code and make necessary changes. The JAI
+ * Jpeg2000 library is not under active development, so copy/paste should not cause maintenance
+ * problems.
+ *
+ * <p>TODO: This class could use a little refactoring. It still has methods to read metadata that we
+ * are not interested in. This logic can be removed and replace with calls to skip() to skip over
+ * data we are not interested in.
  */
 public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
 

@@ -92,7 +92,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
   int getReductionFactor() {
     return new ComputeResolutionLevel()
-        .setMaxResolutionlevels(metadata.getMinNumResolutionLevels())
+        .setMaxResolutionLevels(metadata.getMinNumResolutionLevels())
         .setInputSize(metadata.getWidth(), metadata.getHeight())
         .setOutputSize(getMaxWidth(), getMaxHeight())
         .compute();
