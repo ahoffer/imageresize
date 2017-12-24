@@ -3,7 +3,7 @@ package com.github.ahoffer.sizeimage.provider;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
-import com.github.ahoffer.sizeimage.support.FuzzyFile;
+import com.github.ahoffer.fuzzyfile.FuzzyFile;
 import java.io.IOException;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
@@ -78,13 +78,14 @@ public class MagickSizer extends AbstractImageSizer {
   }
 
   FuzzyFile getExecutable() {
-    if (executable == null) {
-      executable = new FuzzyFile();
-      executable.setWindowsSearchPath(configuration.get(WINDOWS_SEARCH_PATH));
-      executable.setPosixSearchPath(configuration.get(POSIX_SEARCH_PATH));
-      executable.setWindowsExecutableName("convert.exe");
-      executable.setPosixExecutableName("convert");
-    }
-    return executable;
+    //    if (executable == null) {
+    //      executable = new FuzzyFile();
+    //      executable.setWindowsSearchPath(configuration.get(WINDOWS_SEARCH_PATH));
+    //      executable.setPosixSearchPath(configuration.get(POSIX_SEARCH_PATH));
+    //      executable.setWindowsExecutableName("convert.exe");
+    //      executable.setPosixExecutableName("convert");
+    //    }
+    //    return executable;
+    return null;
   }
 }

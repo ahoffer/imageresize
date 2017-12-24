@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.github.ahoffer.fuzzyfile.FuzzyFile;
 import com.github.ahoffer.imagereader.SaferImageReader;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
@@ -83,12 +84,12 @@ public class IoTest {
 
   @Test
   public void testOpenJpeg2000Sizer() throws IOException {
-    ImageSizer sizer = new OpenJpeg2000Sizer();
-    HashMap<String, String> configuration = new HashMap<>();
-    configuration.put(
-        AbstractImageSizer.POSIX_SEARCH_PATH,
-        "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
-    sizer.setInput(getData().jpeg2000_513x341_Stream).setConfiguration(configuration);
+    ExternalProcessSizer sizer = new OpenJpeg2000Sizer();
+    FuzzyFile executable =
+        new FuzzyFile(
+            "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/", "opj_decompress",
+            "./", "opj_decompress.exe");
+    sizer.setExecutable(executable).setInput(getData().jpeg2000_513x341_Stream);
     belittleIt(sizer);
   }
 

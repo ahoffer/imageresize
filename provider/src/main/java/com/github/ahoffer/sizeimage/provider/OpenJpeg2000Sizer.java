@@ -11,7 +11,6 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.support.ComputeResolutionLevel;
-import com.github.ahoffer.sizeimage.support.FuzzyFile;
 import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,7 +22,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 import net.coobird.thumbnailator.Thumbnails;
 
-public class OpenJpeg2000Sizer extends AbstractImageSizer {
+public class OpenJpeg2000Sizer extends ExternalProcessSizer {
 
   // There is a limited number of output formats to choose from.
   // For Open JPEG v2.3.0 they are: PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|RAW|RAWL|TGA
@@ -34,8 +33,7 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   int reductionFactor;
   File inputFile;
   Path outputFile;
-  private Process process;
-  FuzzyFile executable;
+  Process process;
 
   void prepare() {
     super.prepare();
@@ -161,17 +159,6 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   @Override
   public boolean isAvailable() {
     return getExecutable().canExecute();
-  }
-
-  FuzzyFile getExecutable() {
-    if (executable == null) {
-      executable = new FuzzyFile();
-      executable.setWindowsSearchPath(configuration.get(WINDOWS_SEARCH_PATH));
-      executable.setPosixSearchPath(configuration.get(POSIX_SEARCH_PATH));
-      executable.setWindowsExecutableName("opj_decompress.exe");
-      executable.setPosixExecutableName("opj_decompress");
-    }
-    return executable;
   }
 
   String getStdError(InputStream inputStream) {
