@@ -183,7 +183,7 @@ public class BeLittle {
    * Setting a configuration should be done rarely and is usually done once, at startup, by a
    * dependency injection library.
    *
-   * @return
+   * @return map of mime types to lists of ImageSizer prototypes
    */
   @SuppressWarnings("unused")
   public synchronized Map<String, List<ImageSizer>> getConfiguration() {

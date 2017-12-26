@@ -30,6 +30,11 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.UNKNOWN_MESS
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
 
+/**
+ * This class serves two purposes. First, it provides a shortcut for adding messages to ImageSizers.
+ * Second, it is a way to ensure consistency of messages. The same ID string should always produce
+ * the same (or consistently similar) messages.
+ */
 public class MessageFactory {
 
   public BeLittlingMessage make(String id, Object... values) {

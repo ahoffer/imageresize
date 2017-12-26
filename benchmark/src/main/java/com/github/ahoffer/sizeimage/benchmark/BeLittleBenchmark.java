@@ -1,11 +1,12 @@
 package com.github.ahoffer.sizeimage.benchmark;
 
 import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.INFO;
-import static com.github.ahoffer.sizeimage.provider.AbstractImageSizer.PATH_TO_EXECUTABLE;
 
+import com.github.ahoffer.fuzzyfile.FuzzyFile;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.provider.BasicSizer;
+import com.github.ahoffer.sizeimage.provider.ExternalProcessSizer;
 import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.provider.MagickSizer;
 import com.github.ahoffer.sizeimage.provider.NullImageSizer;
@@ -28,8 +29,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
@@ -65,17 +64,18 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class BeLittleBenchmark {
 
   public static final int TIMEOUT_SECONDS = 300;
+
+  @Param({"128"})
+  public int thumbSize;
+
   String inputDir;
   String magickPath;
   String outputDir;
   String opjPath;
   BufferedImage lastThumbnail;
-  String lastDescription;
 
   //  static String inputDir = "/Users/aaronhoffer/data/jpeg2000-compliance/";
-
-  @Param({"128"})
-  public int thumbSize;
+  String lastDescription;
   // LARGE FILES ( > 1 MB)
   // Mixed
   @Param({
@@ -205,6 +205,17 @@ public class BeLittleBenchmark {
     new Runner(opt).run();
   }
 
+  @SuppressWarnings("unused")
+  public static String getFilenames(String dir) throws IOException {
+    return Files.list(Paths.get(dir))
+        .map(Path::toFile)
+        .filter(File::isFile)
+        .filter(file -> !file.getName().equals(".DS_Store"))
+        .map(File::getName)
+        .map(s -> String.format("\"%s\"", s))
+        .collect(Collectors.joining(","));
+  }
+
   @Setup
   public void setup() {
     // Register image reader service providers in setup() because this method will be run when JMH
@@ -222,17 +233,6 @@ public class BeLittleBenchmark {
     opjPath =
         System.getProperty("opjPath", "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/");
     magickPath = System.getProperty("magickPath", "/opt/local/bin/");
-  }
-
-  @SuppressWarnings("unused")
-  public static String getFilenames(String dir) throws IOException {
-    return Files.list(Paths.get(dir))
-        .map(Path::toFile)
-        .filter(File::isFile)
-        .filter(file -> !file.getName().equals(".DS_Store"))
-        .map(File::getName)
-        .map(s -> String.format("\"%s\"", s))
-        .collect(Collectors.joining(","));
   }
 
   //  @Benchmark
@@ -254,20 +254,22 @@ public class BeLittleBenchmark {
   @Benchmark
   public void magickSizer() throws IOException {
     lastDescription = "magickSizer";
-    ImageSizer sizer = new MagickSizer();
-    Map<String, String> config = new HashMap<>();
-    config.put(PATH_TO_EXECUTABLE, magickPath);
-    sizer.setConfiguration(config);
+    ExternalProcessSizer sizer = new MagickSizer();
+    FuzzyFile executable = new FuzzyFile("/opt/local/bin/", "convert", "./", "convert.exe");
+    sizer.setExecutable(executable);
     runBenchmark(sizer);
   }
 
   @Benchmark
   public void openJeg2000Sizer() throws IOException {
 
-    ImageSizer sizer = new OpenJpeg2000Sizer();
-    HashMap<String, String> configuration = new HashMap<>();
-    configuration.put(PATH_TO_EXECUTABLE, opjPath);
-    sizer.setConfiguration(configuration);
+    ExternalProcessSizer sizer = new OpenJpeg2000Sizer();
+    FuzzyFile executable =
+        new FuzzyFile(
+            "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/", "opj_decompress",
+            "./", "opj_decompress.exe");
+
+    sizer.setExecutable(executable);
 
     // This sizer works ONLY with JPEG 2000 images. Filter out other image types.
     if (isJpeg2000(getSoureceFile())) {

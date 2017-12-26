@@ -1,6 +1,8 @@
 package com.github.ahoffer.sizeimage.support;
 
-// TODO: Should this be int he API module? I don't think so but it is worth getting some opinions
+// TODO: Should this be in the API module? Answers: No. The BeLittlingMessage interface in the API
+// is good enough. These contstants have been changing willy-nilly throughout development and should
+// not be considered an API.
 // NOTE: Did not make this an enumeration because it is not possible to extending enumerations
 // with subclassing and I wanted other modules/
 public interface MessageConstants {
