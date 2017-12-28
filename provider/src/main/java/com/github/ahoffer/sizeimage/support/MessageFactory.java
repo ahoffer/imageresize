@@ -39,7 +39,8 @@ public class MessageFactory {
 
   public BeLittlingMessage make(String id, Object... values) {
     // TODO: Make array access safe - extract values into Optional<Object> or Optional<?>. Or just
-    // todo: catch the exception accessing a nonexistent array elemnt and generate a message to that
+    // todo: catch the exception accessing a nonexistent array element and generate a message to
+    // that
     // todo: effect.
     //    boolean hasOneValue = values.length ==1;
     switch (id) {

@@ -71,10 +71,9 @@ public class IoTest {
   public void testMagickSizer() throws IOException {
     ExternalProcessSizer sizer = new MagickSizer();
     FuzzyFile executable = new FuzzyFile("/opt/local/bin/", "convert", "./", "convert.exe");
-    sizer
-        .setExecutable(executable)
-        .setOutputSize(TestData.PIXELS, TestData.PIXELS)
-        .setInput(getData().vanillaJpeg_128x80_Stream);
+    sizer.setExecutable(executable);
+    sizer.setOutputSize(TestData.PIXELS, TestData.PIXELS);
+    sizer.setInput(getData().vanillaJpeg_128x80_Stream);
 
     assertThat(sizer.isAvailable(), equalTo(true));
     belittleIt(sizer);
@@ -87,7 +86,8 @@ public class IoTest {
         new FuzzyFile(
             "/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/", "opj_decompress",
             "./", "opj_decompress.exe");
-    sizer.setExecutable(executable).setInput(getData().jpeg2000_513x341_Stream);
+    sizer.setExecutable(executable);
+    sizer.setInput(getData().jpeg2000_513x341_Stream);
     belittleIt(sizer);
   }
 

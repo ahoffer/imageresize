@@ -1,55 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Scope prototype does not create a new instance of the bean's class ??? -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-  <!--Scope protoype does not create a new instance of the bean's class ??? -->
-  <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingSizer"/>
-
-  <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
-    <property name="configuration">
-      <map>
-        <entry key="pathToExecutable" value="/opt/local/bin/"/>
-        <entry key="outputFormat" value="png"/>
-      </map>
-    </property>
-  </bean>
-  <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
-  <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer"/>
-
-  <service id="belittle" auto-export="all-classes">
-    <bean class="com.github.ahoffer.sizeimage.provider.BeLittle">
-      <property name="maxWidth" value="128"/>
-      <property name="maxHeight" value="128"/>
-      <property name="configuration">
-        <map>
-          <entry key="*">
-            <list>
-              <ref component-id="sampling"/>
-              <ref component-id="magick"/>
-              <ref component-id="basic"/>
-            </list>
-          </entry>
-          <entry key="image/jp2">
-            <list>
-              <ref component-id="magick"/>
-              <ref component-id="jpeg2000"/>
-            </list>
-          </entry>
-
-          <!--Are these entries needed? Some sources say they are aliases for JPEG 200 MIME types-->
-          <entry key="image/jpx">
-            <list>
-              <ref component-id="magick"/>
-              <ref component-id="jpeg2000"/>
-            </list>
-          </entry>
-          <entry key="image/jpm">
-            <list>
-              <ref component-id="magick"/>
-              <ref component-id="jpeg2000"/>
-            </list>
-          </entry>
-        </map>
-      </property>
+    <bean id="magickExecutbale" class="com.github.ahoffer.fuzzyfile.FuzzyFile">
+        <argument value="/opt/local/bin/"/>
+        <argument value="convert"/>
+        <argument value="c:\space blah;other\path\blah"/>
+        <argument value="convert.exe"/>
     </bean>
-  </service>
+    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
+        <property name="executable" ref="magickExecutbale"/>
+    </bean>
+
+    <bean id="openJpegExecutable" class="com.github.ahoffer.fuzzyfile.FuzzyFile">
+        <argument value="/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin"/>
+        <argument value="opj_decompress"/>
+        <argument value="c:\space blah;other\path\blah"/>
+        <argument value="opj_decompress.exe"/>
+    </bean>
+    <bean id="openJpeg" class="com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer">
+        <property name="executable" ref="openJpegExecutable"/>
+    </bean>
+
+    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingSizer"/>
+    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
+    <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer"/>
+
+    <service id="belittle" auto-export="all-classes">
+        <bean class="com.github.ahoffer.sizeimage.provider.BeLittle">
+            <property name="maxWidth" value="128"/>
+            <property name="maxHeight" value="128"/>
+            <property name="configuration">
+                <map>
+                    <entry key="*">
+                        <list>
+                            <ref component-id="sampling"/>
+                            <ref component-id="magick"/>
+                            <ref component-id="basic"/>
+                        </list>
+                    </entry>
+                    <entry key="image/jp2">
+                        <list>
+                            <ref component-id="magick"/>
+                            <ref component-id="jpeg2000"/>
+                        </list>
+                    </entry>
+
+                    <!--Are these entries needed? Some sources say they are aliases for JPEG 200 MIME types-->
+                    <entry key="image/jpx">
+                        <list>
+                            <ref component-id="magick"/>
+                            <ref component-id="jpeg2000"/>
+                        </list>
+                    </entry>
+                    <entry key="image/jpm">
+                        <list>
+                            <ref component-id="magick"/>
+                            <ref component-id="jpeg2000"/>
+                        </list>
+                    </entry>
+                </map>
+            </property>
+        </bean>
+    </service>
 </blueprint>
