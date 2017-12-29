@@ -3,7 +3,6 @@ package com.github.ahoffer.sizeimage.provider;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
-import com.github.ahoffer.fuzzyfile.FuzzyFile;
 import java.io.IOException;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
@@ -31,8 +30,6 @@ public class MagickSizer extends ExternalProcessSizer {
   public static final String OUTPUT_FORMAT_KEY = "outputFormat";
   public static final String STD_IN = "-";
   public static final String STD_OUT = ":-";
-
-  FuzzyFile executable;
 
   void prepare() {
     super.prepare();

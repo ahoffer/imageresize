@@ -172,7 +172,7 @@ public class ContainerTest {
       vmOption("-Xmx4g"),
       // Improve cross-platform compatibility
       vmOption("-Djava.awt.headless=true"),
-      vmOption("-Dfile.encoding=UTF8"),
+      vmOption("-Dfile.encoding=UTF8")
     };
   }
 
