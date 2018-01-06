@@ -1,8 +1,5 @@
 package com.github.ahoffer.sizeimage.support;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-
 public class MarkableInputStream {
 
   @SuppressWarnings("unused")

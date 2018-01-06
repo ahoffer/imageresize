@@ -280,7 +280,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
    */
 
   //  TODO
-  // This is solution has a lot of overhead because it creates and shutsdown and executor for every
+  // This is solution has a lot of overhead because it creates and shuts down and executor for every
   // task. In an environment where the system is processing thousands of images, this could become
   // an issue. For high processing demands, the worker should d submit task to a thread pool. Not
   // sure how to do that. Simplest thing would be to put a static var on worker class.

@@ -11,7 +11,6 @@ import static org.ops4j.pax.exam.CoreOptions.when;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.BasicSizer;
 import com.github.ahoffer.sizeimage.provider.BeLittle;
 import com.github.ahoffer.sizeimage.provider.BeLittle.ImageSizerCollection;
 import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
@@ -69,37 +68,12 @@ public class ContainerTest {
     data = new TestData();
   }
 
-  @Ignore
   @Test
   public void runAllAvailableSizers() throws IOException {
     ImageSizerCollection imageSizers = belittler.getSizersFor((String) null);
     for (ImageSizer imageSizer : imageSizers.getAvailable()) {
       runSizerForEveryImage(imageSizer);
     }
-  }
-
-  // This test doesn't feel relevant anymore.
-  @Ignore
-  @Test
-  public void testGetSizersByJpegStream() throws StreamResetException {
-    ImageSizerCollection sizers = belittler.getSizersFor(data.vanillaJpeg_128x80Stream);
-    int expectedNumberOfSizers = 4;
-    assertThat(
-        "Unexpected different number of unique sizers",
-        sizers.getAll(),
-        hasSize(expectedNumberOfSizers));
-    assertThat(
-        "Unexpected number of unique, available sizers",
-        sizers.getAvailable(),
-        hasSize(expectedNumberOfSizers));
-    assertThat(
-        "Expected second image sizer to be magick",
-        sizers.getRecommendations().get(1),
-        instanceOf(MagickSizer.class));
-    assertThat(
-        "Expected third image sizer to be basic",
-        sizers.getRecommendations().get(2),
-        instanceOf(BasicSizer.class));
   }
 
   @Ignore
@@ -186,21 +160,25 @@ public class ContainerTest {
     final long start = System.nanoTime();
     String sizerName = sizer.getClass().getSimpleName();
     builder.append(
-        String.format("\n%s\t%s\t%.2f MB", sizerName, input.getName(), input.length() / 1e6));
+        String.format("%s % t%.2f MB ", sizerName, input.getName(), input.length() / 1e6));
 
     BeLittlingResult output = sizer.setInput(inputStream).generate();
     final long stop = System.nanoTime();
-    builder.append(String.format("\tTime=%.2f s", (stop - start) / 1.0e9));
-    LOGGER.info(builder.toString());
+    LOGGER.warn(builder.toString());
     java.io.File outputDirObject = new File(OUTPUTDIR);
     outputDirObject.mkdirs();
     java.io.File outputFile = new File(outputDirObject, sizerName + "-" + input.getName() + ".png");
-    ImageIO.write(output.getOutput().get(), "png", outputFile);
+    if (output.getOutput().isPresent()) {
+      builder.append(String.format("Time=%.2f s", (stop - start) / 1.0e9));
+      ImageIO.write(output.getOutput().get(), "png", outputFile);
+    } else {
+      builder.append("FAILED");
+    }
   }
 
   void runSizerForEveryImage(ImageSizer imageSizer) throws IOException {
     for (File inputFile : data.inputFiles) {
-      runSizer(imageSizer, inputFile);
+      runSizer(imageSizer.getNew(), inputFile);
     }
   }
 }
