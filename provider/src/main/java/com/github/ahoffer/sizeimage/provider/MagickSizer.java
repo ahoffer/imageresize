@@ -50,11 +50,11 @@ public class MagickSizer extends ExternalProcessSizer {
     // todo: If not, maybe compose a sample and scale operation to improve performance?
     op.thumbnail(getMaxWidth(), getMaxHeight());
 
-    // Read from std in
+    // Read the image from std in
     op.addImage(STD_IN);
     command.setInputProvider(new Pipe(inputStream, null));
 
-    // Write to std out
+    // Write the image to std out
     String outputFormatDirectedToStandardOut =
         configuration.getOrDefault(OUTPUT_FORMAT_KEY, DEFAULT_OUTPUT_FORMAT) + STD_OUT;
     op.addImage(outputFormatDirectedToStandardOut);

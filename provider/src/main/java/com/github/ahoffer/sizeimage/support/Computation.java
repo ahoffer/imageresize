@@ -41,7 +41,7 @@ public abstract class Computation {
   }
 
   protected long logBase2Int(double number) {
-    return Math.round(logBase2(number));
+    return Math.round(Math.floor(logBase2(number)));
   }
 
   public abstract int compute();

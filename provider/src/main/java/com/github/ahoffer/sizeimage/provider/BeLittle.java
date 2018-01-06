@@ -8,6 +8,7 @@ import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.BeLittlingResultImpl;
 import com.github.ahoffer.sizeimage.support.MessageConstants;
 import com.github.ahoffer.sizeimage.support.MessageFactory;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,6 +69,10 @@ public class BeLittle {
 
   /** Helper class to generate messages to be added to ImageSizers. */
   MessageFactory messageFactory = new MessageFactory();
+
+  public static InputStream from(InputStream inputStream) {
+    return inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
+  }
 
   /**
    * This method is the primary public object for finding the ImageSizers that should be used for a
@@ -159,8 +164,9 @@ public class BeLittle {
    * @return
    */
   public ImageSizerCollection getSizersFor(InputStream inputStream) {
+    InputStream iStream = from(inputStream);
     Optional<String> mimeType;
-    try (SaferImageReader tempReader = new SaferImageReader(inputStream)) {
+    try (SaferImageReader tempReader = new SaferImageReader(iStream)) {
       mimeType = tempReader.getMimeTypes().stream().findFirst();
     }
 
@@ -221,16 +227,16 @@ public class BeLittle {
   }
 
   /**
-   * Convenience method.
+   * Convenience method. Attempt to generate an image from the first available ImageSizer.
    *
    * @param inputStream
    * @return
    */
-  public synchronized BeLittlingResult generate(InputStream inputStream)
-      throws StreamResetException {
-    Optional<ImageSizer> sizer = getSizersFor(inputStream).getRecommended();
+  public BeLittlingResult generate(InputStream inputStream) throws StreamResetException {
+    InputStream iStream = from(inputStream);
+    Optional<ImageSizer> sizer = getSizersFor(iStream).getRecommended();
     if (sizer.isPresent()) {
-      return sizer.get().setInput(inputStream).generate();
+      return sizer.get().setInput(iStream).generate();
     } else {
       return new BeLittlingResultImpl(
           null, Collections.singletonList(messageFactory.make(MessageConstants.NO_SIZER)));

@@ -9,6 +9,11 @@
     </bean>
     <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
         <property name="executable" ref="magickExecutable"/>
+        <property name="configuration">
+            <map>
+                <entry key="TIMEOUT_SECONDS" value="3600"/>
+            </map>
+        </property>
     </bean>
 
     <bean id="openJpegExecutable" class="com.github.ahoffer.fuzzyfile.FuzzyFile">
