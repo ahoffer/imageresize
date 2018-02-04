@@ -160,7 +160,7 @@ public class ContainerTest {
     final long start = System.nanoTime();
     String sizerName = sizer.getClass().getSimpleName();
     builder.append(
-        String.format("%s % t%.2f MB ", sizerName, input.getName(), input.length() / 1e6));
+        String.format("\n%s\t%s\t%.2f MB ", sizerName, input.getName(), input.length() / 1e6));
 
     BeLittlingResult output = sizer.setInput(inputStream).generate();
     final long stop = System.nanoTime();
