@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.sizers;
 
 import static com.github.ahoffer.sizeimage.support.MessageConstants.COULD_NOT_READ_METADATA;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.OPJ_FAILED;

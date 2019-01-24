@@ -1,15 +1,15 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.sizers;
 
 import static com.github.ahoffer.sizeimage.support.MessageConstants.DECODE_JPEG2000;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.github.ahoffer.fuzzyfile.FuzzyFile;
-import com.github.ahoffer.imagereader.SaferImageReader;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.support.FuzzyFile;
 import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
+import com.github.ahoffer.sizeimage.support.SaferImageReader;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;

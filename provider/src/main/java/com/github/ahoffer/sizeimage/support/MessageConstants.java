@@ -1,10 +1,12 @@
 package com.github.ahoffer.sizeimage.support;
 
 // TODO: Should this be in the API module? Answers: No. The BeLittlingMessage interface in the API
-// is good enough. These contstants have been changing willy-nilly throughout development and should
+// is good enough. These constants have been changing willy-nilly throughout development and should
 // not be considered an API.
-// NOTE: Did not make this an enumeration because it is not possible to extending enumerations
-// with subclassing and I wanted other modules/
+// NOTE: Did not make this an enumeration because it is not possible to extend enumerations
+// with subclassing and I wanted other modules to be able to extend the message types. This
+// does not seem to be "the Java Way". Don't what the "Java Way" is in this case. Probably a
+// a of properties that can be loaded or something.
 public interface MessageConstants {
   String BAD_WIDTH = "BAD_WIDTH";
   String BAD_HEIGHT = "BAD_HEIGHT";

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>com.github.ahoffer</groupId>
         <artifactId>sizeimage</artifactId>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.github.jai-imageio</groupId>
             <artifactId>jai-imageio-jpeg2000</artifactId>
-            <version>${jpeg2000.version}</version>
+            <version>1.3.1_CODICE_3</version>
         </dependency>
 
         <!--The API and service ImageSizerCollection-->
@@ -41,27 +41,42 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
-        <!--Libraries to embed-->
-        <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>safer-image-reader</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
         <!--Provided -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>${org.osgi.core.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
-            <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.im4java</groupId>
+            <artifactId>im4java</artifactId>
+            <version>${im4java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-core</artifactId>
+            <version>1.3.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -74,14 +89,17 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            com.github.ahoffer.sizeimage.*,
-                            com.github.jaiimageio.*
-                        </Export-Package>
                         <Embed-Dependency>
-                            *;scope=!provided|test
+                            api,
+                            provider,
+                            jai-imageio-jpeg2000,
+                            thumbnailator,
+                            im4java,
+                            commons-io,
+                            thumbnailator,
+                            commons-lang3,
+                            jai-imageio-core
                         </Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
                         <Import-Package>
                             !sun.security.action,
                             *

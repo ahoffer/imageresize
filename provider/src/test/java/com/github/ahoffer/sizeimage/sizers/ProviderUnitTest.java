@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.sizers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;

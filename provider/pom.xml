@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -12,34 +12,16 @@
 
     <artifactId>provider</artifactId>
     <packaging>jar</packaging>
-
-    <!--<repositories>-->
-    <!--<repository>-->
-    <!--<id>codice</id>-->
-    <!--<name>Codice Repository</name>-->
-    <!--<url>https://artifacts.codice.org/content/groups/public/</url>-->
-    <!--</repository>-->
-    <!--</repositories>-->
     <dependencies>
         <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>fuzzy-file</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>safer-image-reader</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8</version>
         </dependency>
         <dependency>
             <groupId>org.im4java</groupId>
             <artifactId>im4java</artifactId>
             <version>${im4java.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -71,15 +53,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>fuzzy-file</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-jpeg2000</artifactId>
+            <version>1.3.1_CODICE_3</version>
         </dependency>
 
         <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-jpeg2000</artifactId>
-            <version>${jpeg2000.version}</version>
+            <groupId>com.github.ahoffer</groupId>
+            <artifactId>api</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

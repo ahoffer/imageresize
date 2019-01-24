@@ -2,17 +2,17 @@ package com.github.ahoffer.sizeimage.benchmark;
 
 import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.INFO;
 
-import com.github.ahoffer.fuzzyfile.FuzzyFile;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.BasicSizer;
-import com.github.ahoffer.sizeimage.provider.ExternalProcessSizer;
-import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
-import com.github.ahoffer.sizeimage.provider.MagickSizer;
-import com.github.ahoffer.sizeimage.provider.NullImageSizer;
-import com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer;
-import com.github.ahoffer.sizeimage.provider.SamplingSizer;
+import com.github.ahoffer.sizeimage.sizers.BasicSizer;
+import com.github.ahoffer.sizeimage.sizers.ExternalProcessSizer;
+import com.github.ahoffer.sizeimage.sizers.JaiJpeg2000Sizer;
+import com.github.ahoffer.sizeimage.sizers.MagickSizer;
+import com.github.ahoffer.sizeimage.sizers.NullImageSizer;
+import com.github.ahoffer.sizeimage.sizers.OpenJpeg2000Sizer;
+import com.github.ahoffer.sizeimage.sizers.SamplingSizer;
 import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.support.FuzzyFile;
 import com.github.ahoffer.sizeimage.support.LittleWorker;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import com.twelvemonkeys.imageio.plugins.tiff.TIFFImageReaderSpi;
@@ -79,80 +79,80 @@ public class BeLittleBenchmark {
   // LARGE FILES ( > 1 MB)
   // Mixed
   @Param({
-    "land-8mb.jpg",
-    "building-30mb.jpg",
-    "gettysburg-6mb.jp2",
-    "airplane-4mb.jp2",
-    "building-30mb.jpg",
-    "britain-108mb.jpg",
-    "paris-201mb.tiff",
-    "oslo-j2k-19mb.jp2",
-    "ortho-744mb.jp2",
-    "seattle-300mb.tif",
-    "salt-lake-1gb.png"
+      "land-8mb.jpg",
+      "building-30mb.jpg",
+      "gettysburg-6mb.jp2",
+      "airplane-4mb.jp2",
+      "building-30mb.jpg",
+      "britain-108mb.jpg",
+      "paris-201mb.tiff",
+      "oslo-j2k-19mb.jp2",
+      "ortho-744mb.jp2",
+      "seattle-300mb.tif",
+      "salt-lake-1gb.png"
   })
 
   // LARGE FILES ( > 1 MB)
-  // JPEG 2000
-  //  @Param({
-  //    "carrots-j2k-8mb.j2k",
-  //    "gettysburg-6mb.jp2",
-  //    "oslo-j2k-19mb.jp2",
-  //    "airplane-4mb.jp2",
-  //    "ortho-744mb.jp2",
-  //    "old-map-60mb.jp2"
-  //  })
+      // JPEG 2000
+      //  @Param({
+      //    "carrots-j2k-8mb.j2k",
+      //    "gettysburg-6mb.jp2",
+      //    "oslo-j2k-19mb.jp2",
+      //    "airplane-4mb.jp2",
+      //    "ortho-744mb.jp2",
+      //    "old-map-60mb.jp2"
+      //  })
 
-  // HUGE FILES > 100 MB
-  // JPEG, JPEG 2000, PNG
-  //  @Param({
-  //    "australia-250mb.png",
-  //    "salt-lake-340mb.jpg",
-  //    "salt-lake-1gb.png",
-  //    "britain-108mb.jpg",
-  //    "seattle-300mb.tif"
-  //  //        "mars-crater-456mb.JP2" // NEVER FINISHES. VERY MESSED FILE!
-  //  })
+      // HUGE FILES > 100 MB
+      // JPEG, JPEG 2000, PNG
+      //  @Param({
+      //    "australia-250mb.png",
+      //    "salt-lake-340mb.jpg",
+      //    "salt-lake-1gb.png",
+      //    "britain-108mb.jpg",
+      //    "seattle-300mb.tif"
+      //  //        "mars-crater-456mb.JP2" // NEVER FINISHES. VERY MESSED FILE!
+      //  })
 
-  //   COMPLIANCE TESTS
-  //  @Param({
-  //    "p1_04.j2k",
-  //    "file9.jp2",
-  //    "file8.jp2",
-  //    "p1_05.j2k",
-  //    "p1_07.j2k",
-  //    "p1_06.j2k",
-  //    "p1_02.j2k",
-  //    "p1_03.j2k",
-  //    "p1_01.j2k",
-  //    "p0_09.j2k",
-  //    "p0_08.j2k",
-  //    "p0_06.j2k",
-  //    "p0_12.j2k",
-  //    "p0_13.j2k",
-  //    "p0_07.j2k",
-  //    "p0_11.j2k",
-  //    "p0_05.j2k",
-  //    "p0_04.j2k",
-  //    "p0_10.j2k",
-  //    "p0_14.j2k",
-  //    "p0_01.j2k",
-  //    "p0_15.j2k",
-  //    "p0_03.j2k",
-  //    "p0_16.j2k",
-  //    "p0_02.j2k",
-  //    "file1.jp2",
-  //    "file3.jp2",
-  //    "file2.jp2",
-  //    "file6.jp2",
-  //    "file7.jp2",
-  //    "file5.jp2",
-  //    "file4.jp2"
-  //  })
+      //   COMPLIANCE TESTS
+      //  @Param({
+      //    "p1_04.j2k",
+      //    "file9.jp2",
+      //    "file8.jp2",
+      //    "p1_05.j2k",
+      //    "p1_07.j2k",
+      //    "p1_06.j2k",
+      //    "p1_02.j2k",
+      //    "p1_03.j2k",
+      //    "p1_01.j2k",
+      //    "p0_09.j2k",
+      //    "p0_08.j2k",
+      //    "p0_06.j2k",
+      //    "p0_12.j2k",
+      //    "p0_13.j2k",
+      //    "p0_07.j2k",
+      //    "p0_11.j2k",
+      //    "p0_05.j2k",
+      //    "p0_04.j2k",
+      //    "p0_10.j2k",
+      //    "p0_14.j2k",
+      //    "p0_01.j2k",
+      //    "p0_15.j2k",
+      //    "p0_03.j2k",
+      //    "p0_16.j2k",
+      //    "p0_02.j2k",
+      //    "file1.jp2",
+      //    "file3.jp2",
+      //    "file2.jp2",
+      //    "file6.jp2",
+      //    "file7.jp2",
+      //    "file5.jp2",
+      //    "file4.jp2"
+      //  })
 
-  //  @Param({"p1_05.j2k"}) //Evil file that causes the JAI JPEG 2000 to process indefinitely
-  // without using up the heap
-  String filename;
+      //  @Param({"p1_05.j2k"}) //Evil file that causes the JAI JPEG 2000 to process indefinitely
+      // without using up the heap
+      String filename;
   //  })
   //    "salt-lake-340mb.jpg"
   //    "australia-250mb.png",
@@ -387,7 +387,7 @@ public class BeLittleBenchmark {
   }
 
   @SuppressWarnings("unused")
-  // Example of fast duplication of a file, or fast copy
+    // Example of fast duplication of a file, or fast copy
   void copyFileUsingFileChannels(File source, File dest) throws IOException {
     try (FileChannel inputChannel = new FileInputStream(source).getChannel();
         FileChannel outputChannel = new FileOutputStream(dest).getChannel()) {

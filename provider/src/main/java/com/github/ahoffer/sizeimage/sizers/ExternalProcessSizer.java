@@ -1,7 +1,7 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.sizers;
 
-import com.github.ahoffer.fuzzyfile.FuzzyFile;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.support.FuzzyFile;
 
 /**
  * This class adds a single field. The field holds an object that represents the executable the

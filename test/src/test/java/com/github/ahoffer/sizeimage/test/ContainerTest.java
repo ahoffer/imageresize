@@ -11,11 +11,11 @@ import static org.ops4j.pax.exam.CoreOptions.when;
 
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.BeLittle;
-import com.github.ahoffer.sizeimage.provider.BeLittle.ImageSizerCollection;
-import com.github.ahoffer.sizeimage.provider.BeLittle.StreamResetException;
-import com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer;
-import com.github.ahoffer.sizeimage.provider.MagickSizer;
+import com.github.ahoffer.sizeimage.belittle.BeLittleImpl;
+import com.github.ahoffer.sizeimage.belittle.BeLittleImpl.ImageSizerCollection;
+import com.github.ahoffer.sizeimage.sizers.JaiJpeg2000Sizer;
+import com.github.ahoffer.sizeimage.sizers.MagickSizer;
+import com.github.ahoffer.sizeimage.support.StreamResetException;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerSuite.class)
 public class ContainerTest {
 
-  static final String ARTIFACT_ID = "bundle";
   static final String GROUP_ID = "com.github.ahoffer";
+  static final String ARTIFACT_ID = "bundle";
   static String OUTPUTDIR = TestData.INPUT_DIR + "output/";
   static Logger LOGGER = LoggerFactory.getLogger(ContainerTest.class);
 
@@ -55,7 +55,7 @@ public class ContainerTest {
     IIORegistry.getDefaultInstance().registerServiceProvider(new J2KImageReaderSpi());
   }
 
-  @Inject protected BeLittle belittler;
+  @Inject protected BeLittleImpl belittler;
 
   TestData data;
 

@@ -1,17 +1,17 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.sizers;
 
 import static com.github.ahoffer.sizeimage.support.MessageConstants.REDUCTION_FACTOR;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.SAMPLE_PERIOD;
 
-import com.github.ahoffer.imagereader.SaferImageReader;
-import com.github.ahoffer.imagereader.SaferImageReader.ImageReaderError;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.support.ComputeResolutionLevel;
 import com.github.ahoffer.sizeimage.support.ComputeSubSamplingPeriod;
 import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
 import com.github.ahoffer.sizeimage.support.MessageConstants;
-import com.github.jaiimageio.jpeg2000.J2KImageReadParam;
+import com.github.ahoffer.sizeimage.support.SaferImageReader;
+import com.github.ahoffer.sizeimage.support.SaferImageReader.ImageReaderError;
+import com.github.jaiimageio.jpeg2000.impl.J2KImageReadParamJava;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -23,8 +23,11 @@ import net.coobird.thumbnailator.Thumbnails;
 public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
   // TODO: Make this configurable.
-  // TODO: Do not set it for images close to the target size, or else there will be too little
-  // information and the output image will be very blurry
+
+  /*
+    TODO: Do not set bit per pixel for images close to the target size, or else there will be too little
+    information and the output image will be very blurry
+  */
   public static final double DEFAULT_BITS_PER_PIXEL = 0.3;
 
   static {
@@ -66,10 +69,10 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   }
 
   void processInput() {
-    try (SaferImageReader reader = new SaferImageReader(inputStream)) {
-      J2KImageReadParam param = (J2KImageReadParam) reader.getImageReadParam();
-      param.setResolution(reductionFactor);
-      param.setDecodingRate(DEFAULT_BITS_PER_PIXEL);
+    J2KImageReadParamJava param = new J2KImageReadParamJava();
+    param.setResolution(reductionFactor);
+    param.setDecodingRate(DEFAULT_BITS_PER_PIXEL);
+    try (SaferImageReader reader = new SaferImageReader(inputStream, param)) {
 
       // TODO: this sampling part needs testing.
       if (reductionFactor == 0) {

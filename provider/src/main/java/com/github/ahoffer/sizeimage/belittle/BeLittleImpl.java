@@ -1,13 +1,15 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.belittle;
 
 import static java.util.Collections.EMPTY_LIST;
 
-import com.github.ahoffer.imagereader.SaferImageReader;
+import com.github.ahoffer.sizeimage.BeLittle;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.BeLittlingResultImpl;
 import com.github.ahoffer.sizeimage.support.MessageConstants;
 import com.github.ahoffer.sizeimage.support.MessageFactory;
+import com.github.ahoffer.sizeimage.support.SaferImageReader;
+import com.github.ahoffer.sizeimage.support.StreamResetException;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,10 +28,10 @@ import org.slf4j.LoggerFactory;
  * Central class for the BeLittle library. Encapsulates the configuration. The configuration
  * controls what ImageSizers are preferred for certain image types.
  */
-public class BeLittle {
+public class BeLittleImpl implements BeLittle {
 
   @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory.getLogger(BeLittle.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BeLittleImpl.class);
 
   /**
    * The character '*' is the wildcard and will match an image type. Think of wildcard sizers as
@@ -39,7 +41,7 @@ public class BeLittle {
    * the image. Therefore, wildcard sizers should be selected to be broadly applicable to many image
    * types. Good choices for wildcard sizers are MagickSizer, SamplingSizer, and BasicSizer.
    */
-  String MATCH_ANY = "*";
+  public String MATCH_ANY = "*";
 
   /**
    * TODO: Not sure if we still need this. Can't recall why I wanted this and the wildcard. BeLittle
@@ -240,12 +242,6 @@ public class BeLittle {
     } else {
       return new BeLittlingResultImpl(
           null, Collections.singletonList(messageFactory.make(MessageConstants.NO_SIZER)));
-    }
-  }
-
-  public static class StreamResetException extends RuntimeException {
-    public StreamResetException(Throwable t) {
-      super(t);
     }
   }
 

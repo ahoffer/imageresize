@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.belittle;
 
 import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -10,7 +10,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.provider.BeLittle.ImageSizerCollection;
+import com.github.ahoffer.sizeimage.belittle.BeLittleImpl.ImageSizerCollection;
+import com.github.ahoffer.sizeimage.sizers.BasicSizer;
+import com.github.ahoffer.sizeimage.sizers.SamplingSizer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -20,11 +22,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class BeLittleUnitTest {
+public class BeLittleImplUnitTest {
 
   public static final String MANY = "many";
   public static final String NONE = "none";
-  private BeLittle belittle;
+  private BeLittleImpl belittle;
   private ImageSizer wildcardSizer;
   private ImageSizer basicSizer;
   private ImageSizer otherSizer;
@@ -34,8 +36,8 @@ public class BeLittleUnitTest {
   private List<ImageSizer> multiplesList;
 
   @Before
-  public void setUp() throws Exception {
-    belittle = new BeLittle();
+  public void setUp() {
+    belittle = new BeLittleImpl();
     wildcardSizer = mock(SamplingSizer.class);
 
     basicSizer = mock(BasicSizer.class);
@@ -60,7 +62,7 @@ public class BeLittleUnitTest {
   private Map<String, List<ImageSizer>> getTestConfiguration() {
     Map<String, List<ImageSizer>> configuration = new HashMap<>();
     wildcardList = Arrays.asList(wildcardSizer);
-    configuration.put(new BeLittle().MATCH_ANY, wildcardList);
+    configuration.put(new BeLittleImpl().MATCH_ANY, wildcardList);
     List<ImageSizer> singletonList = Arrays.asList(otherSizer);
     multiplesList = Arrays.asList(basicSizer, unavailableSizer, duplicatedInstance, otherSizer);
     configuration.put(MANY, multiplesList);
@@ -69,7 +71,7 @@ public class BeLittleUnitTest {
 
   @Ignore
   @Test
-  public void testRecomendations() throws Exception {
+  public void testRecomendations() {
 
     List<ImageSizer> sizers = belittle.getSizersFor(MANY).getRecommendations();
     // (This does not work because of mocks) --> assertThat(sizers, contains(multiplesList));

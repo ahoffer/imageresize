@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="magickExecutable" class="com.github.ahoffer.fuzzyfile.FuzzyFile">
+    <bean id="magickExecutable" class="com.github.ahoffer.sizeimage.support.FuzzyFile">
         <argument value="/opt/local/bin/"/>
         <argument value="convert"/>
         <argument value="c:\space blah;other\path\blah"/>
         <argument value="convert.exe"/>
     </bean>
-    <bean id="magick" class="com.github.ahoffer.sizeimage.provider.MagickSizer">
+    <bean id="magick" class="com.github.ahoffer.sizeimage.sizers.MagickSizer">
         <property name="executable" ref="magickExecutable"/>
         <property name="configuration">
             <map>
@@ -16,22 +16,22 @@
         </property>
     </bean>
 
-    <bean id="openJpegExecutable" class="com.github.ahoffer.fuzzyfile.FuzzyFile">
+    <bean id="openJpegExecutable" class="com.github.ahoffer.sizeimage.support.FuzzyFile">
         <argument value="/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin"/>
         <argument value="opj_decompress"/>
         <argument value="c:\space blah;other\path\blah"/>
         <argument value="opj_decompress.exe"/>
     </bean>
-    <bean id="openJpeg" class="com.github.ahoffer.sizeimage.provider.OpenJpeg2000Sizer">
+    <bean id="openJpeg" class="com.github.ahoffer.sizeimage.sizers.OpenJpeg2000Sizer">
         <property name="executable" ref="openJpegExecutable"/>
     </bean>
 
-    <bean id="sampling" class="com.github.ahoffer.sizeimage.provider.SamplingSizer"/>
-    <bean id="basic" class="com.github.ahoffer.sizeimage.provider.BasicSizer"/>
-    <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.provider.JaiJpeg2000Sizer"/>
+    <bean id="sampling" class="com.github.ahoffer.sizeimage.sizers.SamplingSizer"/>
+    <bean id="basic" class="com.github.ahoffer.sizeimage.sizers.BasicSizer"/>
+    <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.sizers.JaiJpeg2000Sizer"/>
 
     <service id="belittle" auto-export="all-classes">
-        <bean class="com.github.ahoffer.sizeimage.provider.BeLittle">
+        <bean class="com.github.ahoffer.sizeimage.belittle.BeLittleImpl">
             <property name="maxWidth" value="128"/>
             <property name="maxHeight" value="128"/>
             <property name="configuration">

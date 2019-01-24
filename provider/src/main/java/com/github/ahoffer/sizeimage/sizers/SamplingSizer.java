@@ -1,14 +1,14 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.sizers;
 
 import static com.github.ahoffer.sizeimage.support.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.COULD_NOT_READ_IMAGE;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.SAMPLE_PERIOD;
 
-import com.github.ahoffer.imagereader.SaferImageReader;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.support.ComputeSubSamplingPeriod;
+import com.github.ahoffer.sizeimage.support.SaferImageReader;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Optional;

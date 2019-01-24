@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.provider;
+package com.github.ahoffer.sizeimage.sizers;
 
 import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.ERROR;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.BAD_HEIGHT;

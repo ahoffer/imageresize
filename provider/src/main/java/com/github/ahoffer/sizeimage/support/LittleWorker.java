@@ -30,10 +30,6 @@ public class LittleWorker implements AutoCloseable {
    * LittleWorker can add messages to the image sizer as it needs to. To use the LittleWorker
    * without an ImageSizer, create a new instance of NullImageSizer and pass it to the constructor.
    * Pass also the maximum time the LittleWorker will run a task before killing it.
-   *
-   * @param caller
-   * @param timeout
-   * @param unit
    */
   public LittleWorker(ImageSizer caller, long timeout, TimeUnit unit) {
     this.caller = caller;
@@ -48,12 +44,7 @@ public class LittleWorker implements AutoCloseable {
             });
   }
 
-  /**
-   * Set the amount of time to elapse before the worker thread is terminated.
-   *
-   * @param timeout
-   * @param unit
-   */
+  /** Set the amount of time to elapse before the worker thread is terminated. */
   public void setTimeout(long timeout, TimeUnit unit) {
     this.timeout = timeout;
     this.unit = unit;
@@ -67,7 +58,6 @@ public class LittleWorker implements AutoCloseable {
    * task completes, or the time permitted to the task has elapsed. The time spent executing the
    * callable is also added as an informational message.
    *
-   * @param supplier
    * @param <T> For typical usage, the type T will be a BufferedImage
    * @return <T>
    */
@@ -79,13 +69,13 @@ public class LittleWorker implements AutoCloseable {
       // Wait for the task to complete or time-out.
       result = future.get(timeout, unit);
     } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
       caller.addMessage(
           new BeLittlingMessageImpl(
               THREAD_INTERRUPTED,
               BeLittlingSeverity.ERROR,
               "Caught InterruptedException. No automatic retry.",
               e));
+      Thread.currentThread().interrupt();
     } catch (ExecutionException e) {
       caller.addMessage(
           new BeLittlingMessageImpl(
@@ -114,11 +104,7 @@ public class LittleWorker implements AutoCloseable {
     return executor.shutdownNow();
   }
 
-  /**
-   * Implementation of AutoCloseable method. Shutdown object's resources.
-   *
-   * @throws Exception
-   */
+  /** Implementation of AutoCloseable method. Shutdown object's resources. */
   @Override
   public void close() throws Exception {
     shutdownNow();

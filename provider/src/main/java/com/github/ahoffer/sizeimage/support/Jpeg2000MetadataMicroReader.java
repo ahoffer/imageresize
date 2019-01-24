@@ -59,7 +59,7 @@ import jj2000.j2k.io.RandomAccessIO;
 import jj2000.j2k.util.ISRandomAccessIO;
 
 /**
- * Hack-up of the FileFormatReader class for Jpeg20000. All the fields in class are private and
+ * Hack-up of the FileFormatReader class for Jpeg20000. All the fields in that class are private and
  * cannot inherited by subclasses. Many methods were touching those variables, but the changes are
  * not visible to a subclass. Easier just copy/paste the code and make necessary changes. The JAI
  * Jpeg2000 library is not under active development, so copy/paste should not cause maintenance
@@ -69,6 +69,10 @@ import jj2000.j2k.util.ISRandomAccessIO;
  * are not interested in. This logic can be removed and replace with calls to skip() to skip over
  * data we are not interested in.
  */
+
+// TODO: I think class or a sublcass should implement iterator. You want to pass in a stream
+// and be able to call hasNext() and next();
+
 public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
 
   public static final List<Integer> JPX_FILE_FORMAT_BOXES =
@@ -133,7 +137,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   /**
    * Attempt to read file or codestream header of a JPEG 20000 stream Return true if successful.
    *
-   * @exception java.io.IOException stream reset failed
+   * @throws java.io.IOException stream reset failed
    */
   public void read() throws IOException {
 
@@ -153,8 +157,8 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
 
     int initialPos = in.getPos();
 
-    // Make sure that the first 12 bytes is the JP2_SIGNATURE_BOX
-    // or if not that the first 2 bytes is the SOC marker
+    // Make sure that the first 12 bytes are eith the JP2_SIGNATURE_BOX
+    // OR that the first 2 bytes is the SOC marker
     isJpeg2000File =
         in.readInt() == 0x0000000c
             && in.readInt() == JP2_SIGNATURE_BOX
@@ -167,7 +171,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
       short twoBytes = in.readShort();
       codestreamBoxDetected = twoBytes == Markers.SOC;
       if (isCodestreamBoxDetected()) {
-        // Stream represents a JPEG 2000 codestream. Read its header
+        // Stream represents a JPEG 2000 codestream. Read its header.
         in.seek(initialPos);
         readContiguousCodeStreamBox();
       } else {
@@ -180,8 +184,8 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    * This method reads the File Type box
    *
    * @return false if the File Type box was not found or invalid else true
-   * @exception java.io.IOException If an I/O error ocurred.
-   * @exception java.io.EOFException If the end of file was reached
+   * @throws java.io.IOException If an I/O error ocurred.
+   * @throws java.io.EOFException If the end of file was reached
    */
   boolean readFileTypeBox(int length) throws IOException {
     int nComp;
@@ -195,7 +199,9 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
 
     // Check that this is a correct DBox value
     // Read Brand field
-    if (in.readInt() != FT_BR) return false;
+    if (in.readInt() != FT_BR) {
+      return false;
+    }
 
     // Read MinV field
     int minorVersion = in.readInt();
@@ -205,9 +211,13 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
     nComp = (length - 16) / 4; // Number of compatibilities.
     int[] comp = new int[nComp];
     for (int i = 0; i < nComp; i++) {
-      if ((comp[i] = in.readInt()) == FT_BR) foundComp = true;
+      if ((comp[i] = in.readInt()) == FT_BR) {
+        foundComp = true;
+      }
     }
-    if (!foundComp) return false;
+    if (!foundComp) {
+      return false;
+    }
 
     //    if (metadata != null) metadata.addNode(new FileTypeBox(FT_BR, minorVersion, comp));
 
@@ -219,13 +229,15 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    *
    * @param length The length of the JP2Header box
    * @return false if the JP2Header box was not found or invalid else true
-   * @exception java.io.IOException If an I/O error ocurred.
-   * @exception java.io.EOFException If the end of file was reached
+   * @throws java.io.IOException If an I/O error ocurred.
+   * @throws java.io.EOFException If the end of file was reached
    */
   boolean readImageHeaderBox(int length) throws IOException, EOFException {
 
     if (length == 0) // This can not be last box
-    throw new Error("Zero-length of JP2Header Box");
+    {
+      throw new Error("Zero-length of JP2Header Box");
+    }
 
     heightFromImgHeaderBox = in.readInt();
     widthFromImgHeaderBox = in.readInt();
@@ -244,8 +256,8 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    * vector
    *
    * @return false if the Contiguous codestream box was not found or invalid else true
-   * @exception java.io.IOException If an I/O error ocurred.
-   * @exception java.io.EOFException If the end of file was reached
+   * @throws java.io.IOException If an I/O error ocurred.
+   * @throws java.io.EOFException If the end of file was reached
    */
   boolean readContiguousCodeStreamBox() throws IOException {
 
@@ -289,7 +301,9 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
     for (int n = 0; n < lutSize; n++) {
       for (int c = 0; c < numComp; c++) {
         int depth = 1 + (compSize[c] & 0x7F);
-        if (depth > 32) depth = 32;
+        if (depth > 32) {
+          depth = 32;
+        }
         int numBytes = (depth + 7) >> 3;
         byte[] buf = new byte[numBytes];
         in.readFully(buf, 0, numBytes);
@@ -324,7 +338,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   /**
    * This method reads the Channel Definition box
    *
-   * @exception java.io.IOException If an I/O error ocurred.
+   * @throws java.io.IOException If an I/O error ocurred.
    */
   void readChannelDefinitionBox() throws IOException {
     // TODO: Just read the short at the start of the box and then skip (short value) * (2 bytes)
@@ -392,7 +406,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
             throw new Error(
                 "Invalid JP2 file: JP2Header box not found before Contiguous codestream box");
           }
-          // For sanity's sake, assume  only 1 code streams and stop looking.
+          // For sanity's sake, assume only 1 code stream. Stop looking if you find one.
           readContiguousCodeStreamBox();
           return;
         case JP2_HEADER_BOX:
