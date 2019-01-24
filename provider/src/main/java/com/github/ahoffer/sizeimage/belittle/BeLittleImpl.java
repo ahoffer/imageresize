@@ -5,10 +5,9 @@ import static java.util.Collections.EMPTY_LIST;
 import com.github.ahoffer.sizeimage.BeLittle;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
-import com.github.ahoffer.sizeimage.support.BeLittlingResultImpl;
-import com.github.ahoffer.sizeimage.support.MessageConstants;
 import com.github.ahoffer.sizeimage.support.MessageFactory;
 import com.github.ahoffer.sizeimage.support.SaferImageReader;
+import com.github.ahoffer.sizeimage.support.SaferImageReader.ImageReaderError;
 import com.github.ahoffer.sizeimage.support.StreamResetException;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -170,6 +169,8 @@ public class BeLittleImpl implements BeLittle {
     Optional<String> mimeType;
     try (SaferImageReader tempReader = new SaferImageReader(iStream)) {
       mimeType = tempReader.getMimeTypes().stream().findFirst();
+    } catch (ImageReaderError e) {
+      mimeType = Optional.empty();
     }
 
     return getSizersFor(mimeType.orElse(getUnknownMimeType()));
@@ -236,6 +237,15 @@ public class BeLittleImpl implements BeLittle {
    */
   public BeLittlingResult generate(InputStream inputStream) throws StreamResetException {
     InputStream iStream = from(inputStream);
+    List<ImageSizer> sizers;
+
+    sizers = getSizersFor(iStream).getRecommendations();
+    return null;
+  }
+
+  /*
+  public BeLittlingResult generate(InputStream inputStream) throws StreamResetException {
+    InputStream iStream = from(inputStream);
     Optional<ImageSizer> sizer = getSizersFor(iStream).getRecommended();
     if (sizer.isPresent()) {
       return sizer.get().setInput(iStream).generate();
@@ -244,6 +254,8 @@ public class BeLittleImpl implements BeLittle {
           null, Collections.singletonList(messageFactory.make(MessageConstants.NO_SIZER)));
     }
   }
+
+  */
 
   /**
    * Encapsulate information about what resizing techniques are (or are not) available and

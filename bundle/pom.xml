@@ -72,11 +72,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.8</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.jai-imageio</groupId>
-            <artifactId>jai-imageio-core</artifactId>
-            <version>1.3.0</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.github.jai-imageio</groupId>-->
+        <!--<artifactId>jai-imageio-core</artifactId>-->
+        <!--<version>1.3.0</version>-->
+        <!--</dependency>-->
     </dependencies>
     <build>
         <plugins>
@@ -97,13 +97,17 @@
                             im4java,
                             commons-io,
                             thumbnailator,
-                            commons-lang3,
-                            jai-imageio-core
+                            commons-lang3
+                            <!--,jai-imageio-core-->
                         </Embed-Dependency>
                         <Import-Package>
                             !sun.security.action,
+                            !com.github.jaiimageio.impl.common
                             *
                         </Import-Package>
+                        <Export-Package>
+                            com.github.ahoffer.sizeimage
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
