@@ -15,7 +15,6 @@ import com.github.ahoffer.sizeimage.belittle.BeLittleImpl;
 import com.github.ahoffer.sizeimage.belittle.BeLittleImpl.ImageSizerCollection;
 import com.github.ahoffer.sizeimage.sizers.JaiJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.sizers.MagickSizer;
-import com.github.ahoffer.sizeimage.support.StreamResetException;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -78,7 +77,7 @@ public class ContainerTest {
 
   @Ignore
   @Test
-  public void testGetSizersByJp2Stream() throws StreamResetException {
+  public void testGetSizersByJp2Stream() {
     ImageSizerCollection sizers = belittler.getSizersFor(data.jpeg2000_128x80Stream);
     assertThat("Expect 6 image sizers", sizers.getRecommendations(), hasSize(5));
     assertThat(
@@ -106,7 +105,7 @@ public class ContainerTest {
   }
 
   @Test
-  public void testConvenienceMethod() throws StreamResetException {
+  public void testConvenienceMethod() {
     BeLittlingResult output = belittler.generate(data.jpeg2000_513x341Stream);
     assertThat(output.getOutput().isPresent(), is(true));
     assertThat(output.getOutput().get().getWidth(), equalTo(belittler.getMaxWidth()));

@@ -5,9 +5,9 @@ import static java.util.Collections.EMPTY_LIST;
 import com.github.ahoffer.sizeimage.BeLittle;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
+import com.github.ahoffer.sizeimage.support.ImageReaderError;
 import com.github.ahoffer.sizeimage.support.MessageFactory;
 import com.github.ahoffer.sizeimage.support.SaferImageReader;
-import com.github.ahoffer.sizeimage.support.SaferImageReader.ImageReaderError;
 import com.github.ahoffer.sizeimage.support.StreamResetException;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -78,9 +78,6 @@ public class BeLittleImpl implements BeLittle {
   /**
    * This method is the primary public object for finding the ImageSizers that should be used for a
    * particular image type. See the ImageSizerCollection class for more information.
-   *
-   * @param inputMimeType
-   * @return
    */
   public ImageSizerCollection getSizersFor(String inputMimeType) {
     ImageSizerCollection coll = new ImageSizerCollection();
@@ -135,7 +132,6 @@ public class BeLittleImpl implements BeLittle {
    * once. This method clones a prototype ImageSizer and sets its desired width and height, if
    * appropriate.
    *
-   * @param sizer
    * @return copy of an image sizer
    */
   ImageSizer copyAndInitialize(ImageSizer sizer) {
@@ -160,9 +156,6 @@ public class BeLittleImpl implements BeLittle {
    * Similar to getSizerFor(mimeType), expect that it accepts an input stream representing an image.
    * It will attempt to extract the MIME type from the stream and reset the stream to its original
    * position.
-   *
-   * @param inputStream
-   * @return
    */
   public ImageSizerCollection getSizersFor(InputStream inputStream) {
     InputStream iStream = from(inputStream);
@@ -229,17 +222,10 @@ public class BeLittleImpl implements BeLittle {
     this.maxHeight = maxHeight;
   }
 
-  /**
-   * Convenience method. Attempt to generate an image from the first available ImageSizer.
-   *
-   * @param inputStream
-   * @return
-   */
+  /** Convenience method. Attempt to generate an image from the first available ImageSizer. */
   public BeLittlingResult generate(InputStream inputStream) throws StreamResetException {
     InputStream iStream = from(inputStream);
-    List<ImageSizer> sizers;
-
-    sizers = getSizersFor(iStream).getRecommendations();
+    List<ImageSizer> sizers = getSizersFor(iStream).getRecommendations();
     return null;
   }
 
@@ -262,6 +248,7 @@ public class BeLittleImpl implements BeLittle {
    * recommended.
    */
   public class ImageSizerCollection {
+
     private Optional<ImageSizer> recommended;
     private List<ImageSizer> recommendations;
     private List<ImageSizer> wildcards;

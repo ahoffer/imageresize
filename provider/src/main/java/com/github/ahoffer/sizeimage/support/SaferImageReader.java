@@ -219,19 +219,4 @@ public class SaferImageReader implements AutoCloseable {
   protected void setInputStream(InputStream inputStream) {
     this.inputStream = inputStream;
   }
-
-  public static class ImageReaderError extends RuntimeException {
-
-    public ImageReaderError() {
-      super();
-    }
-
-    public ImageReaderError(Throwable cause) {
-      super(cause);
-    }
-
-    public ImageReaderError(String msg) {
-      super(msg);
-    }
-  }
 }
