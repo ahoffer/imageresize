@@ -7,7 +7,7 @@ can be implemented developers. The `ImageSizer` interface is simple. It includes
 method declarations: 
 * A method to set an input stream that represents an image, such as a JPEG 
 or GIF.
-* Methods to get and set a configuration. The configuration can be used by 
+* Methods to get and set a settings. The settings can be used by 
 implementors of `ImageSize`.
 * A method to set the desired generate of the output image.
 * A method to initiate the sizing operation and return a `BufferedImage`
@@ -71,18 +71,18 @@ fit inside that box.
 #### ImageSizerFactory API
 The public methods fall into two groups:
 
-* Methods for managing configuration
+* Methods for managing settings
 * Methods for getting image sizers
 * Facade method
 
 ### Configuration API
 
-The ImageSizerFactory is mostly a configurable factory. The configuration associates
+The ImageSizerFactory is mostly a configurable factory. The settings associates
 the MIME type of an image format to an ordered list of ImageSizer instances. The list is ordered
 from the most preferred ImageSizer for a MIME type to the least preferred ImageSizer for
 that MIME type. 
 
-The configuration references a _prototype_ instance of an ImageSizer. 
+The settings references a _prototype_ instance of an ImageSizer. 
 The ImageSizerFactory creates a new instances from the prototypes. 
 
 * Configure the rules for the factory ()
@@ -104,7 +104,7 @@ The ImageSizerFactory creates a new instances from the prototypes.
 
 #### Sample ImageSizerFactory Configuration
 
-Sample configuration
+Sample settings
 
 | MIME Type  | Sizers | 
 | ---------  | ------ |
@@ -112,21 +112,21 @@ Sample configuration
 | image/jpeg | Magic Sizer, SamplingSizer |
 | *          | SamplingSizer, MagicSizer, BasicSizer | 
 
-The configuration above has three rules.
+The settings above has three rules.
 * It associates the MIME type for a TGA image,`image/tga`, with a `MagicSizer`.
 * It associates the MIME type for a JPEG image, `imager/jpeg` with a `MagickSizer` 
 followed by a `SamplingSizer`
 * It associates the wildcard, `*` with:`SamplingSizer`, `MagicSizer`, and `BasicSizer`.
 
-Here is the definition of the sample configuration in Java:
+Here is the definition of the sample settings in Java:
 
 ```java
-Map<String, List<ImageSizer>> configuration = new HashMap<>();
+Map<String, List<ImageSizer>> settings = new HashMap<>();
 configurations.put("image/jpeg", 
     Arrays.asList(new SamplingSizer()));
-configuration.put("image/tga", 
+settings.put("image/tga", 
     Arrays.asList(new MagickSizer()));
-configuration.put("*", 
+settings.put("*", 
     Arrays.asList(new SamplingSizer(),
         new MagickSizer(),
         new BasicSizer()));
@@ -138,12 +138,12 @@ The factory methods return either a list of image sizers
 This group of methods accepts one of two types of parameters. They 
 either accept the MIME type (as a String), or an input stream of an image. 
 
-How do the factory methods behave with the sample configuration? 
+How do the factory methods behave with the sample settings? 
 Before answering that question, let's assume that the ImageMagick library is not installed
 on the machine, so `MagicSizer` is not actually available, even though it appears in the 
-configuration.
+settings.
 
-Here is how the ImageSizerFactory behaves with the sample configuration:
+Here is how the ImageSizerFactory behaves with the sample settings:
 
  | Method                 | Input               | Output                                      |
  | ---------------------- | ------------        | ------------------------------------------- |
@@ -151,7 +151,7 @@ Here is how the ImageSizerFactory behaves with the sample configuration:
  | `getRecommendedSizers` | "image\tga"         | List of generate 2: {`SamplingSizer`, `BasicSizer`}. 
                                                   The factory successfully matches the input to `MagicSizer`, 
                                                   but `MagicSizer` is unavailable and is filtered out of the results. 
-                                                  The factory uses the wildcard sizers (`*` in the configuration) |
+                                                  The factory uses the wildcard sizers (`*` in the settings) |
  | `getRecommendedSizers` | "image\tga", false  | List with one item, `MagickSizer`. 
                                                   The input `false` means "do not to filter out unavailable results". |
  | `getRecommendedSizers` | "image\foo"         | List of generate 2: {`SamplingSizer`, `BasicSizer`}. 

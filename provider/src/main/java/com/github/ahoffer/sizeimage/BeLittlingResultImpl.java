@@ -1,7 +1,5 @@
-package com.github.ahoffer.sizeimage.support;
+package com.github.ahoffer.sizeimage;
 
-import com.github.ahoffer.sizeimage.BeLittlingMessage;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,11 +13,15 @@ public class BeLittlingResultImpl implements BeLittlingResult {
   BufferedImage output;
 
   @SuppressWarnings("unused")
-  private BeLittlingResultImpl() {}
+  public BeLittlingResultImpl() {}
 
   public BeLittlingResultImpl(BufferedImage output, List<BeLittlingMessage> messages) {
     this.output = output;
     this.messages = Collections.unmodifiableList(new ArrayList<>(messages));
+  }
+
+  public void addMessage(BeLittlingMessage message) {
+    messages.add(message);
   }
 
   @Override
@@ -28,8 +30,19 @@ public class BeLittlingResultImpl implements BeLittlingResult {
   }
 
   @Override
+  // This method should only be called by an ImageSizer
+  public void setOutput(BufferedImage image) {
+    output = image;
+  }
+
+  @Override
   public List<BeLittlingMessage> getMessages() {
     return messages;
+  }
+
+  @Override
+  public boolean succeeded() {
+    return getOutput().isPresent();
   }
 
   public String toString() {

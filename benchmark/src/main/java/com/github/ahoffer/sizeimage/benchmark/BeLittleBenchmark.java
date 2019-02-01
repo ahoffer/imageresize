@@ -11,7 +11,7 @@ import com.github.ahoffer.sizeimage.sizers.MagickSizer;
 import com.github.ahoffer.sizeimage.sizers.NullImageSizer;
 import com.github.ahoffer.sizeimage.sizers.OpenJpeg2000Sizer;
 import com.github.ahoffer.sizeimage.sizers.SamplingSizer;
-import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
 import com.github.ahoffer.sizeimage.support.FuzzyFile;
 import com.github.ahoffer.sizeimage.support.LittleWorker;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;

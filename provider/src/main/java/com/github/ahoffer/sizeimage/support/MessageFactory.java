@@ -29,6 +29,7 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.UNCONFIGURED
 import static com.github.ahoffer.sizeimage.support.MessageConstants.UNKNOWN_MESSAGE_ID;
 
 import com.github.ahoffer.sizeimage.BeLittlingMessage;
+import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
 
 /**
  * This class serves two purposes. First, it provides a shortcut for adding messages to ImageSizers.

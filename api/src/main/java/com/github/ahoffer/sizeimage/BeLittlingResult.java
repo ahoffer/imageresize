@@ -26,4 +26,10 @@ public interface BeLittlingResult {
    * @return List of informative messages, warnings, and errors.
    */
   List<BeLittlingMessage> getMessages();
+
+  void addMessage(BeLittlingMessage message);
+
+  void setOutput(BufferedImage image);
+
+  boolean succeeded();
 }

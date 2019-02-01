@@ -1,6 +1,5 @@
-package com.github.ahoffer.sizeimage.support;
+package com.github.ahoffer.sizeimage;
 
-import com.github.ahoffer.sizeimage.BeLittlingMessage;
 import java.util.Optional;
 
 public class BeLittlingMessageImpl implements BeLittlingMessage {

@@ -1,6 +1,8 @@
 package com.github.ahoffer.sizeimage;
 
-import java.io.InputStream;
+import java.io.File;
+import java.util.List;
+import javax.imageio.stream.ImageInputStream;
 
 public interface BeLittle {
 
@@ -124,7 +126,9 @@ public interface BeLittle {
   */
 
   /** Convenience method. Attempt to generate an image from the first available ImageSizer. */
-  BeLittlingResult generate(InputStream inputStream) throws RuntimeException;
+  List<BeLittlingResult> generate(ImageInputStream iis) throws RuntimeException;
+
+  List<BeLittlingResult> generate(File file) throws RuntimeException;
 
   /*
       public class ImageSizerCollection {

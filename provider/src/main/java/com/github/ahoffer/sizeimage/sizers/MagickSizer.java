@@ -3,7 +3,11 @@ package com.github.ahoffer.sizeimage.sizers;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.EXTERNAL_EXECUTABLE;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
+import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
+import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.ImageSizer;
 import java.io.IOException;
+import java.io.InputStream;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -31,15 +35,21 @@ public class MagickSizer extends ExternalProcessSizer {
   public static final String STD_IN = "-";
   public static final String STD_OUT = ":-";
 
+  public MagickSizer(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
+    super(sizerSetting, injectedResult);
+  }
+
   void prepare() {
     super.prepare();
     if (!isAvailable()) {
-      addMessage(messageFactory.make(EXTERNAL_EXECUTABLE));
+      result.addMessage(messageFactory.make(EXTERNAL_EXECUTABLE));
     }
   }
 
-  void generateOutput() {
-    // TODO if MIME type is JPEG, add this option "-define jpeg:generate=200x200" and substitute a
+  @Override
+  public BeLittlingResult resize(
+      InputStream inputStream) { // TODO if MIME type is JPEG, add this option "-define
+    // jpeg:generate=200x200" and substitute a
     // size that is twice the size of the desired thumbnail.
     // TODO use -sample to improve memory usage
 
@@ -48,15 +58,19 @@ public class MagickSizer extends ExternalProcessSizer {
     Stream2BufferedImage outputConsumer = new Stream2BufferedImage();
     // TODO: Does "thumbnail" use "sample" option?
     // todo: If not, maybe compose a sample and scale operation to improve performance?
-    op.thumbnail(getMaxWidth(), getMaxHeight());
+    op.thumbnail(sizerSetting.getWidth(), sizerSetting.getHeight());
 
     // Read the image from std in
     op.addImage(STD_IN);
     command.setInputProvider(new Pipe(inputStream, null));
 
     // Write the image to std out
-    String outputFormatDirectedToStandardOut =
-        configuration.getOrDefault(OUTPUT_FORMAT_KEY, DEFAULT_OUTPUT_FORMAT) + STD_OUT;
+    String configuredOutputFormat = sizerSetting.getProperty(OUTPUT_FORMAT_KEY);
+    if (configuredOutputFormat == null) {
+      configuredOutputFormat = DEFAULT_OUTPUT_FORMAT;
+    }
+
+    String outputFormatDirectedToStandardOut = configuredOutputFormat + STD_OUT;
     op.addImage(outputFormatDirectedToStandardOut);
     command.setOutputConsumer(outputConsumer);
 
@@ -64,13 +78,19 @@ public class MagickSizer extends ExternalProcessSizer {
     try {
       command.run(op);
     } catch (InterruptedException | IM4JavaException | IOException e) {
-      addMessage(messageFactory.make(RESIZE_ERROR, e));
+      result.addMessage(messageFactory.make(RESIZE_ERROR, e));
     }
-    output = outputConsumer.getImage();
+    result.setOutput(outputConsumer.getImage());
+    return result;
   }
 
   @Override
   public boolean isAvailable() {
     return getExecutable().canExecute();
+  }
+
+  @Override
+  public ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
+    return new MagickSizer(sizerSetting, injectedResult);
   }
 }

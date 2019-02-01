@@ -1,51 +1,75 @@
 package com.github.ahoffer.sizeimage.sizers;
 
 import static com.github.ahoffer.sizeimage.support.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
-import static com.github.ahoffer.sizeimage.support.MessageConstants.COULD_NOT_READ_IMAGE;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
-import static com.github.ahoffer.sizeimage.support.MessageConstants.SAMPLE_PERIOD;
 
+import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
 import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
-import com.github.ahoffer.sizeimage.support.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.ComputeSubSamplingPeriod;
-import com.github.ahoffer.sizeimage.support.SaferImageReader;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Optional;
+import java.io.InputStream;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class SamplingSizer extends AbstractImageSizer {
 
   public static final String SAMPLING_PERIOD_KEY = "samplingPeriod";
-  SaferImageReader reader;
-  private Integer samplingPeriod;
-  private BufferedImage input;
 
-  Optional<Integer> defaultSamplingPeriod() {
-    return Optional.ofNullable(configuration.get(SAMPLING_PERIOD_KEY)).map(Integer::parseInt);
+  private Integer samplingPeriod;
+  private ImageReader reader;
+
+  public SamplingSizer(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
+    super(sizerSetting, injectedResult);
+  }
+
+  void prepare(InputStream inputStream) {}
+
+  void cleanup() {
+    if (reader != null) {
+      reader.dispose();
+    }
   }
 
   @Override
-  void prepare() {
+  public BeLittlingResult resize(InputStream inputStream) {
 
-    super.prepare();
-    reader = new SaferImageReader(inputStream);
-    Optional<Integer> inputHeight = reader.getHeight();
-    Optional<Integer> inputWidth = reader.getWidth();
-    if (!(inputHeight.isPresent() && inputWidth.isPresent())) {
-      Optional<Integer> defaultSamplingPeriod = defaultSamplingPeriod();
-      if (defaultSamplingPeriod.isPresent()) {
-        samplingPeriod = defaultSamplingPeriod.get();
-        addMessage(
+    ImageInputStream iis = null;
+    reader = getImageReaderByMIMEType();
+    try {
+      iis = ImageIO.createImageInputStream(inputStream);
+      reader.setInput(iis);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    int inputHeight = 0;
+    int inputWidth = 0;
+    try {
+      inputHeight = reader.getHeight(0);
+      inputWidth = reader.getWidth(0);
+    } catch (IOException e) {
+      // A message will be added later
+    }
+    if (inputHeight <= 0 || inputWidth <= 0) {
+      int defaultSamplingPeriod = Integer.valueOf(sizerSetting.getProperty(SAMPLING_PERIOD_KEY));
+      if (defaultSamplingPeriod > 0) {
+        samplingPeriod = defaultSamplingPeriod;
+        result.addMessage(
             new BeLittlingMessageImpl(
                 CANNOT_READ_WIDTH_AND_HEIGHT,
                 BeLittlingSeverity.WARNING,
                 String.format(
                     "Width and height of input image cannot be determined. Using configured sampling period of %s pixels",
-                    defaultSamplingPeriod.get())));
+                    samplingPeriod)));
 
       } else {
-        addMessage(
+        result.addMessage(
             new BeLittlingMessageImpl(
                 CANNOT_READ_WIDTH_AND_HEIGHT,
                 BeLittlingSeverity.ERROR,
@@ -54,42 +78,28 @@ public class SamplingSizer extends AbstractImageSizer {
     } else {
       samplingPeriod =
           new ComputeSubSamplingPeriod()
-              .setInputSize(inputWidth.get(), inputHeight.get())
-              .setOutputSize(getMaxWidth(), getMaxHeight())
+              .setInputSize(inputWidth, inputHeight)
+              .setOutputSize(sizerSetting.getWidth(), sizerSetting.getHeight())
               .compute();
     }
-  }
+    reader.getDefaultReadParam().setSourceSubsampling(samplingPeriod, samplingPeriod, 0, 0);
 
-  @Override
-  void processInput() {
-    super.processInput();
-    reader.setSourceSubsampling(samplingPeriod, samplingPeriod);
-    addMessage(messageFactory.make(SAMPLE_PERIOD, samplingPeriod));
-    Optional<BufferedImage> result = reader.read();
-    if (result.isPresent()) {
-      input = result.get();
-    } else {
-      addMessage(
-          new BeLittlingMessageImpl(
-              COULD_NOT_READ_IMAGE,
-              BeLittlingSeverity.ERROR,
-              String.format("%s could not read input image", reader.getClass().getSimpleName())));
-    }
-  }
+    BufferedImage image = null;
 
-  @Override
-  void generateOutput() {
     try {
-      output = Thumbnails.of(input).size(getMaxWidth(), getMaxHeight()).asBufferedImage();
+      image = reader.read(0);
+      result.setOutput(
+          Thumbnails.of(image)
+              .size(sizerSetting.getWidth(), sizerSetting.getHeight())
+              .asBufferedImage());
     } catch (IOException e) {
-      addMessage(messageFactory.make(RESIZE_ERROR, e));
+      result.addMessage(messageFactory.make(RESIZE_ERROR, e));
     }
+    return result;
   }
 
   @Override
-  void cleanup() {
-    if (reader != null) {
-      reader.dispose();
-    }
+  public ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
+    return new SamplingSizer(sizerSetting, injectedResult);
   }
 }

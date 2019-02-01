@@ -1,7 +1,6 @@
 package com.github.ahoffer.sizeimage;
 
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * The ImageSizer interface is central class of this library. Implementers of the interface can use
@@ -28,65 +27,12 @@ import java.util.Map;
 public interface ImageSizer {
 
   /**
-   * Return the image sizer's configuration. It is recommended that implementors return an
-   * unmodifiable view or a copy of the configuration, but it is not required.
+   * Primary method
    *
+   * @param inputStream
    * @return
    */
-  Map<String, String> getConfiguration();
-
-  /**
-   * The configuration is expected to be a simple map of string keys to string values. One use is to
-   * store the desired output generate of re-sized images. See implementers of this interface for
-   * samples of how configuration can be used. It is expected implementers will copy the input and
-   * not keep a reference to the input.
-   *
-   * @param configuration
-   */
-  // TODO: Blueprint expects the method to return void. Does a map w/ generics work in
-  // todo: blueprint?  Gotta check it out.
-  void setConfiguration(Map configuration);
-
-  /**
-   * Provide the image sizer with the image that should be re-sized.
-   *
-   * @param inputStream representing image
-   * @return
-   */
-  ImageSizer setInput(InputStream inputStream);
-
-  /**
-   * Return the desired maximum width, in pixels. Resized image may have smaller than the maximum
-   * width to preserve aspect ratio.
-   *
-   * @return maximum width of resized image, in pixels
-   */
-  int getMaxWidth();
-
-  /**
-   * Return the desired maximum height, in pixels. Resized image may have smaller than the maximum
-   * height to preserve aspect ratio.
-   *
-   * @return height in pixels
-   */
-  int getMaxHeight();
-
-  /**
-   * Set the desired output generate. Always preserve aspect ratio. The sized image should fit into
-   * a bounding box with dimensions maximum width x maximum height. The units are expected to be
-   * pixels.
-   *
-   * @return this object
-   */
-  ImageSizer setOutputSize(int maxWidth, int maxHeight);
-
-  /**
-   * Resize the image associated with this image. Assume the image to be resized as passed as the
-   * parameter of the setInput() method.
-   *
-   * @return resized image
-   */
-  BeLittlingResult generate();
+  BeLittlingResult resize(InputStream inputStream);
 
   /**
    * Return true is the image sizer is ready and able generate images. Image sizers have
@@ -109,34 +55,7 @@ public interface ImageSizer {
    *
    * @return instance of a concrete image sizer
    */
-  // TODO: Tried using scope=prototype in blueprint. Then fetch it using getServiceObjects(), but
-  // always same instance. Work-around was to clone the ImageSizer before returning it to a
-  // consumer.
+  ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult);
+
   ImageSizer getNew();
-
-  /**
-   * Allows cooperating objects the opportunity to add messages to the sizer about errors, potential
-   * problems, or information.
-   *
-   * @param message
-   * @return the image sizer
-   */
-  ImageSizer addMessage(BeLittlingMessage message);
-
-  /**
-   * Prevent the ImageSizer run indefinitely. Limit its execution time to a certain number of
-   * seconds.
-   *
-   * @param seconds
-   * @return the image sizer
-   */
-  ImageSizer setTimeoutSeconds(int seconds);
-
-  /**
-   * The number of seconds the ImageSizer should run before giving up and returning control to the
-   * caller.
-   *
-   * @return seconds
-   */
-  int getTimeoutSeconds();
 }

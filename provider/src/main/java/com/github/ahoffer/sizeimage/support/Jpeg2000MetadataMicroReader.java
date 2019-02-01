@@ -128,9 +128,8 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   public Jpeg2000MetadataMicroReader(InputStream inputStream) throws IOException {
     // 1K should probably be enough. Look at lower the buffer size.
     // Also, ISRandomAcessIO will throw a throwable if consumers try to read past the cache limit.
-    InputStream saferStream =
+    this.inputStream =
         inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
-    this.inputStream = saferStream;
     this.in = new ISRandomAccessIO(inputStream, READ_LIMIT, READ_LIMIT, READ_LIMIT);
   }
 
