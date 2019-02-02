@@ -7,20 +7,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class BeLittlingResultImpl implements BeLittlingResult {
+public class BeLittleResultImpl implements BeLittleResult {
 
-  List<BeLittlingMessage> messages = Collections.EMPTY_LIST;
+  List<BeLittleMessage> messages = Collections.EMPTY_LIST;
   BufferedImage output;
 
   @SuppressWarnings("unused")
-  public BeLittlingResultImpl() {}
+  public BeLittleResultImpl() {}
 
-  public BeLittlingResultImpl(BufferedImage output, List<BeLittlingMessage> messages) {
+  public BeLittleResultImpl(BufferedImage output, List<BeLittleMessage> messages) {
     this.output = output;
     this.messages = Collections.unmodifiableList(new ArrayList<>(messages));
   }
 
-  public void addMessage(BeLittlingMessage message) {
+  public void addMessage(BeLittleMessage message) {
     messages.add(message);
   }
 
@@ -36,7 +36,7 @@ public class BeLittlingResultImpl implements BeLittlingResult {
   }
 
   @Override
-  public List<BeLittlingMessage> getMessages() {
+  public List<BeLittleMessage> getMessages() {
     return messages;
   }
 
@@ -53,7 +53,7 @@ public class BeLittlingResultImpl implements BeLittlingResult {
           .stream()
           // For now, I want to see the messages in the order they were added
           // .sorted(Comparator.comparing(BeLittlingMessage::getSeverity).reversed())
-          .map(BeLittlingMessage::toString)
+          .map(BeLittleMessage::toString)
           .collect(Collectors.joining(System.lineSeparator()));
     }
   }

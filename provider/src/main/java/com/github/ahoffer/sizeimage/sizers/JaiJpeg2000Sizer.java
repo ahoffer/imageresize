@@ -4,9 +4,9 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.REDUCTION_FA
 import static com.github.ahoffer.sizeimage.support.MessageConstants.SAMPLE_PERIOD;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
-import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
-import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.BeLittleMessage.BeLittlingSeverity;
+import com.github.ahoffer.sizeimage.BeLittleMessageImpl;
+import com.github.ahoffer.sizeimage.BeLittleResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.ComputeResolutionLevel;
 import com.github.ahoffer.sizeimage.support.ComputeSubSamplingPeriod;
@@ -52,7 +52,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
       metadata = new Jpeg2000MetadataMicroReader(inputStream);
       metadata.read();
     } catch (IOException e) {
-      addMessage(new BeLittlingMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
+      addMessage(new BeLittleMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
     }
     if (!metadata.isSucessfullyRead()) {
       addMessage(messageFactory.make(MessageConstants.COULD_NOT_READ_METADATA));
@@ -68,7 +68,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittlingResult resize(InputStream inputStream) {
+  public BeLittleResult resize(InputStream inputStream) {
     readMetaData(inputStream);
     BufferedImage decodedImage = null;
     J2KImageReadParamJava param = new J2KImageReadParamJava();

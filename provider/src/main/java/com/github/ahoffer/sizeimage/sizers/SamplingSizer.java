@@ -4,9 +4,9 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.CANNOT_READ_
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
-import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
-import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.BeLittleMessage.BeLittlingSeverity;
+import com.github.ahoffer.sizeimage.BeLittleMessageImpl;
+import com.github.ahoffer.sizeimage.BeLittleResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.ComputeSubSamplingPeriod;
 import java.awt.image.BufferedImage;
@@ -37,7 +37,7 @@ public class SamplingSizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittlingResult resize(InputStream inputStream) {
+  public BeLittleResult resize(InputStream inputStream) {
 
     ImageInputStream iis = null;
     reader = getImageReaderByMIMEType();
@@ -61,7 +61,7 @@ public class SamplingSizer extends AbstractImageSizer {
       if (defaultSamplingPeriod > 0) {
         samplingPeriod = defaultSamplingPeriod;
         addMessage(
-            new BeLittlingMessageImpl(
+            new BeLittleMessageImpl(
                 CANNOT_READ_WIDTH_AND_HEIGHT,
                 BeLittlingSeverity.WARNING,
                 String.format(
@@ -70,7 +70,7 @@ public class SamplingSizer extends AbstractImageSizer {
 
       } else {
         addMessage(
-            new BeLittlingMessageImpl(
+            new BeLittleMessageImpl(
                 CANNOT_READ_WIDTH_AND_HEIGHT,
                 BeLittlingSeverity.ERROR,
                 "Width and/or height of input image cannot be determined and no default sampling period is value is configured. Sampling sizer needs these values to compute subsampling period."));

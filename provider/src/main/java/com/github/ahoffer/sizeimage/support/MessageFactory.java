@@ -1,8 +1,8 @@
 package com.github.ahoffer.sizeimage.support;
 
-import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.ERROR;
-import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.INFO;
-import static com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity.WARNING;
+import static com.github.ahoffer.sizeimage.BeLittleMessage.BeLittlingSeverity.ERROR;
+import static com.github.ahoffer.sizeimage.BeLittleMessage.BeLittlingSeverity.INFO;
+import static com.github.ahoffer.sizeimage.BeLittleMessage.BeLittlingSeverity.WARNING;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.BAD_HEIGHT;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.BAD_WIDTH;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.BIT_RATE;
@@ -28,8 +28,8 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.UNABLE_TO_CR
 import static com.github.ahoffer.sizeimage.support.MessageConstants.UNCONFIGURED;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.UNKNOWN_MESSAGE_ID;
 
-import com.github.ahoffer.sizeimage.BeLittlingMessage;
-import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
+import com.github.ahoffer.sizeimage.BeLittleMessage;
+import com.github.ahoffer.sizeimage.BeLittleMessageImpl;
 
 /**
  * This class serves two purposes. First, it provides a shortcut for adding messages to ImageSizers.
@@ -38,7 +38,7 @@ import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
  */
 public class MessageFactory {
 
-  public BeLittlingMessage make(String id, Object... values) {
+  public BeLittleMessage make(String id, Object... values) {
     // TODO: Make array access safe - extract values into Optional<Object> or Optional<?>. Or just
     // todo: catch the exception accessing a nonexistent array element and generate a message to
     // that
@@ -46,83 +46,83 @@ public class MessageFactory {
     //    boolean hasOneValue = values.length ==1;
     switch (id) {
       case BAD_WIDTH:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             BAD_WIDTH, ERROR, String.format("%d is not a valid size", (int) values[0]));
       case BAD_HEIGHT:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             BAD_HEIGHT, ERROR, String.format("%d is not a valid size", (int) values[0]));
       case SIZER_NAME:
-        return new BeLittlingMessageImpl(SIZER_NAME, INFO, values[0].toString());
+        return new BeLittleMessageImpl(SIZER_NAME, INFO, values[0].toString());
       case EXTERNAL_EXECUTABLE:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             EXTERNAL_EXECUTABLE,
             ERROR,
             "Executable not found. Check executable path. "
                 + "Process does not inherit a PATH environment variable");
       case MISSING_INPUT_STREAM:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             MISSING_INPUT_STREAM, ERROR, "Input stream cannot be null");
       case RESIZE_ERROR:
-        return new BeLittlingMessageImpl(RESIZE_ERROR, ERROR, (Exception) values[0]);
+        return new BeLittleMessageImpl(RESIZE_ERROR, ERROR, (Exception) values[0]);
 
       case NO_SIZER:
-        return new BeLittlingMessageImpl(NO_SIZER, ERROR, "No image sizer could be found");
+        return new BeLittleMessageImpl(NO_SIZER, ERROR, "No image sizer could be found");
       case DECODE_JPEG2000:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             DECODE_JPEG2000,
             ERROR,
             "Exception attempting to read/decode JPEG 2000 image. Is it a different kind of image?");
       case SAMPLE_PERIOD:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             SAMPLE_PERIOD, INFO, String.format("Sampling period=%d", (int) values[0]));
       case RESOLUTION_LEVELS:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             RESOLUTION_LEVELS,
             INFO,
             String.format("Resolutions levels decoded %d", (int) values[0]));
       case UNABLE_TO_CREATE_TEMP_FILE:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             UNABLE_TO_CREATE_TEMP_FILE, ERROR, "Could not create temporary file for input image");
       case OS_PROCESS_FAILED:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             OS_PROCESS_FAILED, ERROR, ((Exception) values[0]).getMessage());
       case OPJ_FAILED:
-        return new BeLittlingMessageImpl(OPJ_FAILED, ERROR, values[0].toString());
+        return new BeLittleMessageImpl(OPJ_FAILED, ERROR, values[0].toString());
       case CANNOT_READ_WIDTH_AND_HEIGHT:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             CANNOT_READ_WIDTH_AND_HEIGHT,
             WARNING,
             "Could not read width and height of image. Using resolution level 0 (maximum)");
       case OS_PROCESS_INTERRUPTED:
-        return new BeLittlingMessageImpl(OS_PROCESS_INTERRUPTED, ERROR, "OS process interrupted");
+        return new BeLittleMessageImpl(OS_PROCESS_INTERRUPTED, ERROR, "OS process interrupted");
       case STREAM_MANGLED:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             STREAM_MANGLED, ERROR, ((Exception) values[0]).getMessage());
       case BIT_RATE:
-        return new BeLittlingMessageImpl(BIT_RATE, INFO, values[0].toString());
+        return new BeLittleMessageImpl(BIT_RATE, INFO, values[0].toString());
       case COULD_NOT_READ_METADATA:
-        return new BeLittlingMessageImpl(
+        return new BeLittleMessageImpl(
             COULD_NOT_READ_METADATA,
             ERROR,
             "Could not read metadata from image. Image might be corrupt");
       case UNCONFIGURED:
-        return new BeLittlingMessageImpl(UNCONFIGURED, WARNING, values[0].toString());
+        return new BeLittleMessageImpl(UNCONFIGURED, WARNING, values[0].toString());
       case COULD_NOT_READ_IMAGE:
-        return new BeLittlingMessageImpl(COULD_NOT_READ_IMAGE, ERROR, (Exception) values[0]);
+        return new BeLittleMessageImpl(COULD_NOT_READ_IMAGE, ERROR, (Exception) values[0]);
       case COULD_NOT_CLOSE_STREAM:
-        return new BeLittlingMessageImpl(COULD_NOT_CLOSE_STREAM, WARNING, (Exception) values[0]);
+        return new BeLittleMessageImpl(COULD_NOT_CLOSE_STREAM, WARNING, (Exception) values[0]);
       case REDUCTION_FACTOR:
-        return new BeLittlingMessageImpl(REDUCTION_FACTOR, INFO, values[0].toString());
+        return new BeLittleMessageImpl(REDUCTION_FACTOR, INFO, values[0].toString());
       case NO_IMAGE_READER:
-        return new BeLittlingMessageImpl(NO_IMAGE_READER, ERROR, "No compatible JAI reader found");
+        return new BeLittleMessageImpl(NO_IMAGE_READER, ERROR, "No compatible JAI reader found");
 
       default:
         return makeUnrecognized(id);
     }
   }
 
-  BeLittlingMessageImpl makeUnrecognized(String unknownMessageId) {
-    return new BeLittlingMessageImpl(
+  BeLittleMessageImpl makeUnrecognized(String unknownMessageId) {
+    return new BeLittleMessageImpl(
         UNKNOWN_MESSAGE_ID, ERROR, String.format("%s is unrecognized", unknownMessageId));
   }
 }

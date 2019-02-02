@@ -2,7 +2,7 @@ package com.github.ahoffer.sizeimage;
 
 import java.util.Optional;
 
-public class BeLittlingMessageImpl implements BeLittlingMessage {
+public class BeLittleMessageImpl implements BeLittleMessage {
 
   String id;
   String description;
@@ -10,21 +10,21 @@ public class BeLittlingMessageImpl implements BeLittlingMessage {
   Throwable throwable;
 
   @SuppressWarnings("unsed")
-  private BeLittlingMessageImpl() {}
+  private BeLittleMessageImpl() {}
 
-  public BeLittlingMessageImpl(String id, BeLittlingSeverity severity, String description) {
+  public BeLittleMessageImpl(String id, BeLittlingSeverity severity, String description) {
     this.id = id;
     this.severity = severity;
     this.description = description;
   }
 
-  public BeLittlingMessageImpl(
+  public BeLittleMessageImpl(
       String id, BeLittlingSeverity severity, String description, Throwable throwable) {
     this(id, severity, description);
     this.throwable = throwable;
   }
 
-  public BeLittlingMessageImpl(String id, BeLittlingSeverity severity, Throwable throwable) {
+  public BeLittleMessageImpl(String id, BeLittlingSeverity severity, Throwable throwable) {
     this(id, severity, throwable.getMessage(), throwable);
   }
 

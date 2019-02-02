@@ -5,9 +5,9 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.SIZER_NAME;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
 import com.github.ahoffer.sizeimage.BeLittleSizerSettingImpl;
-import com.github.ahoffer.sizeimage.BeLittlingMessage;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
-import com.github.ahoffer.sizeimage.BeLittlingResultImpl;
+import com.github.ahoffer.sizeimage.BeLittleMessage;
+import com.github.ahoffer.sizeimage.BeLittleResult;
+import com.github.ahoffer.sizeimage.BeLittleResultImpl;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.MessageFactory;
 import java.util.Iterator;
@@ -38,14 +38,14 @@ public abstract class AbstractImageSizer implements ImageSizer {
 
   MessageFactory messageFactory = new MessageFactory();
   BeLittleSizerSetting sizerSetting;
-  BeLittlingResult result;
+  BeLittleResult result;
 
   public AbstractImageSizer(BeLittleSizerSetting sizerSettings) {
     this.sizerSetting = new BeLittleSizerSettingImpl(sizerSettings);
-    result = new BeLittlingResultImpl();
+    result = new BeLittleResultImpl();
   }
 
-  public BeLittlingResult getResult() {
+  public BeLittleResult getResult() {
     return result;
   }
 
@@ -103,7 +103,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     }
   }
 
-  public void addMessage(BeLittlingMessage message) {
+  public void addMessage(BeLittleMessage message) {
     getResult().addMessage(message);
   }
 

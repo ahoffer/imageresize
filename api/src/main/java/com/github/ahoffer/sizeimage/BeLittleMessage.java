@@ -11,7 +11,7 @@ import java.util.Optional;
  * and, at a high level, about it is about. A message also includes its severity (error, warning, or
  * informational). A message can optionally include an exception (throwable) to aid debugging.
  */
-public interface BeLittlingMessage {
+public interface BeLittleMessage {
 
   /**
    * The ID is a string that identifies the message at a high level. Implementers are free to

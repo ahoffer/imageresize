@@ -4,7 +4,7 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.EXTERNAL_EXE
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.BeLittleResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ public class MagickSizer extends ExternalProcessSizer {
   }
 
   @Override
-  public BeLittlingResult resize(
+  public BeLittleResult resize(
       InputStream inputStream) { // TODO if MIME type is JPEG, add this option "-define
     // jpeg:generate=200x200" and substitute a
     // size that is twice the size of the desired thumbnail.

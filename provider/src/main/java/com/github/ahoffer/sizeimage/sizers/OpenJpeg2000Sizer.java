@@ -9,9 +9,9 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.UNABLE_TO_CR
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
-import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
-import com.github.ahoffer.sizeimage.BeLittlingMessageImpl;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.BeLittleMessage.BeLittlingSeverity;
+import com.github.ahoffer.sizeimage.BeLittleMessageImpl;
+import com.github.ahoffer.sizeimage.BeLittleResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.ComputeResolutionLevel;
 import com.github.ahoffer.sizeimage.support.Jpeg2000MetadataMicroReader;
@@ -42,7 +42,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     super(sizerSetting);
   }
 
-  public BeLittlingResult resize(InputStream inputStream) {
+  public BeLittleResult resize(InputStream inputStream) {
 
     readMetaData(inputStream);
     reductionFactor = getReductionFactor();
@@ -109,7 +109,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       metadata = new Jpeg2000MetadataMicroReader(inputStream);
       metadata.read();
     } catch (IOException e) {
-      addMessage(new BeLittlingMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
+      addMessage(new BeLittleMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
     }
     if (!metadata.isSucessfullyRead()) {
       addMessage(messageFactory.make(COULD_NOT_READ_METADATA));

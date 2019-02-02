@@ -3,7 +3,7 @@ package com.github.ahoffer.sizeimage.sizers;
 import static com.github.ahoffer.sizeimage.support.MessageConstants.RESIZE_ERROR;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.BeLittleResult;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class BasicSizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittlingResult resize(InputStream inputStream) {
+  public BeLittleResult resize(InputStream inputStream) {
     BufferedImage image = null;
     try {
       image =

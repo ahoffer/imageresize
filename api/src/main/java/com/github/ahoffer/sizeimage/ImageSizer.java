@@ -32,7 +32,7 @@ public interface ImageSizer {
    * @param inputStream
    * @return
    */
-  BeLittlingResult resize(InputStream inputStream);
+  BeLittleResult resize(InputStream inputStream);
 
   /**
    * Return true is the image sizer is ready and able generate images. Image sizers have
@@ -59,7 +59,7 @@ public interface ImageSizer {
 
   ImageSizer getNew();
 
-  BeLittlingResult getResult();
+  BeLittleResult getResult();
 
-  void addMessage(BeLittlingMessage message);
+  void addMessage(BeLittleMessage message);
 }

@@ -9,7 +9,7 @@ import java.util.Optional;
  * list of messages collected during the operation. The object receiving the reulst owns them and is
  * free to mutate them as it needed or desired.
  */
-public interface BeLittlingResult {
+public interface BeLittleResult {
 
   /**
    * The result of the resizing the image. If the resizer operation was successful, the Optional is
@@ -25,9 +25,9 @@ public interface BeLittlingResult {
    *
    * @return List of informative messages, warnings, and errors.
    */
-  List<BeLittlingMessage> getMessages();
+  List<BeLittleMessage> getMessages();
 
-  void addMessage(BeLittlingMessage message);
+  void addMessage(BeLittleMessage message);
 
   void setOutput(BufferedImage image);
 

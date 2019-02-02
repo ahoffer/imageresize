@@ -126,9 +126,9 @@ public interface BeLittle {
   */
 
   /** Convenience method. Attempt to generate an image from the first available ImageSizer. */
-  List<BeLittlingResult> generate(ImageInputStream iis) throws RuntimeException;
+  List<BeLittleResult> generate(ImageInputStream iis) throws RuntimeException;
 
-  List<BeLittlingResult> generate(File file) throws RuntimeException;
+  List<BeLittleResult> generate(File file) throws RuntimeException;
 
   /*
       public class ImageSizerCollection {

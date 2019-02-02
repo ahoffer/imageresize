@@ -3,7 +3,7 @@ package com.github.ahoffer.sizeimage;
 import static com.github.ahoffer.sizeimage.BeLittleConstants.MIME_TYPE;
 import static com.github.ahoffer.sizeimage.BeLittleConstants.UNKNOWN_MIME_TYPE;
 
-import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
+import com.github.ahoffer.sizeimage.BeLittleMessage.BeLittlingSeverity;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
 import java.io.File;
@@ -53,7 +53,7 @@ public class BeLittleImpl implements BeLittle {
     return Collections.unmodifiableList(sizers.get(getMimeType()));
   }
 
-  public List<BeLittlingResult> generate(ImageInputStream iis) {
+  public List<BeLittleResult> generate(ImageInputStream iis) {
     File file = null;
     try {
       file = File.createTempFile("belittle", null);
@@ -75,21 +75,21 @@ public class BeLittleImpl implements BeLittle {
    * failed attempts. Could also prodive methods like "succeeded?", "getSuccessfulResult", and get
    * "getImage" (from successful result).
    */
-  public List<BeLittlingResult> generate(File file) {
+  public List<BeLittleResult> generate(File file) {
     setMimeType(readMimeType(file));
     ByteSource source = Files.asByteSource(file);
 
     List<ImageSizer> sizerList = getSizersForCurrentMimeType();
 
     for (ImageSizer sizer : sizerList) {
-      Callable<BeLittlingResult> callable = () -> sizer.resize(source.openBufferedStream());
-      Future<BeLittlingResult> future = executorService.submit(callable);
+      Callable<BeLittleResult> callable = () -> sizer.resize(source.openBufferedStream());
+      Future<BeLittleResult> future = executorService.submit(callable);
       try {
         future.get(sizerSetting.getTimeoutSeconds(), TimeUnit.SECONDS);
       } catch (InterruptedException | ExecutionException | TimeoutException e) {
-        sizer.addMessage(new BeLittlingMessageImpl("EXP", BeLittlingSeverity.ERROR, e));
+        sizer.addMessage(new BeLittleMessageImpl("EXP", BeLittlingSeverity.ERROR, e));
       }
-      BeLittlingResult result = sizer.getResult();
+      BeLittleResult result = sizer.getResult();
       if (result.succeeded()) {
         // Return immediately if a sizer succeeds.
         return Collections.singletonList(result);
