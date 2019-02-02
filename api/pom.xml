@@ -5,16 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.ahoffer</groupId>
-        <artifactId>sizeimage</artifactId>
+        <groupId>belittle</groupId>
+        <artifactId>belittle-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>api</artifactId>
+    <artifactId>belittle-api</artifactId>
     <packaging>jar</packaging>
-    <distributionManagement>
-        <repository>
-            <id>internal</id>
-            <url>file:///repos/artifacts</url>
-        </repository>
-    </distributionManagement>
 </project>
