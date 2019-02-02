@@ -24,8 +24,8 @@ public class SamplingSizer extends AbstractImageSizer {
   private Integer samplingPeriod;
   private ImageReader reader;
 
-  public SamplingSizer(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    super(sizerSetting, injectedResult);
+  public SamplingSizer(BeLittleSizerSetting sizerSetting) {
+    super(sizerSetting);
   }
 
   void prepare(InputStream inputStream) {}
@@ -60,7 +60,7 @@ public class SamplingSizer extends AbstractImageSizer {
       int defaultSamplingPeriod = Integer.valueOf(sizerSetting.getProperty(SAMPLING_PERIOD_KEY));
       if (defaultSamplingPeriod > 0) {
         samplingPeriod = defaultSamplingPeriod;
-        result.addMessage(
+        addMessage(
             new BeLittlingMessageImpl(
                 CANNOT_READ_WIDTH_AND_HEIGHT,
                 BeLittlingSeverity.WARNING,
@@ -69,7 +69,7 @@ public class SamplingSizer extends AbstractImageSizer {
                     samplingPeriod)));
 
       } else {
-        result.addMessage(
+        addMessage(
             new BeLittlingMessageImpl(
                 CANNOT_READ_WIDTH_AND_HEIGHT,
                 BeLittlingSeverity.ERROR,
@@ -93,13 +93,13 @@ public class SamplingSizer extends AbstractImageSizer {
               .size(sizerSetting.getWidth(), sizerSetting.getHeight())
               .asBufferedImage());
     } catch (IOException e) {
-      result.addMessage(messageFactory.make(RESIZE_ERROR, e));
+      addMessage(messageFactory.make(RESIZE_ERROR, e));
     }
     return result;
   }
 
   @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    return new SamplingSizer(sizerSetting, injectedResult);
+  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
+    return new SamplingSizer(sizerSetting);
   }
 }

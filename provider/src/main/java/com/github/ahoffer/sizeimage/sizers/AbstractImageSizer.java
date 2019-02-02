@@ -5,7 +5,9 @@ import static com.github.ahoffer.sizeimage.support.MessageConstants.SIZER_NAME;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
 import com.github.ahoffer.sizeimage.BeLittleSizerSettingImpl;
+import com.github.ahoffer.sizeimage.BeLittlingMessage;
 import com.github.ahoffer.sizeimage.BeLittlingResult;
+import com.github.ahoffer.sizeimage.BeLittlingResultImpl;
 import com.github.ahoffer.sizeimage.ImageSizer;
 import com.github.ahoffer.sizeimage.support.MessageFactory;
 import java.util.Iterator;
@@ -38,13 +40,17 @@ public abstract class AbstractImageSizer implements ImageSizer {
   BeLittleSizerSetting sizerSetting;
   BeLittlingResult result;
 
-  public AbstractImageSizer(BeLittleSizerSetting sizerSettings, BeLittlingResult result) {
+  public AbstractImageSizer(BeLittleSizerSetting sizerSettings) {
     this.sizerSetting = new BeLittleSizerSettingImpl(sizerSettings);
-    this.result = result;
+    result = new BeLittlingResultImpl();
+  }
+
+  public BeLittlingResult getResult() {
+    return result;
   }
 
   public ImageSizer getNew() {
-    return getNew(sizerSetting, null);
+    return getNew(sizerSetting);
   }
 
   /**
@@ -97,8 +103,12 @@ public abstract class AbstractImageSizer implements ImageSizer {
     }
   }
 
+  public void addMessage(BeLittlingMessage message) {
+    getResult().addMessage(message);
+  }
+
   /** Adds informational message that gives the class name of the sizer */
   protected void stampNameOnResults() {
-    result.addMessage(messageFactory.make(SIZER_NAME, this.getClass().getSimpleName()));
+    addMessage(messageFactory.make(SIZER_NAME, this.getClass().getSimpleName()));
   }
 }

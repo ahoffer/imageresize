@@ -35,14 +35,14 @@ public class MagickSizer extends ExternalProcessSizer {
   public static final String STD_IN = "-";
   public static final String STD_OUT = ":-";
 
-  public MagickSizer(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    super(sizerSetting, injectedResult);
+  public MagickSizer(BeLittleSizerSetting sizerSetting) {
+    super(sizerSetting);
   }
 
   void prepare() {
     super.prepare();
     if (!isAvailable()) {
-      result.addMessage(messageFactory.make(EXTERNAL_EXECUTABLE));
+      addMessage(messageFactory.make(EXTERNAL_EXECUTABLE));
     }
   }
 
@@ -78,7 +78,7 @@ public class MagickSizer extends ExternalProcessSizer {
     try {
       command.run(op);
     } catch (InterruptedException | IM4JavaException | IOException e) {
-      result.addMessage(messageFactory.make(RESIZE_ERROR, e));
+      addMessage(messageFactory.make(RESIZE_ERROR, e));
     }
     result.setOutput(outputConsumer.getImage());
     return result;
@@ -90,7 +90,7 @@ public class MagickSizer extends ExternalProcessSizer {
   }
 
   @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    return new MagickSizer(sizerSetting, injectedResult);
+  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
+    return new MagickSizer(sizerSetting);
   }
 }

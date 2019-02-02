@@ -1,7 +1,6 @@
 package com.github.ahoffer.sizeimage.sizers;
 
 import com.github.ahoffer.sizeimage.BeLittleSizerSetting;
-import com.github.ahoffer.sizeimage.BeLittlingResult;
 import com.github.ahoffer.sizeimage.support.FuzzyFile;
 
 /**
@@ -12,8 +11,8 @@ public abstract class ExternalProcessSizer extends AbstractImageSizer {
 
   FuzzyFile executable;
 
-  public ExternalProcessSizer(BeLittleSizerSetting sizerSettings, BeLittlingResult result) {
-    super(sizerSettings, result);
+  public ExternalProcessSizer(BeLittleSizerSetting sizerSettings) {
+    super(sizerSettings);
   }
 
   public FuzzyFile getExecutable() {

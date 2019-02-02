@@ -40,8 +40,8 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
   Jpeg2000MetadataMicroReader metadata;
 
-  public JaiJpeg2000Sizer(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    super(sizerSetting, injectedResult);
+  public JaiJpeg2000Sizer(BeLittleSizerSetting sizerSetting) {
+    super(sizerSetting);
   }
 
   void readMetaData(InputStream inputStream) {
@@ -52,10 +52,10 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
       metadata = new Jpeg2000MetadataMicroReader(inputStream);
       metadata.read();
     } catch (IOException e) {
-      result.addMessage(new BeLittlingMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
+      addMessage(new BeLittlingMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
     }
     if (!metadata.isSucessfullyRead()) {
-      result.addMessage(messageFactory.make(MessageConstants.COULD_NOT_READ_METADATA));
+      addMessage(messageFactory.make(MessageConstants.COULD_NOT_READ_METADATA));
     }
   }
 
@@ -74,7 +74,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     J2KImageReadParamJava param = new J2KImageReadParamJava();
     int reductionFactor = getReductionFactor();
     param.setResolution(reductionFactor);
-    result.addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
+    addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
     param.setDecodingRate(DEFAULT_BITS_PER_PIXEL);
 
     try {
@@ -86,11 +86,11 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
       if (reductionFactor == 0) {
         int samplingPeriod = getSamplingPeriod(reader.getWidth(0), reader.getWidth(0));
         param.setSourceSubsampling(samplingPeriod, samplingPeriod, 0, 0);
-        result.addMessage(messageFactory.make(SAMPLE_PERIOD, samplingPeriod));
+        addMessage(messageFactory.make(SAMPLE_PERIOD, samplingPeriod));
       }
       decodedImage = reader.read(0, param);
     } catch (IOException e) {
-      result.addMessage(messageFactory.make(MessageConstants.DECODE_JPEG2000));
+      addMessage(messageFactory.make(MessageConstants.DECODE_JPEG2000));
     }
 
     try {
@@ -99,7 +99,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
               .size(sizerSetting.getWidth(), sizerSetting.getHeight())
               .asBufferedImage());
     } catch (IOException e) {
-      result.addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR, e));
+      addMessage(messageFactory.make(MessageConstants.RESIZE_ERROR, e));
     }
     return result;
   }
@@ -112,7 +112,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   }
 
   @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    return new JaiJpeg2000Sizer(sizerSetting, injectedResult);
+  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
+    return new JaiJpeg2000Sizer(sizerSetting);
   }
 }

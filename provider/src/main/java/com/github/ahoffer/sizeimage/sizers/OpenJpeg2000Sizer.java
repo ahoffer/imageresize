@@ -38,15 +38,15 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   Path outputFile;
   Process process;
 
-  public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    super(sizerSetting, injectedResult);
+  public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting) {
+    super(sizerSetting);
   }
 
   public BeLittlingResult resize(InputStream inputStream) {
 
     readMetaData(inputStream);
     reductionFactor = getReductionFactor();
-    result.addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
+    addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
 
     long bytesWritten;
     try {
@@ -61,7 +61,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       // TODO Add check on bytes written. If bytes read < 1, it is an error.
       bytesWritten = java.nio.file.Files.copy(inputStream, inputFile.toPath(), REPLACE_EXISTING);
     } catch (IOException e) {
-      result.addMessage(messageFactory.make(UNABLE_TO_CREATE_TEMP_FILE));
+      addMessage(messageFactory.make(UNABLE_TO_CREATE_TEMP_FILE));
     }
 
     ProcessBuilder processBuilder = getProcessBuilderForDecompress();
@@ -109,10 +109,10 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       metadata = new Jpeg2000MetadataMicroReader(inputStream);
       metadata.read();
     } catch (IOException e) {
-      result.addMessage(new BeLittlingMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
+      addMessage(new BeLittlingMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
     }
     if (!metadata.isSucessfullyRead()) {
-      result.addMessage(messageFactory.make(COULD_NOT_READ_METADATA));
+      addMessage(messageFactory.make(COULD_NOT_READ_METADATA));
     }
   }
 
@@ -123,14 +123,14 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       try {
         returnCode = process.waitFor();
         if (returnCode != 0) {
-          result.addMessage(messageFactory.make(OPJ_FAILED, getStdError(process.getErrorStream())));
+          addMessage(messageFactory.make(OPJ_FAILED, getStdError(process.getErrorStream())));
         }
       } catch (InterruptedException e) {
-        result.addMessage(messageFactory.make(OS_PROCESS_INTERRUPTED));
+        addMessage(messageFactory.make(OS_PROCESS_INTERRUPTED));
       }
 
     } catch (IOException e) {
-      result.addMessage(messageFactory.make(OS_PROCESS_FAILED, e));
+      addMessage(messageFactory.make(OS_PROCESS_FAILED, e));
     }
   }
 
@@ -164,8 +164,8 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   }
 
   @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult) {
-    return new OpenJpeg2000Sizer(sizerSetting, injectedResult);
+  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
+    return new OpenJpeg2000Sizer(sizerSetting);
   }
 
   String getStdError(InputStream inputStream) {

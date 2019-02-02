@@ -55,7 +55,11 @@ public interface ImageSizer {
    *
    * @return instance of a concrete image sizer
    */
-  ImageSizer getNew(BeLittleSizerSetting sizerSetting, BeLittlingResult injectedResult);
+  ImageSizer getNew(BeLittleSizerSetting sizerSetting);
 
   ImageSizer getNew();
+
+  BeLittlingResult getResult();
+
+  void addMessage(BeLittlingMessage message);
 }

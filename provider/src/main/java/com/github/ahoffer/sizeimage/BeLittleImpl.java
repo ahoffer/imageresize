@@ -3,16 +3,23 @@ package com.github.ahoffer.sizeimage;
 import static com.github.ahoffer.sizeimage.BeLittleConstants.MIME_TYPE;
 import static com.github.ahoffer.sizeimage.BeLittleConstants.UNKNOWN_MIME_TYPE;
 
+import com.github.ahoffer.sizeimage.BeLittlingMessage.BeLittlingSeverity;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import javax.imageio.stream.ImageInputStream;
 import org.apache.tika.Tika;
@@ -23,7 +30,9 @@ public class BeLittleImpl implements BeLittle {
 
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(BeLittleImpl.class);
-
+  // TODO: Make it so a thread pool can be injected.
+  ExecutorService executorService = Executors.newCachedThreadPool();
+  //  ScheduledExecutorService schedulerService = Executors.newScheduledThreadPool(5);
   Map<String, List<ImageSizer>> sizers;
   BeLittleSizerSetting sizerSetting;
 
@@ -40,11 +49,11 @@ public class BeLittleImpl implements BeLittle {
     sizerSetting.setProperty(MIME_TYPE, mimeType);
   }
 
-  public List<ImageSizer> getSizers() {
+  public List<ImageSizer> getSizersForCurrentMimeType() {
     return Collections.unmodifiableList(sizers.get(getMimeType()));
   }
 
-  public List<BeLittlingResult> generate(ImageInputStream iis) throws RuntimeException {
+  public List<BeLittlingResult> generate(ImageInputStream iis) {
     File file = null;
     try {
       file = File.createTempFile("belittle", null);
@@ -69,24 +78,71 @@ public class BeLittleImpl implements BeLittle {
   public List<BeLittlingResult> generate(File file) {
     setMimeType(readMimeType(file));
     ByteSource source = Files.asByteSource(file);
-    List<BeLittlingResult> results = new ArrayList<>();
 
-    List<ImageSizer> sizerList = getSizers();
+    List<ImageSizer> sizerList = getSizersForCurrentMimeType();
+
     for (ImageSizer sizer : sizerList) {
+      Callable<BeLittlingResult> callable = () -> sizer.resize(source.openBufferedStream());
+      Future<BeLittlingResult> future = executorService.submit(callable);
       try {
-        BeLittlingResult result = sizer.resize(source.openBufferedStream());
-        if (result.succeeded()) {
-          // Return first success
-          return Collections.singletonList(result);
-        }
-        results.add(result);
-      } catch (IOException e) {
-        LOGGER.info("Unexpected error resizing an image", e);
+        future.get(sizerSetting.getTimeoutSeconds(), TimeUnit.SECONDS);
+      } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        sizer.addMessage(new BeLittlingMessageImpl("EXP", BeLittlingSeverity.ERROR, e));
+      }
+      BeLittlingResult result = sizer.getResult();
+      if (result.succeeded()) {
+        // Return immediately if a sizer succeeds.
+        return Collections.singletonList(result);
       }
     }
-    // If all sizers failed, returns all results
-    return results;
+
+    // If no sizer succeeds, return results from all sizers.
+    return sizerList.stream().map(ImageSizer::getResult).collect(Collectors.toList());
   }
+
+  // This was some partially implemented bad-ass rock star code that
+  // I ditched because I don't think it is necessary. The plan was to have the sizers running
+  // in parallel and look for the first one to succeed. I think it is an unnecessary drain on
+  // system resources. In retrospect, it was just plain over-engineered.
+  /*
+  public List<BeLittlingResult> generate(File file) {
+      setMimeType(readMimeType(file));
+      ByteSource source = Files.asByteSource(file);
+
+      //    Set<Callable<String>>
+      List<ImageSizer> sizerList = getSizers();
+      List<Callable<BeLittlingResult>> callables;
+
+      try {
+        callables = sizerList.stream().<Callable<BeLittlingResult>>map(
+            sizer -> () -> sizer.resize(source.openBufferedStream())).collect(Collectors.toList());
+        List<Future<BeLittlingResult>> futures = executorService.invokeAll(callables);
+        futures.forEach(f -> schedulerService
+            .schedule(() -> f.cancel(true), sizerSetting.getTimeoutSeconds(), TimeUnit.SECONDS));
+        BeLittlingResult result;
+        while (futures.stream.matchAll(f -> !f.isDone() ) {
+          for (Future<BeLittlingResult> future : futures) {
+            try {
+              //Look for sizers that are done
+              if (future.isDone()) {
+                result = future.get();
+              if (result.succeeded()) {
+                // Cancel other futures and return first success
+                futures.forEach(f -> f.cancel(true));
+                return Collections.singletonList(result);
+              }
+            } catch (ExecutionException | TimeoutException | InterruptedException e) {
+              LOGGER.info("Unexpected error resizing an image", e);
+            }
+          }
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+      // If all sizers fail, returns all results
+      return sizerList.stream().map(ImageSizer::getResult).collect(Collectors.toList());
+    }
+    */
 
   /**
    * Helper method to write an InputImageStream to disk. Although the InputImageStream class is a
@@ -99,7 +155,6 @@ public class BeLittleImpl implements BeLittle {
    * @param file Destination for the IIS bits
    */
   private void write(ImageInputStream iis, File file) throws IOException {
-
     try (OutputStream outputStream = Files.asByteSink(file).openBufferedStream()) {
       int size = 8 * 1024;
       int len;
