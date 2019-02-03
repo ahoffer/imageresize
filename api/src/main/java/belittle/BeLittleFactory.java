@@ -2,9 +2,9 @@ package belittle;
 
 public interface BeLittleFactory {
 
-  // this class exists just to avoid threading issues.
+  BeLittle newBeLittle(BeLittleSizerSetting settings);
 
-  public BeLittle newBeLittler(BeLittleSizerSetting settings);
+  BeLittle newBeLittle();
 
-  BeLittleSizerSetting newSettings();
+  BeLittleSizerSetting newSetting();
 }

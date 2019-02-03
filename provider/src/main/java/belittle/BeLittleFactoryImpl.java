@@ -6,18 +6,26 @@ import java.util.Map;
 public class BeLittleFactoryImpl implements BeLittleFactory {
 
   Map<String, List<ImageSizer>> configuredSizers;
+  BeLittleSizerSetting sizerSetting;
 
-  public BeLittleFactoryImpl(Map<String, List<ImageSizer>> configuredSizers) {
+  public BeLittleFactoryImpl(
+      BeLittleSizerSetting sizerSetting, Map<String, List<ImageSizer>> configuredSizers) {
     this.configuredSizers = configuredSizers;
+    this.sizerSetting = sizerSetting;
   }
 
   @Override
-  public BeLittle newBeLittler(BeLittleSizerSetting settings) {
-    return new BeLittleImpl(configuredSizers, settings);
+  public BeLittle newBeLittle(BeLittleSizerSetting sizerSetting) {
+    return new BeLittleImpl(configuredSizers, sizerSetting);
   }
 
   @Override
-  public BeLittleSizerSetting newSettings() {
-    return new BeLittleSizerSettingImpl();
+  public BeLittle newBeLittle() {
+    return new BeLittleImpl(configuredSizers, sizerSetting);
+  }
+
+  @Override
+  public BeLittleSizerSetting newSetting() {
+    return new BeLittleSizerSettingImpl(sizerSetting);
   }
 }

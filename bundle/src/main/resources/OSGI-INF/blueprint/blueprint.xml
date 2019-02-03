@@ -1,71 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="magickExecutable" class="com.github.ahoffer.sizeimage.support.FuzzyFile">
+    <bean id="magickExecutable" class="belittle.support.FuzzyFile">
         <argument value="/Users/aaronhoffer/bin/ImageMagick-7.0.8/bin/"/>
         <argument value="convert"/>
         <argument value="c:\space blah;other\path\blah"/>
         <argument value="convert.exe"/>
     </bean>
-    <bean id="magick" class="com.github.ahoffer.sizeimage.sizers.MagickSizer">
+    <bean id="magick" class="belittle.sizers.MagickSizer">
         <property name="executable" ref="magickExecutable"/>
     </bean>
 
-    <bean id="openJpegExecutable" class="com.github.ahoffer.sizeimage.support.FuzzyFile">
+    <bean id="openJpegExecutable" class="belittle.support.FuzzyFile">
         <argument value="/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin"/>
         <argument value="opj_decompress"/>
         <argument value="c:\space blah;other\path\blah"/>
         <argument value="opj_decompress.exe"/>
     </bean>
-    <bean id="openJpeg" class="com.github.ahoffer.sizeimage.sizers.OpenJpeg2000Sizer">
+    <bean id="openJpeg" class="belittle.sizers.OpenJpeg2000Sizer">
         <property name="executable" ref="openJpegExecutable"/>
     </bean>
 
-    <bean id="sampling" class="com.github.ahoffer.sizeimage.sizers.SamplingSizer"/>
-    <bean id="basic" class="com.github.ahoffer.sizeimage.sizers.BasicSizer"/>
-    <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.sizers.JaiJpeg2000Sizer"/>
+    <bean id="sampling" class="belittle.sizers.SamplingSizer"/>
+    <bean id="basic" class="belittle.sizers.BasicSizer"/>
+    <bean id="jpeg2000" class="belittle.sizers.JaiJpeg2000Sizer"/>
 
-    <bean id="belittleSettings" class="com.github.ahoffer.sizeimage.BeLittleSizerSettingImpl">
+    <bean id="setting" class="belittle.BeLittleSizerSettingImpl">
         <property name="width" value="200"/>
         <property name="height" value="200"/>
     </bean>
 
-    <service id="belittleFactory" auto-export="all-classes">
-        <bean class="com.github.ahoffer.sizeimage.BeLittleFactory">
-            <property name="maxWidth" value="200"/>
-            <property name="maxHeight" value="200"/>
-            <property name="settings">
-                <map>
-                    <entry key="application/octet-stream">
-                        <list>
-                            <ref component-id="magick"/>
-                        </list>
-                    </entry>
-                    <entry key="image/jp2">
-                        <list>
-                            <ref component-id="jpeg2000"/>
-                            <ref component-id="magick"/>
-                            <ref component-id="openJpeg"/>
-                        </list>
-                    </entry>
+    <bean id="factory" class="belittle.BeLittleFactory">
+        <argument>
+            <map>
+                <entry key="application/octet-stream">
+                    <list>
+                        <ref component-id="magick"/>
+                    </list>
+                </entry>
+                <entry key="image/jp2">
+                    <list>
+                        <ref component-id="jpeg2000"/>
+                        <ref component-id="magick"/>
+                        <ref component-id="openJpeg"/>
+                    </list>
+                </entry>
 
-                    <!--Are these entries needed? Some sources say they are aliases for JPEG 200 MIME types-->
-                    <entry key="image/jpx">
-                        <list>
-                            <ref component-id="jpeg2000"/>
-                            <ref component-id="magick"/>
-                            <ref component-id="openJpeg"/>
-                        </list>
-                    </entry>
-                    <entry key="image/jpm">
-                        <list>
-                            <ref component-id="jpeg2000"/>
-                            <ref component-id="magick"/>
-                            <ref component-id="openJpeg"/>
-                        </list>
-                    </entry>
-                </map>
-            </property>
-        </bean>
-    </service>
+                <!--Are these entries needed? Some sources say they are aliases for JPEG 200 MIME types-->
+                <entry key="image/jpx">
+                    <list>
+                        <ref component-id="jpeg2000"/>
+                        <ref component-id="magick"/>
+                        <ref component-id="openJpeg"/>
+                    </list>
+                </entry>
+                <entry key="image/jpm">
+                    <list>
+                        <ref component-id="jpeg2000"/>
+                        <ref component-id="magick"/>
+                        <ref component-id="openJpeg"/>
+                    </list>
+                </entry>
+            </map>
+        </argument>
+        <argument ref="setting"/>
+    </bean>
+
+    <service ref="factory" interface="belittle.BeLittleFactory"/>
+
 </blueprint>
