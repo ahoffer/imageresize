@@ -9,11 +9,6 @@
     </bean>
     <bean id="magick" class="com.github.ahoffer.sizeimage.sizers.MagickSizer">
         <property name="executable" ref="magickExecutable"/>
-        <property name="settings">
-            <map>
-                <entry key="TIMEOUT_SECONDS" value="3600"/>
-            </map>
-        </property>
     </bean>
 
     <bean id="openJpegExecutable" class="com.github.ahoffer.sizeimage.support.FuzzyFile">
@@ -30,10 +25,15 @@
     <bean id="basic" class="com.github.ahoffer.sizeimage.sizers.BasicSizer"/>
     <bean id="jpeg2000" class="com.github.ahoffer.sizeimage.sizers.JaiJpeg2000Sizer"/>
 
-    <service id="belittle" auto-export="all-classes">
-        <bean class="com.github.ahoffer.sizeimage.belittle.BeLittleImpl">
-            <property name="maxWidth" value="128"/>
-            <property name="maxHeight" value="128"/>
+    <bean id="belittleSettings" class="com.github.ahoffer.sizeimage.BeLittleSizerSettingImpl">
+        <property name="width" value="200"/>
+        <property name="height" value="200"/>
+    </bean>
+
+    <service id="belittleFactory" auto-export="all-classes">
+        <bean class="com.github.ahoffer.sizeimage.BeLittleFactory">
+            <property name="maxWidth" value="200"/>
+            <property name="maxHeight" value="200"/>
             <property name="settings">
                 <map>
                     <entry key="application/octet-stream">

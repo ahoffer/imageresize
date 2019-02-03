@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage;
+package belittle;
 
 import java.util.Map;
 

@@ -10,7 +10,7 @@
     <modules>
         <module>feature</module>
         <module>bundle</module>
-        <module>test</module>
+        <!--<module>test</module>-->
         <module>provider</module>
         <module>api</module>
         <!--<module>benchmark</module>-->

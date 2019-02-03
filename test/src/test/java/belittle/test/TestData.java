@@ -1,4 +1,4 @@
-package com.github.ahoffer.sizeimage.test;
+package belittle.test;
 
 import java.io.File;
 import java.io.IOException;
