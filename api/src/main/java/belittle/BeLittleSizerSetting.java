@@ -10,15 +10,15 @@ public interface BeLittleSizerSetting {
 
   int getTimeoutSeconds();
 
-  BeLittleSizerSetting setTimeoutSeconds(int seconds);
+  void setTimeoutSeconds(int seconds);
 
   int getWidth();
 
-  BeLittleSizerSetting setWidth(int width);
+  void setWidth(int width);
 
   int getHeight();
 
-  BeLittleSizerSetting setHeight(int height);
+  void setHeight(int height);
 
   Map<String, String> getProperties();
 }

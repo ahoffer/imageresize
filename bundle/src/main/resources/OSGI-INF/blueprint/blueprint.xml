@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
+    <bean id="setting" class="belittle.BeLittleSizerSettingImpl">
+        <property name="width" value="200"/>
+        <property name="height" value="200"/>
+    </bean>
+
     <bean id="magickExecutable" class="belittle.support.FuzzyFile">
         <argument value="/Users/aaronhoffer/bin/ImageMagick-7.0.8/bin/"/>
         <argument value="convert"/>
@@ -8,6 +13,7 @@
         <argument value="convert.exe"/>
     </bean>
     <bean id="magick" class="belittle.sizers.MagickSizer">
+        <argument ref="setting"/>
         <property name="executable" ref="magickExecutable"/>
     </bean>
 
@@ -17,25 +23,33 @@
         <argument value="c:\space blah;other\path\blah"/>
         <argument value="opj_decompress.exe"/>
     </bean>
+
     <bean id="openJpeg" class="belittle.sizers.OpenJpeg2000Sizer">
+        <argument ref="setting"/>
         <property name="executable" ref="openJpegExecutable"/>
     </bean>
 
-    <bean id="sampling" class="belittle.sizers.SamplingSizer"/>
-    <bean id="basic" class="belittle.sizers.BasicSizer"/>
-    <bean id="jpeg2000" class="belittle.sizers.JaiJpeg2000Sizer"/>
-
-    <bean id="setting" class="belittle.BeLittleSizerSettingImpl">
-        <property name="width" value="200"/>
-        <property name="height" value="200"/>
+    <bean id="sampling" class="belittle.sizers.SamplingSizer">
+        <argument ref="setting"/>
     </bean>
 
-    <bean id="factory" class="belittle.BeLittleFactory">
+    <bean id="basic" class="belittle.sizers.BasicSizer">
+        <argument ref="setting"/>
+    </bean>
+
+    <bean id="jpeg2000" class="belittle.sizers.JaiJpeg2000Sizer">
+        <argument ref="setting"/>
+    </bean>
+
+    <bean id="factory" class="belittle.BeLittleFactoryImpl">
+        <argument ref="setting"/>
         <argument>
             <map>
                 <entry key="application/octet-stream">
                     <list>
+                        <ref component-id="sampling"/>
                         <ref component-id="magick"/>
+                        <ref component-id="basic"/>
                     </list>
                 </entry>
                 <entry key="image/jp2">
@@ -63,7 +77,6 @@
                 </entry>
             </map>
         </argument>
-        <argument ref="setting"/>
     </bean>
 
     <service ref="factory" interface="belittle.BeLittleFactory"/>

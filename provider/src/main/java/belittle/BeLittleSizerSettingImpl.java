@@ -12,7 +12,9 @@ public class BeLittleSizerSettingImpl implements BeLittleSizerSetting {
 
   public BeLittleSizerSettingImpl() {
     // Set reasonable defaults
-    setTimeoutSeconds(BeLittleConstants.DEFAULT_TIMEOUT_SECONDS).setWidth(256).setHeight(256);
+    setTimeoutSeconds(BeLittleConstants.DEFAULT_TIMEOUT_SECONDS);
+    setWidth(256);
+    setHeight(256);
   }
 
   // Uses default values for missing keys.
@@ -44,8 +46,8 @@ public class BeLittleSizerSettingImpl implements BeLittleSizerSetting {
   }
 
   @Override
-  public BeLittleSizerSetting setTimeoutSeconds(int seconds) {
-    return setProperty(BeLittleConstants.TIMEOUT_SECONDS, String.valueOf(seconds));
+  public void setTimeoutSeconds(int seconds) {
+    setProperty(BeLittleConstants.TIMEOUT_SECONDS, String.valueOf(seconds));
   }
 
   @Override
@@ -54,8 +56,8 @@ public class BeLittleSizerSettingImpl implements BeLittleSizerSetting {
   }
 
   @Override
-  public BeLittleSizerSetting setWidth(int width) {
-    return setProperty(BeLittleConstants.MAX_WIDTH, String.valueOf(width));
+  public void setWidth(int width) {
+    setProperty(BeLittleConstants.MAX_WIDTH, String.valueOf(width));
   }
 
   @Override
@@ -64,8 +66,8 @@ public class BeLittleSizerSettingImpl implements BeLittleSizerSetting {
   }
 
   @Override
-  public BeLittleSizerSetting setHeight(int height) {
-    return setProperty(BeLittleConstants.MAX_HEIGHT, String.valueOf(height));
+  public void setHeight(int height) {
+    setProperty(BeLittleConstants.MAX_HEIGHT, String.valueOf(height));
   }
 
   @Override

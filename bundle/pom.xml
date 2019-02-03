@@ -28,25 +28,17 @@
 
         <!--The API and service ImageSizerCollection-->
         <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>api</artifactId>
+            <groupId>belittle</groupId>
+            <artifactId>belittle-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <!--Actual image sizers-->
         <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>provider</artifactId>
+            <groupId>belittle</groupId>
+            <artifactId>belittle-provider</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <!--Libraries to embed-->
-        <dependency>
-            <groupId>com.github.ahoffer</groupId>
-            <artifactId>fuzzy-file</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
         <!--Provided -->
         <dependency>
             <groupId>org.osgi</groupId>
@@ -78,6 +70,16 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.8</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.18</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -86,28 +88,25 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>4.1.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Embed-Dependency>
-                            api,
-                            provider,
+                            belittle-api,
+                            belittle-provider,
+                            commons-io,
+                            im4java,
                             jai-imageio-core,
                             jai-imageio-jpeg2000,
                             thumbnailator,
-                            im4java,
-                            commons-io,
-                            thumbnailator,
-                            commons-lang3
-                            <!--,jai-imageio-core-->
                         </Embed-Dependency>
                         <Import-Package>
                             !sun.security.action,
                             *
                         </Import-Package>
                         <Export-Package>
-                            com.github.ahoffer.sizeimage
+                            belittle
                         </Export-Package>
                     </instructions>
                 </configuration>

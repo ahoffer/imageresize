@@ -8,7 +8,7 @@
     <artifactId>belittle-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>feature</module>
+        <!--<module>feature</module>-->
         <module>bundle</module>
         <!--<module>test</module>-->
         <module>provider</module>
