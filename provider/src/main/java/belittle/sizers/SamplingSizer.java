@@ -37,10 +37,10 @@ public class SamplingSizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittleResult resize(InputStream inputStream) {
+  public BeLittleResult resize(InputStream inputStream, String mimeType) {
 
     ImageInputStream iis = null;
-    reader = getImageReaderByMIMEType();
+    reader = getImageReaderByMIMEType(mimeType);
     try {
       iis = ImageIO.createImageInputStream(inputStream);
       reader.setInput(iis);
@@ -101,5 +101,11 @@ public class SamplingSizer extends AbstractImageSizer {
   @Override
   public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
     return new SamplingSizer(sizerSetting);
+  }
+
+  @Override
+  public BeLittleResult resize(InputStream inputStream) {
+    throw new UnsupportedOperationException(
+        "The Jpeg 2000 sizer expects a MIMME type. Use another implementation of the resize method");
   }
 }

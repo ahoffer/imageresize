@@ -26,12 +26,10 @@ import java.io.InputStream;
  */
 public interface ImageSizer {
 
-  /**
-   * Primary method
-   *
-   * @param inputStream
-   * @return
-   */
+  // Not every sizer cares about MIME type.
+  BeLittleResult resize(InputStream inputStream, String mimeType);
+
+  /** Primary method */
   BeLittleResult resize(InputStream inputStream);
 
   /**
@@ -39,8 +37,6 @@ public interface ImageSizer {
    * dependencies that might not be satisfied. For example, the image sizer could depend on a
    * external library, or on the availability of a web service. This method should return true if
    * the image sizers dependencies are all met.
-   *
-   * @return
    */
   default boolean isAvailable() {
     return true;
@@ -57,7 +53,7 @@ public interface ImageSizer {
    */
   ImageSizer getNew(BeLittleSizerSetting sizerSetting);
 
-  ImageSizer getNew();
+  //  ImageSizer getNew();
 
   BeLittleResult getResult();
 

@@ -1,6 +1,7 @@
 package belittle.sizers;
 
 import static belittle.support.MessageConstants.COULD_NOT_READ_METADATA;
+import static belittle.support.MessageConstants.EXTERNAL_EXECUTABLE;
 import static belittle.support.MessageConstants.OPJ_FAILED;
 import static belittle.support.MessageConstants.OS_PROCESS_FAILED;
 import static belittle.support.MessageConstants.OS_PROCESS_INTERRUPTED;
@@ -14,6 +15,7 @@ import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
 import belittle.support.ComputeResolutionLevel;
+import belittle.support.FuzzyFile;
 import belittle.support.Jpeg2000MetadataMicroReader;
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,6 +24,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.UUID;
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -42,30 +46,52 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     super(sizerSetting);
   }
 
+  public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting, FuzzyFile executable) {
+    super(sizerSetting);
+    this.setExecutable(executable);
+  }
+
   public BeLittleResult resize(InputStream inputStream) {
 
-    readMetaData(inputStream);
-    reductionFactor = getReductionFactor();
-    addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
+    AccessController.doPrivileged(
+        (PrivilegedAction<Void>)
+            () -> {
+              if (getExecutable() == null) {
+                addMessage(messageFactory.make(EXTERNAL_EXECUTABLE));
+                return null;
+              }
+              if (!getExecutable().canExecute()) {
+                addMessage(
+                    new BeLittleMessageImpl(
+                        "CANNOT INVOKE EXEC", BeLittlingSeverity.ERROR, "File cannot be executed"));
+                return null;
+              }
 
-    long bytesWritten;
-    try {
-      inputFile = File.createTempFile("input", getProperFileExt());
-      inputFile.deleteOnExit();
+              readMetadata(inputStream);
+              reductionFactor = getReductionFactor();
+              addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
 
-      // Don't create a file for output (e.g. createTempFile). Use a Path instead.
-      // The OS might not let it be overwritten by the command line program.
-      String tempDir = inputFile.getParent();
-      outputFile = Paths.get(tempDir, "out" + UUID.randomUUID() + OUTPUT_FORMAT_EXT);
+              long bytesWritten;
+              try {
+                inputFile = File.createTempFile("input", getProperFileExt());
+                inputFile.deleteOnExit();
 
-      // TODO Add check on bytes written. If bytes read < 1, it is an error.
-      bytesWritten = java.nio.file.Files.copy(inputStream, inputFile.toPath(), REPLACE_EXISTING);
-    } catch (IOException e) {
-      addMessage(messageFactory.make(UNABLE_TO_CREATE_TEMP_FILE));
-    }
+                // Don't create a file for output (e.g. createTempFile). Use a Path instead.
+                // The OS might not let it be overwritten by the command line program.
+                String tempDir = inputFile.getParent();
+                outputFile = Paths.get(tempDir, "out" + UUID.randomUUID() + OUTPUT_FORMAT_EXT);
 
-    ProcessBuilder processBuilder = getProcessBuilderForDecompress();
-    startProcess(processBuilder);
+                // TODO Add check on bytes written. If bytes read < 1, it is an error.
+                bytesWritten =
+                    java.nio.file.Files.copy(inputStream, inputFile.toPath(), REPLACE_EXISTING);
+              } catch (IOException e) {
+                addMessage(messageFactory.make(UNABLE_TO_CREATE_TEMP_FILE));
+              }
+
+              ProcessBuilder processBuilder = getProcessBuilderForDecompress();
+              startProcess(processBuilder);
+              return null;
+            });
 
     try {
       result.setOutput(
@@ -104,7 +130,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     }
   }
 
-  void readMetaData(InputStream inputStream) {
+  void readMetadata(InputStream inputStream) {
     try {
       metadata = new Jpeg2000MetadataMicroReader(inputStream);
       metadata.read();
@@ -150,12 +176,24 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
         .redirectErrorStream(false);
   }
 
+  // A reduction factor greater than zero is CRITICAL.
+  // With no reduction factor, the output image is at least as input image.
+  // Also, decoding a JPEG 2000 is inversely propotional the the reduction factor.
+  // TODO 1: Go ahead and create a huge TIF file or something, then use the Sampling Sizer to carve
+  // it down to size.
+  // TODO 2: Guess a reduction factor of 4 (done), but back it off and retry if it is too large
+  // (todo).
   int getReductionFactor() {
-    return new ComputeResolutionLevel()
-        .setMaxResolutionLevels(metadata.getMinNumResolutionLevels())
-        .setInputSize(metadata.getWidth(), metadata.getHeight())
-        .setOutputSize(sizerSetting.getWidth(), sizerSetting.getHeight())
-        .compute();
+    if (metadata.isSucessfullyRead()) {
+      return new ComputeResolutionLevel()
+          .setMaxResolutionLevels(metadata.getMinNumResolutionLevels())
+          .setInputSize(metadata.getWidth(), metadata.getHeight())
+          .setOutputSize(sizerSetting.getWidth(), sizerSetting.getHeight())
+          .compute();
+
+    } else {
+      return 4;
+    }
   }
 
   @Override
@@ -165,7 +203,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
 
   @Override
   public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
-    return new OpenJpeg2000Sizer(sizerSetting);
+    return new OpenJpeg2000Sizer(sizerSetting, getExecutable());
   }
 
   String getStdError(InputStream inputStream) {

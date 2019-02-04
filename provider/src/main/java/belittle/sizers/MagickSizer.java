@@ -6,8 +6,11 @@ import static belittle.support.MessageConstants.RESIZE_ERROR;
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
+import belittle.support.FuzzyFile;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -39,6 +42,11 @@ public class MagickSizer extends ExternalProcessSizer {
     super(sizerSetting);
   }
 
+  public MagickSizer(BeLittleSizerSetting sizerSetting, FuzzyFile executable) {
+    super(sizerSetting);
+    setExecutable(executable);
+  }
+
   void prepare() {
     super.prepare();
     if (!isAvailable()) {
@@ -52,35 +60,41 @@ public class MagickSizer extends ExternalProcessSizer {
     // jpeg:generate=200x200" and substitute a
     // size that is twice the size of the desired thumbnail.
     // TODO use -sample to improve memory usage
+    // TODO: Does "thumbnail" use "sample" option?
+    // todo: If not, maybe compose a sample and scale operation to improve performance?
 
     IMOperation op = new IMOperation();
     ConvertCmd command = new ConvertCmd();
-    Stream2BufferedImage outputConsumer = new Stream2BufferedImage();
-    // TODO: Does "thumbnail" use "sample" option?
-    // todo: If not, maybe compose a sample and scale operation to improve performance?
-    op.thumbnail(sizerSetting.getWidth(), sizerSetting.getHeight());
+    AccessController.doPrivileged(
+        (PrivilegedAction<Void>)
+            () -> {
+              Stream2BufferedImage outputConsumer = new Stream2BufferedImage();
+              op.thumbnail(sizerSetting.getWidth(), sizerSetting.getHeight());
 
-    // Read the image from std in
-    op.addImage(STD_IN);
-    command.setInputProvider(new Pipe(inputStream, null));
+              // Read the image from std in
+              op.addImage(STD_IN);
+              command.setInputProvider(new Pipe(inputStream, null));
 
-    // Write the image to std out
-    String configuredOutputFormat = sizerSetting.getProperty(OUTPUT_FORMAT_KEY);
-    if (configuredOutputFormat == null) {
-      configuredOutputFormat = DEFAULT_OUTPUT_FORMAT;
-    }
+              // Write the image to std out
+              String configuredOutputFormat = sizerSetting.getProperty(OUTPUT_FORMAT_KEY);
+              if (configuredOutputFormat == null) {
+                configuredOutputFormat = DEFAULT_OUTPUT_FORMAT;
+              }
 
-    String outputFormatDirectedToStandardOut = configuredOutputFormat + STD_OUT;
-    op.addImage(outputFormatDirectedToStandardOut);
-    command.setOutputConsumer(outputConsumer);
+              String outputFormatDirectedToStandardOut = configuredOutputFormat + STD_OUT;
+              op.addImage(outputFormatDirectedToStandardOut);
+              command.setOutputConsumer(outputConsumer);
 
-    command.setSearchPath(getExecutable().getParent());
-    try {
-      command.run(op);
-    } catch (InterruptedException | IM4JavaException | IOException e) {
-      addMessage(messageFactory.make(RESIZE_ERROR, e));
-    }
-    result.setOutput(outputConsumer.getImage());
+              command.setSearchPath(getExecutable().getParent());
+              try {
+                command.run(op);
+              } catch (InterruptedException | IM4JavaException | IOException e) {
+                addMessage(messageFactory.make(RESIZE_ERROR, e));
+                result.setOutput(outputConsumer.getImage());
+              }
+
+              return null;
+            });
     return result;
   }
 
@@ -91,6 +105,6 @@ public class MagickSizer extends ExternalProcessSizer {
 
   @Override
   public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
-    return new MagickSizer(sizerSetting);
+    return new MagickSizer(sizerSetting, this.executable);
   }
 }

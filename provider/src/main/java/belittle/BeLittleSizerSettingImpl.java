@@ -18,6 +18,7 @@ public class BeLittleSizerSettingImpl implements BeLittleSizerSetting {
   }
 
   // Uses default values for missing keys.
+  // Adds new keys or overwrites exiting keys.
   public BeLittleSizerSettingImpl(Map<String, String> sizerPropertiesMap) {
     this();
     this.sizerPropertiesMap.putAll(sizerPropertiesMap);
@@ -41,8 +42,7 @@ public class BeLittleSizerSettingImpl implements BeLittleSizerSetting {
 
   @Override
   public int getTimeoutSeconds() {
-    return Integer.valueOf(
-        sizerPropertiesMap.get(Integer.valueOf(BeLittleConstants.TIMEOUT_SECONDS)));
+    return Integer.valueOf(sizerPropertiesMap.get(BeLittleConstants.TIMEOUT_SECONDS));
   }
 
   @Override

@@ -15,6 +15,7 @@ import belittle.support.ComputeResolutionLevel;
 import belittle.support.ComputeSubSamplingPeriod;
 import belittle.support.Jpeg2000MetadataMicroReader;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReadParamJava;
+import com.github.jaiimageio.jpeg2000.impl.J2KImageReader;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -28,9 +29,9 @@ import net.coobird.thumbnailator.Thumbnails;
 @SuppressWarnings("squid:S2160")
 public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
-  // TODO: Make this configurable.
-
   /*
+
+  // TODO: Make this configurable.
     TODO: Do not set bit per pixel for images close to the target size, or else there will be too little
     information and the output image will be very blurry
   */
@@ -46,7 +47,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     super(sizerSetting);
   }
 
-  void readMetaData(InputStream inputStream) {
+  void readMetadata(InputStream inputStream) {
     try {
       // TODO: ortho-744mb.jp2 comes back with a reduction factor of 0? Is that really how the thing
       // is encoded or is there something wrong with the metadata reader?
@@ -71,7 +72,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
   @Override
   public BeLittleResult resize(InputStream inputStream) {
-    readMetaData(inputStream);
+    readMetadata(inputStream);
     BufferedImage decodedImage = null;
     J2KImageReadParamJava param = new J2KImageReadParamJava();
     int reductionFactor = getReductionFactor();
@@ -79,10 +80,19 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
     param.setDecodingRate(DEFAULT_BITS_PER_PIXEL);
 
+    // Get the reader. Use reader class directly to avoid weird classloader issues with Java SPI
     try {
-      ImageReader reader = getImageReaderByMIMEType();
+      ImageReader reader = new J2KImageReader(null);
       ImageInputStream iis = ImageIO.createImageInputStream(inputStream);
       reader.setInput(iis);
+
+      // Validate the reader (this could be done in the readMetadata() method.
+      try {
+        reader.getImageMetadata(0);
+      } catch (java.lang.Error error) {
+        addMessage(new BeLittleMessageImpl("Bad JP2K stream", BeLittlingSeverity.ERROR, error));
+        return null;
+      }
 
       // TODO: this sampling part needs testing.
       if (reductionFactor == 0) {
@@ -104,6 +114,11 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
       addMessage(messageFactory.make(RESIZE_ERROR, e));
     }
     return result;
+  }
+
+  @Override
+  public BeLittleResult resize(InputStream inputStream, String mimeType) {
+    return resize(inputStream);
   }
 
   private int getSamplingPeriod(int width, int height) {

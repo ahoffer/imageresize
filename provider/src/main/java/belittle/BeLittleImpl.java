@@ -1,6 +1,5 @@
 package belittle;
 
-import static belittle.BeLittleConstants.MIME_TYPE;
 import static belittle.BeLittleConstants.UNKNOWN_MIME_TYPE;
 
 import belittle.BeLittleMessage.BeLittlingSeverity;
@@ -13,13 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.imageio.stream.ImageInputStream;
 import org.apache.tika.Tika;
@@ -31,34 +24,31 @@ public class BeLittleImpl implements BeLittle {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(BeLittleImpl.class);
   // TODO: Make it so a thread pool can be injected.
-  ExecutorService executorService = Executors.newCachedThreadPool();
+  //  ExecutorService executorService = Executors.newCachedThreadPool();
   //  ScheduledExecutorService schedulerService = Executors.newScheduledThreadPool(5);
   Map<String, List<ImageSizer>> sizers;
   BeLittleSizerSetting sizerSetting;
 
   public BeLittleImpl(Map<String, List<ImageSizer>> sizers, BeLittleSizerSetting sizerSetting) {
-    this.sizers = Collections.unmodifiableMap(cloneSizers(sizers));
+    // The order of these statements matters because sizer settings must be set before
+    // calling cloneSizers()
     this.sizerSetting = new BeLittleSizerSettingImpl(sizerSetting);
+    this.sizers = Collections.unmodifiableMap(cloneSizers(sizers));
   }
 
-  String getMimeType() {
-    return sizerSetting.getProperty(MIME_TYPE);
+  public List<ImageSizer> getSizersForMimeType(String mimeType) {
+    Optional<String> firstMatch =
+        sizers.keySet().stream().filter(regex -> mimeType.matches(regex)).findFirst();
+    String lookupKey = firstMatch.orElse(UNKNOWN_MIME_TYPE);
+    return Collections.unmodifiableList(sizers.get(lookupKey));
   }
 
-  void setMimeType(String mimeType) {
-    sizerSetting.setProperty(MIME_TYPE, mimeType);
-  }
-
-  public List<ImageSizer> getSizersForCurrentMimeType() {
-    return Collections.unmodifiableList(sizers.get(getMimeType()));
-  }
-
-  public List<BeLittleResult> generate(ImageInputStream iis) {
+  public List<BeLittleResult> resize(ImageInputStream iis) {
     File file = null;
     try {
       file = File.createTempFile("belittle", null);
       write(iis, file);
-      return generate(file);
+      return resize(file);
     } catch (IOException e) {
       LOGGER.info("Failed to create temporary file {}", file.getAbsolutePath());
     } finally {
@@ -75,21 +65,22 @@ public class BeLittleImpl implements BeLittle {
    * failed attempts. Could also prodive methods like "succeeded?", "getSuccessfulResult", and get
    * "getImage" (from successful result).
    */
-  public List<BeLittleResult> generate(File file) {
-    setMimeType(readMimeType(file));
+  public List<BeLittleResult> resize(File file) {
+    String mimeType = readMimeType(file);
+    List<ImageSizer> sizerList = getSizersForMimeType(mimeType);
     ByteSource source = Files.asByteSource(file);
-
-    List<ImageSizer> sizerList = getSizersForCurrentMimeType();
-
     for (ImageSizer sizer : sizerList) {
-      Callable<BeLittleResult> callable = () -> sizer.resize(source.openBufferedStream());
-      Future<BeLittleResult> future = executorService.submit(callable);
+      BeLittleResult result = sizer.getResult();
+      //      Callable<BeLittleResult> callable = () -> sizer.resize(source.openBufferedStream());
+      //      Future<BeLittleResult> future = executorService.submit(callable);
       try {
-        future.get(sizerSetting.getTimeoutSeconds(), TimeUnit.SECONDS);
-      } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        sizer.resize(source.openBufferedStream(), mimeType);
+        //        future.get(sizerSetting.getTimeoutSeconds(), TimeUnit.SECONDS);
+      } catch (
+      /*InterruptedException | ExecutionException | TimeoutException |*/ RuntimeException
+          | IOException e) {
         sizer.addMessage(new BeLittleMessageImpl("EXP", BeLittlingSeverity.ERROR, e));
       }
-      BeLittleResult result = sizer.getResult();
       if (result.succeeded()) {
         // Return immediately if a sizer succeeds.
         return Collections.singletonList(result);
@@ -105,7 +96,7 @@ public class BeLittleImpl implements BeLittle {
   // in parallel and look for the first one to succeed. I think it is an unnecessary drain on
   // system resources. In retrospect, it was just plain over-engineered.
   /*
-  public List<BeLittlingResult> generate(File file) {
+  public List<BeLittlingResult> resize(File file) {
       setMimeType(readMimeType(file));
       ByteSource source = Files.asByteSource(file);
 
@@ -170,7 +161,8 @@ public class BeLittleImpl implements BeLittle {
     Map<String, List<ImageSizer>> copy = new HashMap<>(original);
     // Copy the sizer instances
     copy.replaceAll(
-        (key, list) -> list.stream().map(ImageSizer::getNew).collect(Collectors.toList()));
+        (key, list) ->
+            list.stream().map(sizer -> sizer.getNew(sizerSetting)).collect(Collectors.toList()));
     return copy;
   }
 

@@ -52,29 +52,29 @@
                         <ref component-id="basic"/>
                     </list>
                 </entry>
-                <entry key="image/jp2">
+                <entry key="image/.*jp[2mx].*">
                     <list>
                         <ref component-id="jpeg2000"/>
-                        <ref component-id="magick"/>
                         <ref component-id="openJpeg"/>
+                        <ref component-id="magick"/>
                     </list>
                 </entry>
 
                 <!--Are these entries needed? Some sources say they are aliases for JPEG 200 MIME types-->
-                <entry key="image/jpx">
-                    <list>
-                        <ref component-id="jpeg2000"/>
-                        <ref component-id="magick"/>
-                        <ref component-id="openJpeg"/>
-                    </list>
-                </entry>
-                <entry key="image/jpm">
-                    <list>
-                        <ref component-id="jpeg2000"/>
-                        <ref component-id="magick"/>
-                        <ref component-id="openJpeg"/>
-                    </list>
-                </entry>
+                <!--<entry key="image/jpx">-->
+                <!--<list>-->
+                <!--<ref component-id="jpeg2000"/>-->
+                <!--<ref component-id="magick"/>-->
+                <!--<ref component-id="openJpeg"/>-->
+                <!--</list>-->
+                <!--</entry>-->
+                <!--<entry key="image/jpm">-->
+                <!--<list>-->
+                <!--<ref component-id="jpeg2000"/>-->
+                <!--<ref component-id="magick"/>-->
+                <!--<ref component-id="openJpeg"/>-->
+                <!--</list>-->
+                <!--</entry>-->
             </map>
         </argument>
     </bean>

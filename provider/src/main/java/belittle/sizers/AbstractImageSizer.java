@@ -1,6 +1,5 @@
 package belittle.sizers;
 
-import static belittle.BeLittleConstants.MIME_TYPE;
 import static belittle.support.MessageConstants.SIZER_NAME;
 
 import belittle.BeLittleMessage;
@@ -10,6 +9,7 @@ import belittle.BeLittleSizerSetting;
 import belittle.BeLittleSizerSettingImpl;
 import belittle.ImageSizer;
 import belittle.support.MessageFactory;
+import java.io.InputStream;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -29,7 +29,7 @@ import javax.imageio.ImageReader;
  *   <li>Ability to limit operations to a configurable amount of time
  * </ul>
  *
- * This class also defines a pattern for the API method generate(). See the documentation for that
+ * This class also defines a pattern for the API method resize(). See the documentation for that
  * method.
  *
  * <p>
@@ -49,17 +49,18 @@ public abstract class AbstractImageSizer implements ImageSizer {
     return result;
   }
 
-  public ImageSizer getNew() {
-    return getNew(sizerSetting);
+  @Override
+  public BeLittleResult resize(InputStream inputStream, String mimeType) {
+    return resize(inputStream);
   }
 
   /**
-   * This message is called at the end of the generate() method. It exists to close, shutdown, or
+   * This message is called at the end of the resize() method. It exists to close, shutdown, or
    * otherwise put the object into a completed state. It does not close the input stream. The input
    * stream was not created by this object and therefore this object should not be responsible for
    * closing that stream.
    *
-   * <p>It is not intended that this object be reused after generate() completes. This object should
+   * <p>It is not intended that this object be reused after resize() completes. This object should
    * be cloned using the getNew() method and the new instance should be used for any additional
    * work.
    *
@@ -70,7 +71,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   /**
-   * The prepare() method is the first step in the generate() process. It's purpose is to validate
+   * The prepare() method is the first step in the resize() process. It's purpose is to validate
    * input, read metadata. It is a place to add ERROR messages to prevent further processing if the
    * input cannot be validated. It is also a place to add informational messages and warnings.
    */
@@ -93,9 +94,8 @@ public abstract class AbstractImageSizer implements ImageSizer {
     //    }
   }
 
-  public ImageReader getImageReaderByMIMEType() {
-    Iterator<ImageReader> it =
-        ImageIO.getImageReadersByMIMEType(sizerSetting.getProperty(MIME_TYPE));
+  public ImageReader getImageReaderByMIMEType(String mimeType) {
+    Iterator<ImageReader> it = ImageIO.getImageReadersByMIMEType(mimeType);
     if (it.hasNext()) {
       return it.next();
     } else {
