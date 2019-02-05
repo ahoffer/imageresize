@@ -6,8 +6,8 @@ import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class BasicSizer extends AbstractImageSizer {
@@ -17,11 +17,11 @@ public class BasicSizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittleResult resize(InputStream inputStream) {
+  public BeLittleResult resize(File file) {
     BufferedImage image = null;
     try {
       image =
-          Thumbnails.of(inputStream)
+          Thumbnails.of(file)
               .size(sizerSetting.getWidth(), sizerSetting.getHeight())
               .asBufferedImage();
     } catch (IOException e) {

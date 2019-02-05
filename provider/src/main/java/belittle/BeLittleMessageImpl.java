@@ -6,22 +6,22 @@ public class BeLittleMessageImpl implements BeLittleMessage {
 
   String id;
   String description;
-  BeLittlingSeverity severity;
+  BeLittleSeverity severity;
   Throwable throwable;
 
-  public BeLittleMessageImpl(String id, BeLittlingSeverity severity, String description) {
+  public BeLittleMessageImpl(String id, BeLittleSeverity severity, String description) {
     this.id = id;
     this.severity = severity;
     this.description = description;
   }
 
   public BeLittleMessageImpl(
-      String id, BeLittlingSeverity severity, String description, Throwable throwable) {
+      String id, BeLittleSeverity severity, String description, Throwable throwable) {
     this(id, severity, description);
     this.throwable = throwable;
   }
 
-  public BeLittleMessageImpl(String id, BeLittlingSeverity severity, Throwable throwable) {
+  public BeLittleMessageImpl(String id, BeLittleSeverity severity, Throwable throwable) {
     this(id, severity, throwable.getMessage(), throwable);
   }
 
@@ -37,7 +37,7 @@ public class BeLittleMessageImpl implements BeLittleMessage {
   }
 
   @Override
-  public BeLittlingSeverity getSeverity() {
+  public BeLittleSeverity getSeverity() {
 
     return severity;
   }

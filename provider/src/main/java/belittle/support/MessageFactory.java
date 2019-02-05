@@ -1,8 +1,8 @@
 package belittle.support;
 
-import static belittle.BeLittleMessage.BeLittlingSeverity.ERROR;
-import static belittle.BeLittleMessage.BeLittlingSeverity.INFO;
-import static belittle.BeLittleMessage.BeLittlingSeverity.WARNING;
+import static belittle.BeLittleMessage.BeLittleSeverity.ERROR;
+import static belittle.BeLittleMessage.BeLittleSeverity.INFO;
+import static belittle.BeLittleMessage.BeLittleSeverity.WARNING;
 import static belittle.support.MessageConstants.BAD_HEIGHT;
 import static belittle.support.MessageConstants.BAD_WIDTH;
 import static belittle.support.MessageConstants.BIT_RATE;

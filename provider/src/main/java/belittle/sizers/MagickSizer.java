@@ -1,14 +1,13 @@
 package belittle.sizers;
 
-import static belittle.support.MessageConstants.EXTERNAL_EXECUTABLE;
 import static belittle.support.MessageConstants.RESIZE_ERROR;
 
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
 import belittle.support.FuzzyFile;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import org.im4java.core.ConvertCmd;
@@ -47,16 +46,9 @@ public class MagickSizer extends ExternalProcessSizer {
     setExecutable(executable);
   }
 
-  void prepare() {
-    super.prepare();
-    if (!isAvailable()) {
-      addMessage(messageFactory.make(EXTERNAL_EXECUTABLE));
-    }
-  }
-
   @Override
-  public BeLittleResult resize(
-      InputStream inputStream) { // TODO if MIME type is JPEG, add this option "-define
+  public BeLittleResult resize(File file) {
+    // TODO if MIME type is JPEG, add this option "-define
     // jpeg:generate=200x200" and substitute a
     // size that is twice the size of the desired thumbnail.
     // TODO use -sample to improve memory usage
@@ -73,34 +65,32 @@ public class MagickSizer extends ExternalProcessSizer {
 
               // Read the image from std in
               op.addImage(STD_IN);
-              command.setInputProvider(new Pipe(inputStream, null));
+              doWithInputStream(
+                  file,
+                  (inputStream) -> {
+                    command.setInputProvider(new Pipe(inputStream, null));
 
-              // Write the image to std out
-              String configuredOutputFormat = sizerSetting.getProperty(OUTPUT_FORMAT_KEY);
-              if (configuredOutputFormat == null) {
-                configuredOutputFormat = DEFAULT_OUTPUT_FORMAT;
-              }
+                    // Write the image to std out
+                    String configuredOutputFormat = sizerSetting.getProperty(OUTPUT_FORMAT_KEY);
+                    if (configuredOutputFormat == null) {
+                      configuredOutputFormat = DEFAULT_OUTPUT_FORMAT;
+                    }
 
-              String outputFormatDirectedToStandardOut = configuredOutputFormat + STD_OUT;
-              op.addImage(outputFormatDirectedToStandardOut);
-              command.setOutputConsumer(outputConsumer);
+                    String outputFormatDirectedToStandardOut = configuredOutputFormat + STD_OUT;
+                    op.addImage(outputFormatDirectedToStandardOut);
+                    command.setOutputConsumer(outputConsumer);
 
-              command.setSearchPath(getExecutable().getParent());
-              try {
-                command.run(op);
-              } catch (InterruptedException | IM4JavaException | IOException e) {
-                addMessage(messageFactory.make(RESIZE_ERROR, e));
-                result.setOutput(outputConsumer.getImage());
-              }
-
+                    command.setSearchPath(getExecutable().getParent());
+                    try {
+                      command.run(op);
+                    } catch (InterruptedException | IM4JavaException | IOException e) {
+                      addMessage(messageFactory.make(RESIZE_ERROR, e));
+                      result.setOutput(outputConsumer.getImage());
+                    }
+                  });
               return null;
             });
     return result;
-  }
-
-  @Override
-  public boolean isAvailable() {
-    return getExecutable().canExecute();
   }
 
   @Override

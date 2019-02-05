@@ -6,10 +6,8 @@ import static belittle.support.MessageConstants.OPJ_FAILED;
 import static belittle.support.MessageConstants.OS_PROCESS_FAILED;
 import static belittle.support.MessageConstants.OS_PROCESS_INTERRUPTED;
 import static belittle.support.MessageConstants.REDUCTION_FACTOR;
-import static belittle.support.MessageConstants.UNABLE_TO_CREATE_TEMP_FILE;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-import belittle.BeLittleMessage.BeLittlingSeverity;
+import belittle.BeLittleMessage.BeLittleSeverity;
 import belittle.BeLittleMessageImpl;
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
@@ -23,10 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.UUID;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class OpenJpeg2000Sizer extends ExternalProcessSizer {
@@ -38,7 +34,6 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   public static String OUTPUT_FORMAT_EXT = ".bmp";
   Jpeg2000MetadataMicroReader metadata;
   int reductionFactor;
-  File inputFile;
   Path outputFile;
   Process process;
 
@@ -51,7 +46,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     this.setExecutable(executable);
   }
 
-  public BeLittleResult resize(InputStream inputStream) {
+  public BeLittleResult resize(File file) {
 
     AccessController.doPrivileged(
         (PrivilegedAction<Void>)
@@ -63,46 +58,27 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
               if (!getExecutable().canExecute()) {
                 addMessage(
                     new BeLittleMessageImpl(
-                        "CANNOT INVOKE EXEC", BeLittlingSeverity.ERROR, "File cannot be executed"));
+                        "CANNOT INVOKE EXEC", BeLittleSeverity.ERROR, "File cannot be executed"));
                 return null;
               }
 
-              readMetadata(inputStream);
               reductionFactor = getReductionFactor();
               addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
 
-              long bytesWritten;
               try {
-                inputFile = File.createTempFile("input", getProperFileExt());
-                inputFile.deleteOnExit();
-
-                // Don't create a file for output (e.g. createTempFile). Use a Path instead.
-                // The OS might not let it be overwritten by the command line program.
-                String tempDir = inputFile.getParent();
-                outputFile = Paths.get(tempDir, "out" + UUID.randomUUID() + OUTPUT_FORMAT_EXT);
-
-                // TODO Add check on bytes written. If bytes read < 1, it is an error.
-                bytesWritten =
-                    java.nio.file.Files.copy(inputStream, inputFile.toPath(), REPLACE_EXISTING);
+                File outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
+                ProcessBuilder processBuilder = getProcessBuilderForDecompress(file);
+                startProcess(processBuilder);
+                result.setOutput(
+                    Thumbnails.of(outputFile)
+                        .size(sizerSetting.getWidth(), sizerSetting.getHeight())
+                        .asBufferedImage());
               } catch (IOException e) {
-                addMessage(messageFactory.make(UNABLE_TO_CREATE_TEMP_FILE));
+                // TODO: Add message that could not read file.
+                // addMessage(messageFactory.make(, e));
               }
-
-              ProcessBuilder processBuilder = getProcessBuilderForDecompress();
-              startProcess(processBuilder);
               return null;
             });
-
-    try {
-      result.setOutput(
-          Thumbnails.of(outputFile.toFile())
-              .size(sizerSetting.getWidth(), sizerSetting.getHeight())
-              .asBufferedImage());
-    } catch (IOException e) {
-      // TODO: Add message that could not read file.
-      // addMessage(messageFactory.make(, e));
-    }
-
     return result;
   }
 
@@ -135,7 +111,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       metadata = new Jpeg2000MetadataMicroReader(inputStream);
       metadata.read();
     } catch (IOException e) {
-      addMessage(new BeLittleMessageImpl("IO Exception", BeLittlingSeverity.ERROR, e));
+      addMessage(new BeLittleMessageImpl("IO Exception", BeLittleSeverity.ERROR, e));
     }
     if (!metadata.isSucessfullyRead()) {
       addMessage(messageFactory.make(COULD_NOT_READ_METADATA));
@@ -160,7 +136,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     }
   }
 
-  ProcessBuilder getProcessBuilderForDecompress() {
+  ProcessBuilder getProcessBuilderForDecompress(File inputFile) {
     // TODO play around with Quality Layers -l "
     // Include space after options
     return new ProcessBuilder(
@@ -194,11 +170,6 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     } else {
       return 4;
     }
-  }
-
-  @Override
-  public boolean isAvailable() {
-    return getExecutable().canExecute();
   }
 
   @Override

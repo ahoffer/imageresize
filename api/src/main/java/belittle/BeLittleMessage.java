@@ -35,7 +35,7 @@ public interface BeLittleMessage {
    *
    * @return informational, warning, or error
    */
-  BeLittlingSeverity getSeverity();
+  BeLittleSeverity getSeverity();
 
   /**
    * Often a message is created in reponse to an Exception. The exception can be attached to the
@@ -55,7 +55,7 @@ public interface BeLittleMessage {
    * to the object's client. Image processing involves a lot of IO. IOExceptions can be almost
    * anywhere and can mean many different things.
    */
-  enum BeLittlingSeverity {
+  enum BeLittleSeverity {
     ERROR,
     WARNING,
     INFO

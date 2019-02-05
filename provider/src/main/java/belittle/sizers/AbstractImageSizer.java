@@ -3,16 +3,23 @@ package belittle.sizers;
 import static belittle.support.MessageConstants.SIZER_NAME;
 
 import belittle.BeLittleMessage;
+import belittle.BeLittleMessage.BeLittleSeverity;
+import belittle.BeLittleMessageImpl;
 import belittle.BeLittleResult;
 import belittle.BeLittleResultImpl;
 import belittle.BeLittleSizerSetting;
 import belittle.BeLittleSizerSettingImpl;
 import belittle.ImageSizer;
+import belittle.support.IoConsumer;
 import belittle.support.MessageFactory;
+import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 /**
  * The primary functionality for all ImageSizers is implemented int this class.
@@ -50,8 +57,8 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   @Override
-  public BeLittleResult resize(InputStream inputStream, String mimeType) {
-    return resize(inputStream);
+  public BeLittleResult resize(File file, String mimeType) {
+    return resize(file);
   }
 
   /**
@@ -70,28 +77,8 @@ public abstract class AbstractImageSizer implements ImageSizer {
     result = null;
   }
 
-  /**
-   * The prepare() method is the first step in the resize() process. It's purpose is to validate
-   * input, read metadata. It is a place to add ERROR messages to prevent further processing if the
-   * input cannot be validated. It is also a place to add informational messages and warnings.
-   */
   void prepare() {
-
     stampNameOnResults();
-
-    // TODO MOVE VALIDATION OF SIZER SETTINGS TO THE BeLittleFactory CLASS
-
-    // old TODO: Create a rule class to encapsulate the rules. It accepts a sizer and can call
-    // old TODO: the sizer's addMessage method. Probably use visitor pattern.
-    //    if (getMaxWidth() < 1) {
-    //      addMessage(messageFactory.make(BAD_WIDTH, getMaxWidth()));
-    //    }
-    //    if (getMaxHeight() < 1) {
-    //      addMessage(messageFactory.make(BAD_HEIGHT, getMaxHeight()));
-    //    }
-    //    if (Objects.isNull(inputStream)) {
-    //      addMessage(messageFactory.make(MISSING_INPUT_STREAM));
-    //    }
   }
 
   public ImageReader getImageReaderByMIMEType(String mimeType) {
@@ -110,5 +97,44 @@ public abstract class AbstractImageSizer implements ImageSizer {
   /** Adds informational message that gives the class name of the sizer */
   protected void stampNameOnResults() {
     addMessage(messageFactory.make(SIZER_NAME, this.getClass().getSimpleName()));
+  }
+
+  protected void closeImageInputStream(ImageInputStream iis) {
+    if (iis != null) {
+      try {
+        iis.close();
+      } catch (IOException e) {
+        addMessage(new BeLittleMessageImpl("", BeLittleSeverity.WARNING, e));
+      }
+    }
+  }
+
+  protected void closeImageReader(ImageReader reader) {
+    if (reader != null) {
+      reader.dispose();
+    }
+  }
+
+  void doWithInputStream(File file, IoConsumer<InputStream> consumer) {
+    try (InputStream istream = Files.asByteSource(file).openStream()) {
+      consumer.accept(istream);
+    } catch (IOException e) {
+      addMessage(new BeLittleMessageImpl("IO Exception", BeLittleSeverity.ERROR, e));
+    }
+  }
+
+  void doWithImageInputStream(File file, IoConsumer<ImageInputStream> consumer) {
+    doWithInputStream(
+        file,
+        (istream) -> {
+          ImageInputStream iis = null;
+          try {
+            iis = ImageIO.createImageInputStream(istream);
+          } catch (IOException e) {
+            addMessage(new BeLittleMessageImpl("IO", BeLittleSeverity.ERROR, e));
+          } finally {
+            closeImageInputStream(iis);
+          }
+        });
   }
 }

@@ -1,20 +1,17 @@
 package belittle.sizers;
 
 import static belittle.support.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
-import static belittle.support.MessageConstants.RESIZE_ERROR;
 
-import belittle.BeLittleMessage.BeLittlingSeverity;
+import belittle.BeLittleMessage.BeLittleSeverity;
 import belittle.BeLittleMessageImpl;
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
 import belittle.support.ComputeSubSamplingPeriod;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class SamplingSizer extends AbstractImageSizer {
@@ -37,64 +34,52 @@ public class SamplingSizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittleResult resize(InputStream inputStream, String mimeType) {
-
-    ImageInputStream iis = null;
+  public BeLittleResult resize(File file, String mimeType) {
+    closeImageReader(reader);
     reader = getImageReaderByMIMEType(mimeType);
-    try {
-      iis = ImageIO.createImageInputStream(inputStream);
-      reader.setInput(iis);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    doWithImageInputStream(
+        file,
+        (iis) -> {
+          reader.setInput(iis);
+          int inputHeight = reader.getHeight(0);
+          int inputWidth = reader.getWidth(0);
+          if (inputHeight <= 0 || inputWidth <= 0) {
+            int defaultSamplingPeriod =
+                Integer.valueOf(sizerSetting.getProperty(SAMPLING_PERIOD_KEY));
+            if (defaultSamplingPeriod > 0) {
+              samplingPeriod = defaultSamplingPeriod;
+              addMessage(
+                  new BeLittleMessageImpl(
+                      CANNOT_READ_WIDTH_AND_HEIGHT,
+                      BeLittleSeverity.WARNING,
+                      String.format(
+                          "Width and height of input image cannot be determined. Using configured sampling period of %s pixels",
+                          samplingPeriod)));
 
-    int inputHeight = 0;
-    int inputWidth = 0;
-    try {
-      inputHeight = reader.getHeight(0);
-      inputWidth = reader.getWidth(0);
-    } catch (IOException e) {
-      // A message will be added later
-    }
-    if (inputHeight <= 0 || inputWidth <= 0) {
-      int defaultSamplingPeriod = Integer.valueOf(sizerSetting.getProperty(SAMPLING_PERIOD_KEY));
-      if (defaultSamplingPeriod > 0) {
-        samplingPeriod = defaultSamplingPeriod;
-        addMessage(
-            new BeLittleMessageImpl(
-                CANNOT_READ_WIDTH_AND_HEIGHT,
-                BeLittlingSeverity.WARNING,
-                String.format(
-                    "Width and height of input image cannot be determined. Using configured sampling period of %s pixels",
-                    samplingPeriod)));
+            } else {
+              addMessage(
+                  new BeLittleMessageImpl(
+                      CANNOT_READ_WIDTH_AND_HEIGHT,
+                      BeLittleSeverity.ERROR,
+                      "Width and/or height of input image cannot be determined and no default sampling period is value is configured. Sampling sizer needs these values to compute subsampling period."));
+            }
+          } else {
+            samplingPeriod =
+                new ComputeSubSamplingPeriod()
+                    .setInputSize(inputWidth, inputHeight)
+                    .setOutputSize(sizerSetting.getWidth(), sizerSetting.getHeight())
+                    .compute();
+          }
+          reader.getDefaultReadParam().setSourceSubsampling(samplingPeriod, samplingPeriod, 0, 0);
 
-      } else {
-        addMessage(
-            new BeLittleMessageImpl(
-                CANNOT_READ_WIDTH_AND_HEIGHT,
-                BeLittlingSeverity.ERROR,
-                "Width and/or height of input image cannot be determined and no default sampling period is value is configured. Sampling sizer needs these values to compute subsampling period."));
-      }
-    } else {
-      samplingPeriod =
-          new ComputeSubSamplingPeriod()
-              .setInputSize(inputWidth, inputHeight)
-              .setOutputSize(sizerSetting.getWidth(), sizerSetting.getHeight())
-              .compute();
-    }
-    reader.getDefaultReadParam().setSourceSubsampling(samplingPeriod, samplingPeriod, 0, 0);
+          BufferedImage image = null;
 
-    BufferedImage image = null;
-
-    try {
-      image = reader.read(0);
-      result.setOutput(
-          Thumbnails.of(image)
-              .size(sizerSetting.getWidth(), sizerSetting.getHeight())
-              .asBufferedImage());
-    } catch (IOException e) {
-      addMessage(messageFactory.make(RESIZE_ERROR, e));
-    }
+          image = reader.read(0);
+          result.setOutput(
+              Thumbnails.of(image)
+                  .size(sizerSetting.getWidth(), sizerSetting.getHeight())
+                  .asBufferedImage());
+        });
     return result;
   }
 
@@ -104,8 +89,8 @@ public class SamplingSizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittleResult resize(InputStream inputStream) {
+  public BeLittleResult resize(File file) {
     throw new UnsupportedOperationException(
-        "The Jpeg 2000 sizer expects a MIMME type. Use another implementation of the resize method");
+        "The sampling sizer expects a MIMME type. Use another implementation of the resize method");
   }
 }

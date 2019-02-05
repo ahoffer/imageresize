@@ -2,8 +2,7 @@ package belittle;
 
 import static belittle.BeLittleConstants.UNKNOWN_MIME_TYPE;
 
-import belittle.BeLittleMessage.BeLittlingSeverity;
-import com.google.common.io.ByteSource;
+import belittle.BeLittleMessage.BeLittleSeverity;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
@@ -68,18 +67,16 @@ public class BeLittleImpl implements BeLittle {
   public List<BeLittleResult> resize(File file) {
     String mimeType = readMimeType(file);
     List<ImageSizer> sizerList = getSizersForMimeType(mimeType);
-    ByteSource source = Files.asByteSource(file);
     for (ImageSizer sizer : sizerList) {
       BeLittleResult result = sizer.getResult();
       //      Callable<BeLittleResult> callable = () -> sizer.resize(source.openBufferedStream());
       //      Future<BeLittleResult> future = executorService.submit(callable);
       try {
-        sizer.resize(source.openBufferedStream(), mimeType);
+        sizer.resize(file, mimeType);
         //        future.get(sizerSetting.getTimeoutSeconds(), TimeUnit.SECONDS);
       } catch (
-      /*InterruptedException | ExecutionException | TimeoutException |*/ RuntimeException
-          | IOException e) {
-        sizer.addMessage(new BeLittleMessageImpl("EXP", BeLittlingSeverity.ERROR, e));
+          /*InterruptedException | ExecutionException | TimeoutException |*/ RuntimeException e) {
+        sizer.addMessage(new BeLittleMessageImpl("EXP", BeLittleSeverity.ERROR, e));
       }
       if (result.succeeded()) {
         // Return immediately if a sizer succeeds.
