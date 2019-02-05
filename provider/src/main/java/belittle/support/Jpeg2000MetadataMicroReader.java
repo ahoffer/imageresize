@@ -44,7 +44,6 @@ package belittle.support;
 
 import com.github.jaiimageio.jpeg2000.impl.Box;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReadParamJava;
-import java.awt.color.ICC_Profile;
 import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -108,9 +107,6 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
   /** The random access from which the file format boxes are read */
   RandomAccessIO in;
 
-  /** ICC profile */
-  ICC_Profile profile;
-
   int heightFromImgHeaderBox;
   int widthFromImgHeaderBox;
   int widthFromCodeStreamStreamBox;
@@ -125,7 +121,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    *
    * @param inputStream The input stream from which to read the file format
    */
-  public Jpeg2000MetadataMicroReader(InputStream inputStream) throws IOException {
+  public Jpeg2000MetadataMicroReader(InputStream inputStream) {
     // 1K should probably be enough. Look at lower the buffer size.
     // Also, ISRandomAcessIO will throw a throwable if consumers try to read past the cache limit.
     this.inputStream =
@@ -140,22 +136,17 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    */
   public void read() throws IOException {
 
-    inputStream.mark(READ_LIMIT);
+    sucessfullyRead = true;
     try {
       read0();
-    } catch (IOException e) {
+      // The JAI JPEG 2000 library can sometimes uses RuntimeException in place  IOException
+    } catch (IOException | RuntimeException e) {
       sucessfullyRead = false;
-    } finally {
-      inputStream.reset();
     }
-
-    sucessfullyRead = true;
   }
 
   void read0() throws IOException {
-
     int initialPos = in.getPos();
-
     // Make sure that the first 12 bytes are eith the JP2_SIGNATURE_BOX
     // OR that the first 2 bytes is the SOC marker
     isJpeg2000File =
@@ -260,16 +251,7 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
    */
   boolean readContiguousCodeStreamBox() throws IOException {
 
-    HeaderInfo hi = new HeaderInfo();
-    HeaderDecoder hd;
-    try {
-      hd = new HeaderDecoder(in, new J2KImageReadParamJava(), hi);
-    } catch (EOFException e) {
-      throw new RuntimeException("J2KReadState2");
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
-
+    HeaderDecoder hd = new HeaderDecoder(in, new J2KImageReadParamJava(), new HeaderInfo());
     widthFromCodeStreamStreamBox = hd.getImgWidth();
     heightFromCodeStreamStreamBox = hd.getImgHeight();
     // Get minimum number of resolution levels available across all tile-components.
@@ -277,7 +259,6 @@ public class Jpeg2000MetadataMicroReader implements FileFormatBoxes {
     // levels + 1 = resolution levels. But I'm not so sure. I need to get something that can read
     // JPEG 2000 metadata better than this JAI library to know.
     minNumResolutionLevels = hd.getDecoderSpecs().dls.getMin();
-
     return true;
   }
 

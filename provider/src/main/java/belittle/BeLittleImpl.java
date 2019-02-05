@@ -88,50 +88,6 @@ public class BeLittleImpl implements BeLittle {
     return sizerList.stream().map(ImageSizer::getResult).collect(Collectors.toList());
   }
 
-  // This was some partially implemented bad-ass rock star code that
-  // I ditched because I don't think it is necessary. The plan was to have the sizers running
-  // in parallel and look for the first one to succeed. I think it is an unnecessary drain on
-  // system resources. In retrospect, it was just plain over-engineered.
-  /*
-  public List<BeLittlingResult> resize(File file) {
-      setMimeType(readMimeType(file));
-      ByteSource source = Files.asByteSource(file);
-
-      //    Set<Callable<String>>
-      List<ImageSizer> sizerList = getSizers();
-      List<Callable<BeLittlingResult>> callables;
-
-      try {
-        callables = sizerList.stream().<Callable<BeLittlingResult>>map(
-            sizer -> () -> sizer.resize(source.openBufferedStream())).collect(Collectors.toList());
-        List<Future<BeLittlingResult>> futures = executorService.invokeAll(callables);
-        futures.forEach(f -> schedulerService
-            .schedule(() -> f.cancel(true), sizerSetting.getTimeoutSeconds(), TimeUnit.SECONDS));
-        BeLittlingResult result;
-        while (futures.stream.matchAll(f -> !f.isDone() ) {
-          for (Future<BeLittlingResult> future : futures) {
-            try {
-              //Look for sizers that are done
-              if (future.isDone()) {
-                result = future.get();
-              if (result.succeeded()) {
-                // Cancel other futures and return first success
-                futures.forEach(f -> f.cancel(true));
-                return Collections.singletonList(result);
-              }
-            } catch (ExecutionException | TimeoutException | InterruptedException e) {
-              LOGGER.info("Unexpected error resizing an image", e);
-            }
-          }
-        }
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
-      // If all sizers fail, returns all results
-      return sizerList.stream().map(ImageSizer::getResult).collect(Collectors.toList());
-    }
-    */
-
   /**
    * Helper method to write an InputImageStream to disk. Although the InputImageStream class is a
    * file-back buffered stream, it is relies on mark and reset functions that can be problematic. An

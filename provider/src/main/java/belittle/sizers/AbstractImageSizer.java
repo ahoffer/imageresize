@@ -119,7 +119,7 @@ public abstract class AbstractImageSizer implements ImageSizer {
     try (InputStream istream = Files.asByteSource(file).openStream()) {
       consumer.accept(istream);
     } catch (IOException e) {
-      addMessage(new BeLittleMessageImpl("IO Exception", BeLittleSeverity.ERROR, e));
+      addMessage(new BeLittleMessageImpl("IO", BeLittleSeverity.ERROR, e));
     }
   }
 
@@ -130,7 +130,9 @@ public abstract class AbstractImageSizer implements ImageSizer {
           ImageInputStream iis = null;
           try {
             iis = ImageIO.createImageInputStream(istream);
-          } catch (IOException e) {
+            consumer.accept(iis);
+            // The JAI JPEG 2000 library can sometimes uses RuntimeException in place  IOException
+          } catch (IOException | RuntimeException e) {
             addMessage(new BeLittleMessageImpl("IO", BeLittleSeverity.ERROR, e));
           } finally {
             closeImageInputStream(iis);

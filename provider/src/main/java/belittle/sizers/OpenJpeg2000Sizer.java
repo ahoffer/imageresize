@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import net.coobird.thumbnailator.Thumbnails;
@@ -34,7 +33,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   public static String OUTPUT_FORMAT_EXT = ".bmp";
   Jpeg2000MetadataMicroReader metadata;
   int reductionFactor;
-  Path outputFile;
+  File outputFile;
   Process process;
 
   public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting) {
@@ -61,12 +60,12 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
                         "CANNOT INVOKE EXEC", BeLittleSeverity.ERROR, "File cannot be executed"));
                 return null;
               }
-
+              doWithInputStream(file, (istream) -> readMetadata(istream));
               reductionFactor = getReductionFactor();
               addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
 
               try {
-                File outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
+                outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
                 ProcessBuilder processBuilder = getProcessBuilderForDecompress(file);
                 startProcess(processBuilder);
                 result.setOutput(
