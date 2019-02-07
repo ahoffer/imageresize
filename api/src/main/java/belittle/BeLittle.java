@@ -1,7 +1,7 @@
 package belittle;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.List;
 import javax.imageio.stream.ImageInputStream;
 
 public interface BeLittle {
@@ -126,9 +126,9 @@ public interface BeLittle {
   */
 
   /** Convenience method. Attempt to generate an image from the first available ImageSizer. */
-  List<BeLittleResult> resize(ImageInputStream iis) throws RuntimeException;
+  BufferedImage resize(ImageInputStream iis) throws RuntimeException;
 
-  List<BeLittleResult> resize(File file) throws RuntimeException;
+  BufferedImage resize(File file) throws RuntimeException;
 
   /*
       public class ImageSizerCollection {

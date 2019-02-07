@@ -2,7 +2,6 @@ package belittle;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This interface defines the results of a resize operation. It can include the resized image and a
@@ -17,7 +16,7 @@ public interface BeLittleResult {
    *
    * @return resized image
    */
-  Optional<BufferedImage> getOutput();
+  BufferedImage getOutput();
 
   /**
    * List of messages created while performing (or attempting to perform) the resize operation.

@@ -3,7 +3,6 @@ package belittle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BeLittleResultImpl implements BeLittleResult {
@@ -19,8 +18,8 @@ public class BeLittleResultImpl implements BeLittleResult {
   }
 
   @Override
-  public Optional<BufferedImage> getOutput() {
-    return Optional.ofNullable(output);
+  public BufferedImage getOutput() {
+    return (output);
   }
 
   @Override
@@ -36,7 +35,7 @@ public class BeLittleResultImpl implements BeLittleResult {
 
   @Override
   public boolean succeeded() {
-    return getOutput().isPresent();
+    return getOutput() != null;
   }
 
   public String toString() {

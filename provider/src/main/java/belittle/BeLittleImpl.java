@@ -4,6 +4,7 @@ import static belittle.BeLittleConstants.UNKNOWN_MIME_TYPE;
 
 import belittle.BeLittleMessage.BeLittleSeverity;
 import com.google.common.io.Files;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -42,13 +43,13 @@ public class BeLittleImpl implements BeLittle {
     return Collections.unmodifiableList(sizers.get(lookupKey));
   }
 
-  public List<BeLittleResult> resize(ImageInputStream iis) {
+  public BufferedImage resize(ImageInputStream iis) {
     File file = null;
     try {
       file = File.createTempFile("belittle", null);
       write(iis, file);
       return resize(file);
-    } catch (IOException e) {
+    } catch (Exception e) {
       LOGGER.info("Failed to create temporary file {}", file.getAbsolutePath());
     } finally {
       if (file != null) {
@@ -56,7 +57,7 @@ public class BeLittleImpl implements BeLittle {
         file.delete();
       }
     }
-    return Collections.emptyList();
+    return null;
   }
 
   /**
@@ -64,7 +65,9 @@ public class BeLittleImpl implements BeLittle {
    * failed attempts. Could also prodive methods like "succeeded?", "getSuccessfulResult", and get
    * "getImage" (from successful result).
    */
-  public List<BeLittleResult> resize(File file) {
+  //  public List<BeLittleResult> resize(File file) {
+  public BufferedImage resize(File file) {
+
     String mimeType = readMimeType(file);
     List<ImageSizer> sizerList = getSizersForMimeType(mimeType);
     for (ImageSizer sizer : sizerList) {
@@ -80,12 +83,13 @@ public class BeLittleImpl implements BeLittle {
       }
       if (result.succeeded()) {
         // Return immediately if a sizer succeeds.
-        return Collections.singletonList(result);
+        return result.getOutput();
       }
     }
 
     // If no sizer succeeds, return results from all sizers.
-    return sizerList.stream().map(ImageSizer::getResult).collect(Collectors.toList());
+    // return sizerList.stream().map(ImageSizer::getResult).collect(Collectors.toList());
+    return null;
   }
 
   /**

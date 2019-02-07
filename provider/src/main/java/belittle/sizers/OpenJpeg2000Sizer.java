@@ -3,7 +3,6 @@ package belittle.sizers;
 import static belittle.support.MessageConstants.COULD_NOT_READ_METADATA;
 import static belittle.support.MessageConstants.EXTERNAL_EXECUTABLE;
 import static belittle.support.MessageConstants.OPJ_FAILED;
-import static belittle.support.MessageConstants.OS_PROCESS_FAILED;
 import static belittle.support.MessageConstants.OS_PROCESS_INTERRUPTED;
 import static belittle.support.MessageConstants.REDUCTION_FACTOR;
 
@@ -15,14 +14,28 @@ import belittle.ImageSizer;
 import belittle.support.ComputeResolutionLevel;
 import belittle.support.FuzzyFile;
 import belittle.support.Jpeg2000MetadataMicroReader;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.concurrent.TimeUnit;
+import javax.imageio.ImageIO;
 import net.coobird.thumbnailator.Thumbnails;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecuteResultHandler;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteResultHandler;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.Executor;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OpenJpeg2000Sizer extends ExternalProcessSizer {
 
@@ -30,10 +43,11 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   // For Open JPEG v2.3.0 they are: PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|RAW|RAWL|TGA
   // Chose BMP. No, seriously! It is much faster than PNG and smaller than PPM.
 
-  public static String OUTPUT_FORMAT_EXT = ".bmp";
+  private static final Logger LOGGER = LoggerFactory.getLogger(OpenJpeg2000Sizer.class);
+
+  public static String OUTPUT_FORMAT_EXT = ".tif";
   Jpeg2000MetadataMicroReader metadata;
   int reductionFactor;
-  File outputFile;
   Process process;
 
   public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting) {
@@ -63,22 +77,75 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
               doWithInputStream(file, (istream) -> readMetadata(istream));
               reductionFactor = getReductionFactor();
               addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
+              File sourceWithNewExtension = null;
+              File outputFile = null;
+              try {
+                sourceWithNewExtension = File.createTempFile("belittle", getProperFileExt());
+                FileUtils.copyFile(file, sourceWithNewExtension);
+                outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+              do {
+                // Open JPEG command line utility is very picky about the extension.
+
+                doIt(sourceWithNewExtension, outputFile);
+                //                ProcessBuilder processBuilder =
+                //                    getProcessBuilderForDecompress(sourceWithNewExtension,
+                // outputFile);
+                //                startProcess(processBuilder);
+                reductionFactor--;
+              } while (reductionFactor > 0 && isTooSmall(outputFile));
 
               try {
-                outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
-                ProcessBuilder processBuilder = getProcessBuilderForDecompress(file);
-                startProcess(processBuilder);
                 result.setOutput(
                     Thumbnails.of(outputFile)
                         .size(sizerSetting.getWidth(), sizerSetting.getHeight())
                         .asBufferedImage());
               } catch (IOException e) {
-                // TODO: Add message that could not read file.
-                // addMessage(messageFactory.make(, e));
+
               }
               return null;
             });
     return result;
+  }
+
+  boolean isTooSmall(File outputFile) {
+    BufferedImage intermediateImage = null;
+    try {
+      intermediateImage = ImageIO.read(outputFile.getAbsoluteFile());
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
+
+    return intermediateImage.getWidth() < sizerSetting.getWidth()
+        || intermediateImage.getHeight() < sizerSetting.getHeight();
+  }
+
+  private void doIt(File file, File outputFile) {
+    String path = getExecutable().getPath();
+    CommandLine cmdLine = new CommandLine(path);
+    cmdLine.addArgument("-r");
+    cmdLine.addArgument(String.valueOf(reductionFactor));
+    cmdLine.addArgument("-i");
+    cmdLine.addArgument(file.toString());
+    cmdLine.addArgument("-o");
+    cmdLine.addArgument(outputFile.toString());
+    Executor executor = new DefaultExecutor();
+    ExecuteWatchdog watchdog = new ExecuteWatchdog(60 * 1000);
+    executor.setWatchdog(watchdog);
+    ExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+    executor.setStreamHandler(streamHandler);
+    try {
+      executor.execute(cmdLine, resultHandler);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    // Don't know why this doesn't work
+    //    String feedback = (outputStream.toString());
   }
 
   /**
@@ -118,32 +185,28 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   }
 
   void startProcess(ProcessBuilder processBuilder) {
-    int returnCode;
+    boolean returnCode;
+
     try {
       process = processBuilder.start();
-      try {
-        returnCode = process.waitFor();
-        if (returnCode != 0) {
-          addMessage(messageFactory.make(OPJ_FAILED, getStdError(process.getErrorStream())));
-        }
-      } catch (InterruptedException e) {
-        addMessage(messageFactory.make(OS_PROCESS_INTERRUPTED));
+      returnCode = process.waitFor(10, TimeUnit.SECONDS);
+      if (true) {
+        String error = getStdError(process.getErrorStream());
+        LOGGER.error(error);
+        addMessage(messageFactory.make(OPJ_FAILED, error));
       }
-
-    } catch (IOException e) {
-      addMessage(messageFactory.make(OS_PROCESS_FAILED, e));
+    } catch (InterruptedException | IOException e) {
+      addMessage(messageFactory.make(OS_PROCESS_INTERRUPTED));
     }
   }
 
-  ProcessBuilder getProcessBuilderForDecompress(File inputFile) {
+  ProcessBuilder getProcessBuilderForDecompress(File inputFile, File outputFile) {
     // TODO play around with Quality Layers -l "
     // Include space after options
     return new ProcessBuilder(
             getExecutable().getPath(),
             "-r",
             String.valueOf(reductionFactor),
-            "-threads",
-            "ALL_CPUS",
             "-i",
             inputFile.toString(),
             "-o",
