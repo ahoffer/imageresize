@@ -102,14 +102,15 @@
                             belittle-provider,
                             commons-io,
                             im4java,
-                            jai-imageio-core,
-                            jai-imageio-jpeg2000,
+                            <!--jai-imageio-core,-->
+                            <!--jai-imageio-jpeg2000,-->
                             thumbnailator,
                             commons-exec
                         </Embed-Dependency>
                         <Import-Package>
-                            !sun.security.action,
-                            *
+                            !sun.security.action
+                            ,!com.github.jaiimageio.impl.common
+                            ,*
                         </Import-Package>
                         <Export-Package>
                             belittle

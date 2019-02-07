@@ -144,8 +144,6 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    // Don't know why this doesn't work
-    //    String feedback = (outputStream.toString());
   }
 
   /**

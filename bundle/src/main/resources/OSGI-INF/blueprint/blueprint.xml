@@ -55,8 +55,7 @@
                 <entry key="image/.*jp[2mx].*">
                     <list>
                         <ref component-id="openJpeg"/>
-                        <!--<ref component-id="magick"/>-->
-                        <!--<ref component-id="jpeg2000"/>-->
+                        <ref component-id="jpeg2000"/>
                     </list>
                 </entry>
             </map>
