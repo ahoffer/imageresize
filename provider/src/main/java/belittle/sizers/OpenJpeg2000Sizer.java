@@ -1,11 +1,5 @@
 package belittle.sizers;
 
-import static belittle.support.MessageConstants.COULD_NOT_READ_METADATA;
-import static belittle.support.MessageConstants.EXTERNAL_EXECUTABLE;
-import static belittle.support.MessageConstants.OPJ_FAILED;
-import static belittle.support.MessageConstants.OS_PROCESS_INTERRUPTED;
-import static belittle.support.MessageConstants.REDUCTION_FACTOR;
-
 import belittle.BeLittleMessage.BeLittleSeverity;
 import belittle.BeLittleMessageImpl;
 import belittle.BeLittleResult;
@@ -45,7 +39,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJpeg2000Sizer.class);
 
-  public static String OUTPUT_FORMAT_EXT = ".tif";
+  public static String OUTPUT_FORMAT_EXT = ".bmp";
   Jpeg2000MetadataMicroReader metadata;
   int reductionFactor;
   Process process;
@@ -60,23 +54,19 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   }
 
   public BeLittleResult resize(File file) {
-
     AccessController.doPrivileged(
         (PrivilegedAction<Void>)
             () -> {
-              if (getExecutable() == null) {
-                addMessage(messageFactory.make(EXTERNAL_EXECUTABLE));
+              if (!isAvailable()) {
+                addError(
+                    String.format(
+                        "%s not available or executable", getExecutable().getExecutableName()));
                 return null;
               }
-              if (!getExecutable().canExecute()) {
-                addMessage(
-                    new BeLittleMessageImpl(
-                        "CANNOT INVOKE EXEC", BeLittleSeverity.ERROR, "File cannot be executed"));
-                return null;
-              }
+
               doWithInputStream(file, (istream) -> readMetadata(istream));
               reductionFactor = getReductionFactor();
-              addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
+              addInfo(String.format("Starting with reduction factor %d", reductionFactor));
               File sourceWithNewExtension = null;
               File outputFile = null;
               try {
@@ -84,16 +74,12 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
                 FileUtils.copyFile(file, sourceWithNewExtension);
                 outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
               } catch (IOException e) {
-                e.printStackTrace();
+                addError("Failed to copy input file. Cannot proceed.", e);
+                return null;
               }
               do {
                 // Open JPEG command line utility is very picky about the extension.
-
                 doIt(sourceWithNewExtension, outputFile);
-                //                ProcessBuilder processBuilder =
-                //                    getProcessBuilderForDecompress(sourceWithNewExtension,
-                // outputFile);
-                //                startProcess(processBuilder);
                 reductionFactor--;
               } while (reductionFactor > 0 && isTooSmall(outputFile));
 
@@ -103,7 +89,8 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
                         .size(sizerSetting.getWidth(), sizerSetting.getHeight())
                         .asBufferedImage());
               } catch (IOException e) {
-
+                addError("Could not resize with Thumbnailator", e);
+                throw new RuntimeException(e);
               }
               return null;
             });
@@ -114,14 +101,18 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     BufferedImage intermediateImage = null;
     try {
       intermediateImage = ImageIO.read(outputFile.getAbsoluteFile());
-    } catch (IOException e1) {
-      e1.printStackTrace();
+    } catch (IOException e) {
+      addError(
+          String.format("Failed to read intermediate image file %s", outputFile.getAbsoluteFile()),
+          e);
+      return false;
     }
 
     return intermediateImage.getWidth() < sizerSetting.getWidth()
         || intermediateImage.getHeight() < sizerSetting.getHeight();
   }
 
+  // THIS ONE DOES NOT SEEM TO BLOCK THE WAY I WANT.
   private void doIt(File file, File outputFile) {
     String path = getExecutable().getPath();
     CommandLine cmdLine = new CommandLine(path);
@@ -139,11 +130,16 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
     executor.setStreamHandler(streamHandler);
+    boolean after;
     try {
+      boolean before = watchdog.isWatching();
       executor.execute(cmdLine, resultHandler);
+      after = watchdog.isWatching();
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    boolean now = watchdog.isWatching();
   }
 
   /**
@@ -178,7 +174,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       addMessage(new BeLittleMessageImpl("IO Exception", BeLittleSeverity.ERROR, e));
     }
     if (!metadata.isSucessfullyRead()) {
-      addMessage(messageFactory.make(COULD_NOT_READ_METADATA));
+      addWarning("Failed to read JPEG 2000 metadata");
     }
   }
 
@@ -191,10 +187,11 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       if (true) {
         String error = getStdError(process.getErrorStream());
         LOGGER.error(error);
-        addMessage(messageFactory.make(OPJ_FAILED, error));
+        addError("Return code from OS process is bad");
       }
     } catch (InterruptedException | IOException e) {
-      addMessage(messageFactory.make(OS_PROCESS_INTERRUPTED));
+      addError("Fatal error. OS process failed.");
+      throw new RuntimeException(e);
     }
   }
 
@@ -254,6 +251,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
         }
       }
     } catch (IOException e) {
+      addWarning("Could not read output stream", e);
       return "<COULD NOT READ ERR STREAM>";
     }
     return builder.toString();

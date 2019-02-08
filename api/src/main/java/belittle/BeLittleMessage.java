@@ -14,15 +14,6 @@ import java.util.Optional;
 public interface BeLittleMessage {
 
   /**
-   * The ID is a string that identifies the message at a high level. Implementers are free to
-   * designate their own IDs strings and it is expected that IDs will be stored as static final
-   * constants.
-   *
-   * @return the string that
-   */
-  String getId();
-
-  /**
    * Free-text description of the message.
    *
    * @return description

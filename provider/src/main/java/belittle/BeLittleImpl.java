@@ -67,7 +67,6 @@ public class BeLittleImpl implements BeLittle {
    */
   //  public List<BeLittleResult> resize(File file) {
   public BufferedImage resize(File file) {
-
     String mimeType = readMimeType(file);
     List<ImageSizer> sizerList = getSizersForMimeType(mimeType);
     for (ImageSizer sizer : sizerList) {

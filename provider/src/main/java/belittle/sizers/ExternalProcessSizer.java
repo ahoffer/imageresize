@@ -22,4 +22,9 @@ public abstract class ExternalProcessSizer extends AbstractImageSizer {
   public void setExecutable(FuzzyFile executable) {
     this.executable = executable;
   }
+
+  @Override
+  public boolean isAvailable() {
+    return getExecutable().canExecute();
+  }
 }

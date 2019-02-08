@@ -1,9 +1,5 @@
 package belittle.sizers;
 
-import static belittle.support.MessageConstants.COULD_NOT_READ_METADATA;
-import static belittle.support.MessageConstants.REDUCTION_FACTOR;
-import static belittle.support.MessageConstants.SAMPLE_PERIOD;
-
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
@@ -39,6 +35,11 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     super(sizerSetting);
   }
 
+  @Override
+  public boolean isAvailable() {
+    return true;
+  }
+
   void readMetadata(File file) {
     // TODO: ortho-744mb.jp2 comes back with a reduction factor of 0? Is that really how the thing
     // is encoded or is there something wrong with the metadata reader?
@@ -51,7 +52,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
         });
 
     if (!metadata.isSucessfullyRead()) {
-      addMessage(messageFactory.make(COULD_NOT_READ_METADATA));
+      addWarning("Failed to read JPEG 2000 metadata");
     }
   }
 
@@ -69,7 +70,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     J2KImageReadParamJava param = new J2KImageReadParamJava();
     int reductionFactor = getReductionFactor();
     param.setResolution(reductionFactor);
-    addMessage(messageFactory.make(REDUCTION_FACTOR, reductionFactor));
+    addInfo(String.format("Setting initial resolution to %d", reductionFactor));
     param.setDecodingRate(DEFAULT_BITS_PER_PIXEL);
     doWithImageInputStream(
         file,
@@ -82,7 +83,7 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
             if (reductionFactor == 0) {
               int samplingPeriod = getSamplingPeriod(reader.getWidth(0), reader.getWidth(0));
               param.setSourceSubsampling(samplingPeriod, samplingPeriod, 0, 0);
-              addMessage(messageFactory.make(SAMPLE_PERIOD, samplingPeriod));
+              addInfo(String.format("Setting sampling period to %d", samplingPeriod));
             }
             BufferedImage decodedImage = reader.read(0, param);
             result.setOutput(decodedImage);

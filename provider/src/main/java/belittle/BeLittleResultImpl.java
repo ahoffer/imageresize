@@ -1,5 +1,6 @@
 package belittle;
 
+import belittle.BeLittleMessage.BeLittleSeverity;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,11 @@ public class BeLittleResultImpl implements BeLittleResult {
 
   public void addMessage(BeLittleMessage message) {
     messages.add(message);
+  }
+
+  @Override
+  public void addMessage(BeLittleSeverity severity, String description, Throwable throwable) {
+    addMessage(new BeLittleMessageImpl(severity, description, throwable));
   }
 
   @Override

@@ -1,7 +1,5 @@
 package belittle.sizers;
 
-import static belittle.support.MessageConstants.RESIZE_ERROR;
-
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
@@ -83,9 +81,10 @@ public class MagickSizer extends ExternalProcessSizer {
                     command.setSearchPath(getExecutable().getParent());
                     try {
                       command.run(op);
-                    } catch (InterruptedException | IM4JavaException | IOException e) {
-                      addMessage(messageFactory.make(RESIZE_ERROR, e));
                       result.setOutput(outputConsumer.getImage());
+                    } catch (InterruptedException | IM4JavaException | IOException e) {
+                      addError("Failed to run Image Magick", e);
+                      throw new RuntimeException(e);
                     }
                   });
               return null;

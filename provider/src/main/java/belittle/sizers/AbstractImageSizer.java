@@ -1,22 +1,20 @@
 package belittle.sizers;
 
-import static belittle.support.MessageConstants.SIZER_NAME;
-
+import belittle.BeLittleConstants;
 import belittle.BeLittleMessage;
 import belittle.BeLittleMessage.BeLittleSeverity;
-import belittle.BeLittleMessageImpl;
 import belittle.BeLittleResult;
 import belittle.BeLittleResultImpl;
 import belittle.BeLittleSizerSetting;
 import belittle.BeLittleSizerSettingImpl;
 import belittle.ImageSizer;
+import belittle.support.BeLittleUtil;
 import belittle.support.IoConsumer;
-import belittle.support.MessageFactory;
-import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -43,7 +41,6 @@ import javax.imageio.stream.ImageInputStream;
  */
 public abstract class AbstractImageSizer implements ImageSizer {
 
-  MessageFactory messageFactory = new MessageFactory();
   BeLittleSizerSetting sizerSetting;
   BeLittleResult result;
 
@@ -81,32 +78,74 @@ public abstract class AbstractImageSizer implements ImageSizer {
     stampNameOnResults();
   }
 
+  public ImageReader getImageReader(File file, String mimeType) {
+    if (BeLittleConstants.UNKNOWN_MIME_TYPE.equals(mimeType)) {
+      return getImageReaderByImageContent(file);
+    } else {
+      return getImageReaderByMIMEType(mimeType);
+    }
+  }
+
   public ImageReader getImageReaderByMIMEType(String mimeType) {
     Iterator<ImageReader> it = ImageIO.getImageReadersByMIMEType(mimeType);
     if (it.hasNext()) {
       return it.next();
     } else {
+      addInfo("Could not get image reader from MIME type %s".format(mimeType));
       return null;
     }
+  }
+
+  public ImageReader getImageReaderByImageContent(File file) {
+    AtomicReference<ImageReader> next = new AtomicReference<>();
+    try {
+      new BeLittleUtil()
+          .doWithImageInputStream(
+              file,
+              (iis) -> {
+                Iterator<ImageReader> it = ImageIO.getImageReaders(iis);
+                if (it.hasNext()) {
+                  next.set(it.next());
+                  return;
+                }
+              });
+    } catch (IOException e) {
+      addWarning("Could not create image reader from file type", e);
+    }
+    return next.get();
   }
 
   public void addMessage(BeLittleMessage message) {
     getResult().addMessage(message);
   }
 
-  /** Adds informational message that gives the class name of the sizer */
-  protected void stampNameOnResults() {
-    addMessage(messageFactory.make(SIZER_NAME, this.getClass().getSimpleName()));
+  public void addError(String description, Throwable throwable) {
+    getResult().addMessage(BeLittleSeverity.ERROR, description, throwable);
   }
 
-  protected void closeImageInputStream(ImageInputStream iis) {
-    if (iis != null) {
-      try {
-        iis.close();
-      } catch (IOException e) {
-        addMessage(new BeLittleMessageImpl("", BeLittleSeverity.WARNING, e));
-      }
-    }
+  public void addWarning(String description, Throwable throwable) {
+    getResult().addMessage(BeLittleSeverity.WARNING, description, throwable);
+  }
+
+  public void addInfo(String description, Throwable throwable) {
+    getResult().addMessage(BeLittleSeverity.INFO, description, throwable);
+  }
+
+  public void addError(String description) {
+    getResult().addMessage(BeLittleSeverity.ERROR, description, null);
+  }
+
+  public void addWarning(String description) {
+    getResult().addMessage(BeLittleSeverity.WARNING, description, null);
+  }
+
+  public void addInfo(String description) {
+    getResult().addMessage(BeLittleSeverity.INFO, description, null);
+  }
+
+  /** Adds informational message that gives the class name of the sizer */
+  protected void stampNameOnResults() {
+    addInfo(this.getClass().getSimpleName());
   }
 
   protected void closeImageReader(ImageReader reader) {
@@ -116,27 +155,28 @@ public abstract class AbstractImageSizer implements ImageSizer {
   }
 
   void doWithInputStream(File file, IoConsumer<InputStream> consumer) {
-    try (InputStream istream = Files.asByteSource(file).openStream()) {
-      consumer.accept(istream);
+    try {
+      new BeLittleUtil().doWithInputStream(file, consumer);
     } catch (IOException e) {
-      addMessage(new BeLittleMessageImpl("IO", BeLittleSeverity.ERROR, e));
+      addWarning("Failed to perform action with input stream", e);
     }
   }
 
   void doWithImageInputStream(File file, IoConsumer<ImageInputStream> consumer) {
-    doWithInputStream(
-        file,
-        (istream) -> {
-          ImageInputStream iis = null;
-          try {
-            iis = ImageIO.createImageInputStream(istream);
-            consumer.accept(iis);
-            // The JAI JPEG 2000 library can sometimes uses RuntimeException in place  IOException
-          } catch (IOException | RuntimeException e) {
-            addMessage(new BeLittleMessageImpl("IO", BeLittleSeverity.ERROR, e));
-          } finally {
-            closeImageInputStream(iis);
-          }
-        });
+    try {
+      new BeLittleUtil()
+          .doWithImageInputStream(
+              file,
+              (istream) -> {
+                ImageInputStream iis = null;
+                iis = ImageIO.createImageInputStream(istream);
+                consumer.accept(iis);
+              });
+      // The JAI JPEG 2000 library can sometimes uses RuntimeException in place  IOException
+    } catch (IOException | RuntimeException e) {
+      addWarning("Failed to perform action with image input stream", e);
+    }
   }
+
+  public abstract boolean isAvailable();
 }

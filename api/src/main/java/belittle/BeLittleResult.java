@@ -18,6 +18,8 @@ public interface BeLittleResult {
    */
   BufferedImage getOutput();
 
+  void setOutput(BufferedImage image);
+
   /**
    * List of messages created while performing (or attempting to perform) the resize operation.
    * Includes informative messages, warnings, and errors. Errors are indicative of failure.
@@ -28,7 +30,8 @@ public interface BeLittleResult {
 
   void addMessage(BeLittleMessage message);
 
-  void setOutput(BufferedImage image);
+  void addMessage(
+      BeLittleMessage.BeLittleSeverity severity, String description, Throwable throwable);
 
   boolean succeeded();
 }

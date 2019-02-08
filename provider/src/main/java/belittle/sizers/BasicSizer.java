@@ -1,7 +1,5 @@
 package belittle.sizers;
 
-import static belittle.support.MessageConstants.RESIZE_ERROR;
-
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
@@ -17,6 +15,11 @@ public class BasicSizer extends AbstractImageSizer {
   }
 
   @Override
+  public boolean isAvailable() {
+    return true;
+  }
+
+  @Override
   public BeLittleResult resize(File file) {
     BufferedImage image = null;
     try {
@@ -25,7 +28,8 @@ public class BasicSizer extends AbstractImageSizer {
               .size(sizerSetting.getWidth(), sizerSetting.getHeight())
               .asBufferedImage();
     } catch (IOException e) {
-      addMessage(messageFactory.make(RESIZE_ERROR, e));
+      addError("Thumnailator error", e);
+      throw new RuntimeException(e);
     }
 
     result.setOutput(image);

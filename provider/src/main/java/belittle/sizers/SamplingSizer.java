@@ -1,9 +1,5 @@
 package belittle.sizers;
 
-import static belittle.support.MessageConstants.CANNOT_READ_WIDTH_AND_HEIGHT;
-
-import belittle.BeLittleMessage.BeLittleSeverity;
-import belittle.BeLittleMessageImpl;
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
 import belittle.ImageSizer;
@@ -34,9 +30,14 @@ public class SamplingSizer extends AbstractImageSizer {
   }
 
   @Override
+  public boolean isAvailable() {
+    return true;
+  }
+
+  @Override
   public BeLittleResult resize(File file, String mimeType) {
     closeImageReader(reader);
-    reader = getImageReaderByMIMEType(mimeType);
+    reader = getImageReader(file, mimeType);
     doWithImageInputStream(
         file,
         (iis) -> {
@@ -48,20 +49,14 @@ public class SamplingSizer extends AbstractImageSizer {
                 Integer.valueOf(sizerSetting.getProperty(SAMPLING_PERIOD_KEY));
             if (defaultSamplingPeriod > 0) {
               samplingPeriod = defaultSamplingPeriod;
-              addMessage(
-                  new BeLittleMessageImpl(
-                      CANNOT_READ_WIDTH_AND_HEIGHT,
-                      BeLittleSeverity.WARNING,
-                      String.format(
-                          "Width and height of input image cannot be determined. Using configured sampling period of %s pixels",
-                          samplingPeriod)));
+              addInfo(
+                  String.format(
+                      "Width and height of input image cannot be determined. Using configured sampling period of %s pixels",
+                      samplingPeriod));
 
             } else {
-              addMessage(
-                  new BeLittleMessageImpl(
-                      CANNOT_READ_WIDTH_AND_HEIGHT,
-                      BeLittleSeverity.ERROR,
-                      "Width and/or height of input image cannot be determined and no default sampling period is value is configured. Sampling sizer needs these values to compute subsampling period."));
+              addInfo(
+                  "Width and/or height of input image cannot be determined and no default sampling period is value is configured. Sampling sizer needs these values to compute subsampling period.");
             }
           } else {
             samplingPeriod =

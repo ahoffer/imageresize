@@ -109,7 +109,7 @@
                         </Embed-Dependency>
                         <Import-Package>
                             !sun.security.action
-                            ,!com.github.jaiimageio.impl.common
+                            ,!belittle
                             ,*
                         </Import-Package>
                         <Export-Package>
