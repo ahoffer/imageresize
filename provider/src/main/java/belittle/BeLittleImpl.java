@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,11 +24,10 @@ public class BeLittleImpl implements BeLittle {
 
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(BeLittleImpl.class);
-  // TODO: Make it so a thread pool can be injected.
-  //  ExecutorService executorService = Executors.newCachedThreadPool();
-  //  ScheduledExecutorService schedulerService = Executors.newScheduledThreadPool(5);
+
   Map<String, List<ImageSizer>> sizers;
   BeLittleSizerSetting sizerSetting;
+  private List<BeLittleResult> results;
 
   public BeLittleImpl(Map<String, List<ImageSizer>> sizers, BeLittleSizerSetting sizerSetting) {
     // The order of these statements matters because sizer settings must be set before
@@ -43,7 +43,7 @@ public class BeLittleImpl implements BeLittle {
     return Collections.unmodifiableList(sizers.get(lookupKey));
   }
 
-  public BufferedImage resize(ImageInputStream iis) {
+  public synchronized BufferedImage resize(ImageInputStream iis) {
     File file = null;
     try {
       file = File.createTempFile("belittle", null);
@@ -66,11 +66,13 @@ public class BeLittleImpl implements BeLittle {
    * "getImage" (from successful result).
    */
   //  public List<BeLittleResult> resize(File file) {
-  public BufferedImage resize(File file) {
+  public synchronized BufferedImage resize(File file) {
+    results = new ArrayList<>();
     String mimeType = readMimeType(file);
     List<ImageSizer> sizerList = getSizersForMimeType(mimeType);
     for (ImageSizer sizer : sizerList) {
       BeLittleResult result = sizer.getResult();
+      results.add(result);
       //      Callable<BeLittleResult> callable = () -> sizer.resize(source.openBufferedStream());
       //      Future<BeLittleResult> future = executorService.submit(callable);
       try {
@@ -91,10 +93,15 @@ public class BeLittleImpl implements BeLittle {
     return null;
   }
 
+  @Override
+  public List<BeLittleResult> getLastResults() {
+    return results;
+  }
+
   /**
    * Helper method to write an InputImageStream to disk. Although the InputImageStream class is a
    * file-back buffered stream, it is relies on mark and reset functions that can be problematic. An
-   * image input stream cannot always be reset. Also, it can only serve one reader (output stream)
+   * image input stream, cannot always be reset. Also, it can only serve one reader (output stream)
    * at a time. It is convenient to open new input streams on a file if multiple threads need to
    * read the data.
    *

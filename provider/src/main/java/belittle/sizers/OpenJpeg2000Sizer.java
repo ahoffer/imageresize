@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.concurrent.TimeUnit;
@@ -130,16 +131,21 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
     executor.setStreamHandler(streamHandler);
-    boolean after;
     try {
-      boolean before = watchdog.isWatching();
       executor.execute(cmdLine, resultHandler);
-      after = watchdog.isWatching();
+      while (watchdog.isWatching()) {
+        Thread.sleep(500);
+      }
     } catch (IOException e) {
-      e.printStackTrace();
+      addError("Failed to exeute Open JPEG 2000 command line decompressor", e);
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException(e);
+    } finally {
+      watchdog.stop();
+      addInfo(new String(outputStream.toByteArray(), Charset.defaultCharset()));
     }
-
-    boolean now = watchdog.isWatching();
   }
 
   /**
