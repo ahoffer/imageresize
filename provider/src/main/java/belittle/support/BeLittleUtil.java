@@ -1,5 +1,6 @@
 package belittle.support;
 
+import belittle.IoConsumer;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
