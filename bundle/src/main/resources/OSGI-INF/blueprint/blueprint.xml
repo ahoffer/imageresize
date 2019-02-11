@@ -62,6 +62,6 @@
         </argument>
     </bean>
 
-    <service ref="factory" interface="belittle.BeLittleFactory"/>
+    <service ref="factory" interface="belittle.ResizableImageFactory"/>
 
 </blueprint>

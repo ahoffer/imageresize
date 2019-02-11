@@ -2,16 +2,14 @@ package belittle.sizers;
 
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
+import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.ComputeResolutionLevel;
 import belittle.support.ComputeSubSamplingPeriod;
 import belittle.support.Jpeg2000MetadataMicroReader;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReadParamJava;
-import com.github.jaiimageio.jpeg2000.impl.J2KImageReader;
 import com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
 
 @SuppressWarnings("squid:S2160")
@@ -40,12 +38,11 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     return true;
   }
 
-  void readMetadata(File file) {
+  void readMetadata(ImageInputFile file) {
     // TODO: ortho-744mb.jp2 comes back with a reduction factor of 0? Is that really how the thing
     // is encoded or is there something wrong with the metadata reader?
     // UPDATE: There is no dimension information in the header or codestream boxes.
-    doWithInputStream(
-        file,
+    file.doWithInputStream(
         (istream) -> {
           metadata = new Jpeg2000MetadataMicroReader(istream);
           metadata.read();
@@ -65,31 +62,23 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittleResult resize(File file) {
+  public BeLittleResult resize(ImageInputFile file) {
     readMetadata(file);
     J2KImageReadParamJava param = new J2KImageReadParamJava();
     int reductionFactor = getReductionFactor();
     param.setResolution(reductionFactor);
     addInfo(String.format("Setting initial resolution to %d", reductionFactor));
     param.setDecodingRate(DEFAULT_BITS_PER_PIXEL);
-    doWithImageInputStream(
-        file,
-        (iis) -> {
-          ImageReader reader = null;
-          try {
-            reader = new J2KImageReader(null);
-            reader.setInput(iis);
-            // TODO: this sampling part needs testing.
-            if (reductionFactor == 0) {
-              int samplingPeriod = getSamplingPeriod(reader.getWidth(0), reader.getWidth(0));
-              param.setSourceSubsampling(samplingPeriod, samplingPeriod, 0, 0);
-              addInfo(String.format("Setting sampling period to %d", samplingPeriod));
-            }
-            BufferedImage decodedImage = reader.read(0, param);
-            result.setOutput(decodedImage);
-          } finally {
-            closeImageReader(reader);
+    file.doWithImageReader(
+        (reader) -> {
+          // TODO: this sampling part needs testing.
+          if (reductionFactor == 0) {
+            int samplingPeriod = getSamplingPeriod(reader.getWidth(0), reader.getWidth(0));
+            param.setSourceSubsampling(samplingPeriod, samplingPeriod, 0, 0);
+            addInfo(String.format("Setting sampling period to %d", samplingPeriod));
           }
+          BufferedImage decodedImage = reader.read(0, param);
+          result.setOutput(decodedImage);
         });
     return result;
   }

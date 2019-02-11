@@ -2,9 +2,9 @@ package belittle.sizers;
 
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
+import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.FuzzyFile;
-import java.io.File;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -45,7 +45,7 @@ public class MagickSizer extends ExternalProcessSizer {
   }
 
   @Override
-  public BeLittleResult resize(File file) {
+  public BeLittleResult resize(ImageInputFile file) {
     // TODO if MIME type is JPEG, add this option "-define
     // jpeg:generate=200x200" and substitute a
     // size that is twice the size of the desired thumbnail.
@@ -63,8 +63,7 @@ public class MagickSizer extends ExternalProcessSizer {
 
               // Read the image from std in
               op.addImage(STD_IN);
-              doWithInputStream(
-                  file,
+              file.doWithInputStream(
                   (inputStream) -> {
                     command.setInputProvider(new Pipe(inputStream, null));
 

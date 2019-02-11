@@ -4,21 +4,19 @@ import belittle.BeLittleMessage.BeLittleSeverity;
 import belittle.BeLittleMessageImpl;
 import belittle.BeLittleResult;
 import belittle.BeLittleSizerSetting;
+import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.ComputeResolutionLevel;
 import belittle.support.FuzzyFile;
 import belittle.support.Jpeg2000MetadataMicroReader;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.exec.CommandLine;
@@ -28,7 +26,6 @@ import org.apache.commons.exec.ExecuteResultHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +40,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   public static String OUTPUT_FORMAT_EXT = ".bmp";
   Jpeg2000MetadataMicroReader metadata;
   int reductionFactor;
-  Process process;
+  //  Process process;
 
   public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting) {
     super(sizerSetting);
@@ -54,7 +51,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     this.setExecutable(executable);
   }
 
-  public BeLittleResult resize(File file) {
+  public BeLittleResult resize(ImageInputFile file) {
     AccessController.doPrivileged(
         (PrivilegedAction<Void>)
             () -> {
@@ -65,21 +62,26 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
                 return null;
               }
 
-              doWithInputStream(file, (istream) -> readMetadata(istream));
+              file.doWithInputStream((istream) -> readMetadata(istream));
               reductionFactor = getReductionFactor();
               addInfo(String.format("Starting with reduction factor %d", reductionFactor));
               File sourceWithNewExtension = null;
               File outputFile = null;
               try {
+                // Open JPEG command line utility is very picky about the extension.
                 sourceWithNewExtension = File.createTempFile("belittle", getProperFileExt());
-                FileUtils.copyFile(file, sourceWithNewExtension);
                 outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
               } catch (IOException e) {
-                addError("Failed to copy input file. Cannot proceed.", e);
+                addError("Failed to open temporary files. Cannot proceed.", e);
                 return null;
               }
+
+              if (!file.copyTo(sourceWithNewExtension)) {
+                addError("Failed to copy input file. Cannot proceed.");
+                return null;
+              }
+
               do {
-                // Open JPEG command line utility is very picky about the extension.
                 doIt(sourceWithNewExtension, outputFile);
                 reductionFactor--;
               } while (reductionFactor > 0 && isTooSmall(outputFile));
@@ -184,36 +186,36 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     }
   }
 
-  void startProcess(ProcessBuilder processBuilder) {
-    boolean returnCode;
+  //  void startProcess(ProcessBuilder processBuilder) {
+  //    boolean returnCode;
+  //
+  //    try {
+  //      process = processBuilder.start();
+  //      returnCode = process.waitFor(10, TimeUnit.SECONDS);
+  //      if (true) {
+  //        String error = getStdError(process.getErrorStream());
+  //        LOGGER.error(error);
+  //        addError("Return code from OS process is bad");
+  //      }
+  //    } catch (InterruptedException | IOException e) {
+  //      addError("Fatal error. OS process failed.");
+  //      throw new RuntimeException(e);
+  //    }
+  //  }
 
-    try {
-      process = processBuilder.start();
-      returnCode = process.waitFor(10, TimeUnit.SECONDS);
-      if (true) {
-        String error = getStdError(process.getErrorStream());
-        LOGGER.error(error);
-        addError("Return code from OS process is bad");
-      }
-    } catch (InterruptedException | IOException e) {
-      addError("Fatal error. OS process failed.");
-      throw new RuntimeException(e);
-    }
-  }
-
-  ProcessBuilder getProcessBuilderForDecompress(File inputFile, File outputFile) {
-    // TODO play around with Quality Layers -l "
-    // Include space after options
-    return new ProcessBuilder(
-            getExecutable().getPath(),
-            "-r",
-            String.valueOf(reductionFactor),
-            "-i",
-            inputFile.toString(),
-            "-o",
-            outputFile.toString())
-        .redirectErrorStream(false);
-  }
+  //  ProcessBuilder getProcessBuilderForDecompress(File inputFile, File outputFile) {
+  //    // TODO play around with Quality Layers -l "
+  //    // Include space after options
+  //    return new ProcessBuilder(
+  //        getExecutable().getPath(),
+  //        "-r",
+  //        String.valueOf(reductionFactor),
+  //        "-i",
+  //        inputFile.toString(),
+  //        "-o",
+  //        outputFile.toString())
+  //        .redirectErrorStream(false);
+  //  }
 
   // A reduction factor greater than zero is CRITICAL.
   // With no reduction factor, the output image is at least as input image.
@@ -240,34 +242,35 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     return new OpenJpeg2000Sizer(sizerSetting, getExecutable());
   }
 
-  String getStdError(InputStream inputStream) {
-    StringBuilder builder = new StringBuilder();
-    BufferedReader stdOutReader = new BufferedReader(new InputStreamReader(inputStream));
-    String line;
-    try {
-      line = stdOutReader.readLine();
-      builder.append(line);
-      // I grabbed this code off a website. I forget where. It has a funky EOF check and I included
-      // it.
-      String eof = "--EOF--";
-      while (line != null && !line.trim().equals(eof)) {
-        line = stdOutReader.readLine();
-        if (line != null) {
-          builder.append(line);
-        }
-      }
-    } catch (IOException e) {
-      addWarning("Could not read output stream", e);
-      return "<COULD NOT READ ERR STREAM>";
-    }
-    return builder.toString();
-  }
+  //  String getStdError(InputStream inputStream) {
+  //    StringBuilder builder = new StringBuilder();
+  //    BufferedReader stdOutReader = new BufferedReader(new InputStreamReader(inputStream));
+  //    String line;
+  //    try {
+  //      line = stdOutReader.readLine();
+  //      builder.append(line);
+  //      // I grabbed this code off a website. I forget where. It has a funky EOF check and I
+  // included
+  //      // it.
+  //      String eof = "--EOF--";
+  //      while (line != null && !line.trim().equals(eof)) {
+  //        line = stdOutReader.readLine();
+  //        if (line != null) {
+  //          builder.append(line);
+  //        }
+  //      }
+  //    } catch (IOException e) {
+  //      addWarning("Could not read output stream", e);
+  //      return "<COULD NOT READ ERR STREAM>";
+  //    }
+  //    return builder.toString();
+  //  }
 
   @Override
   void cleanup() {
     super.cleanup();
-    if (process.isAlive()) {
-      process.destroy();
-    }
+    //    if (process.isAlive()) {
+    //      process.destroy();
+    //    }
   }
 }

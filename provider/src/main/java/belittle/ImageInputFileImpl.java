@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.tika.Tika;
 
 public class ImageInputFileImpl implements ImageInputFile, Closeable, AutoCloseable {
@@ -18,7 +19,7 @@ public class ImageInputFileImpl implements ImageInputFile, Closeable, AutoClosea
   public static final String UNKNOWN_MIME_TYPE = "application/octet-stream";
   protected File file;
   protected String mimeType;
-  protected boolean createdTempFile = false;
+  protected boolean manageTempFile = false;
 
   public ImageInputFileImpl(File sourceFile) {
     this.file = sourceFile;
@@ -26,9 +27,15 @@ public class ImageInputFileImpl implements ImageInputFile, Closeable, AutoClosea
   }
 
   public ImageInputFileImpl(ImageInputStream iis, File newFile) throws IOException {
+    // Caller's responsibility to delete temp files.
     this.file = newFile;
     write(iis);
-    createdTempFile = true;
+  }
+
+  public ImageInputFileImpl(ImageInputStream iis) throws IOException {
+    this.file = File.createTempFile("belittle", null);
+    write(iis);
+    manageTempFile = true;
   }
 
   protected void initialize() {
@@ -46,6 +53,20 @@ public class ImageInputFileImpl implements ImageInputFile, Closeable, AutoClosea
 
   public String getMimeType() {
     return mimeType;
+  }
+
+  public File getFile() {
+    return file;
+  }
+
+  @Override
+  public boolean copyTo(File destination) {
+    try {
+      FileUtils.copyFile(file, destination);
+    } catch (IOException e) {
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -148,7 +169,7 @@ public class ImageInputFileImpl implements ImageInputFile, Closeable, AutoClosea
 
   @Override
   public void close() {
-    if (createdTempFile && file != null) {
+    if (manageTempFile && file != null) {
       // Best effort, no guarantees
       file.delete();
     }

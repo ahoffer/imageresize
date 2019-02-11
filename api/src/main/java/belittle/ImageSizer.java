@@ -1,12 +1,8 @@
 package belittle;
 
-import java.io.File;
-
 public interface ImageSizer {
 
-  BeLittleResult resize(File file, String mimeType);
-
-  BeLittleResult resize(File file);
+  BeLittleResult resize(ImageInputFile file);
 
   /**
    * Create a new instance of the concrete implementor of the image sizer. ImageSizers are intended
@@ -18,6 +14,8 @@ public interface ImageSizer {
    * @return instance of a concrete image sizer
    */
   ImageSizer getNew(BeLittleSizerSetting sizerSetting);
+
+  ImageSizer getNew();
 
   BeLittleResult getResult();
 
