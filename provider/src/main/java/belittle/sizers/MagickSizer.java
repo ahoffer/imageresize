@@ -69,7 +69,6 @@ public class MagickSizer extends ExternalProcessSizer {
                       result.setOutput(outputConsumer.getImage());
                     } catch (InterruptedException | IM4JavaException | IOException e) {
                       addError("Failed to run Image Magick", e);
-                      throw new RuntimeException(e);
                     }
                   });
               return null;
