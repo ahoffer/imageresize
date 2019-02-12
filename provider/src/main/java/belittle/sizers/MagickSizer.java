@@ -28,11 +28,11 @@ public class MagickSizer extends ExternalProcessSizer {
    *
    * <p>BMP is fast to encode and smaller than a pixel map
    */
-  public static final String DEFAULT_OUTPUT_FORMAT = "bmp";
-
-  public static final String OUTPUT_FORMAT_KEY = "outputFormat";
   public static final String STD_IN = "-";
+
   public static final String STD_OUT = ":-";
+
+  private String outputFormatExtension = "bmp";
 
   public MagickSizer(FuzzyFile executable) {
     setExecutable(executable);
@@ -60,7 +60,7 @@ public class MagickSizer extends ExternalProcessSizer {
               file.doWithInputStream(
                   (inputStream) -> {
                     command.setInputProvider(new Pipe(inputStream, null));
-                    String outputFormatDirectedToStandardOut = DEFAULT_OUTPUT_FORMAT + STD_OUT;
+                    String outputFormatDirectedToStandardOut = getOutputFormatExtension() + STD_OUT;
                     op.addImage(outputFormatDirectedToStandardOut);
                     command.setOutputConsumer(outputConsumer);
                     command.setSearchPath(getExecutable().getParent());
@@ -79,5 +79,13 @@ public class MagickSizer extends ExternalProcessSizer {
 
   public ImageSizer getNew() {
     return new MagickSizer(this.executable);
+  }
+
+  public String getOutputFormatExtension() {
+    return outputFormatExtension;
+  }
+
+  public void setOutputFormatExtension(String outputFormatExtension) {
+    this.outputFormatExtension = outputFormatExtension;
   }
 }
