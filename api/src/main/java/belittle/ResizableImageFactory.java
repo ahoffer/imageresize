@@ -6,10 +6,9 @@ import javax.imageio.stream.ImageInputStream;
 
 public interface ResizableImageFactory {
 
-  ResizableImage newResizeableImage(File file, BeLittleSizerSetting sizerSetting);
+  ResizableImage newResizeableImage(ImageInputStream iis) throws IOException;
 
-  ResizableImage newResizeableImage(ImageInputFile iif, BeLittleSizerSetting sizerSetting);
+  ResizableImage newResizeableImage(ImageInputFile iif);
 
-  ResizableImage newResizeableImage(ImageInputStream iis, BeLittleSizerSetting sizerSetting)
-      throws IOException;
+  ResizableImage newResizeableImage(File file);
 }

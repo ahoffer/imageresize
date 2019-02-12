@@ -1,10 +1,9 @@
 package belittle.sizers;
 
-import belittle.BeLittleResult;
-import belittle.BeLittleSizerSetting;
 import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.FuzzyFile;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -35,17 +34,12 @@ public class MagickSizer extends ExternalProcessSizer {
   public static final String STD_IN = "-";
   public static final String STD_OUT = ":-";
 
-  public MagickSizer(BeLittleSizerSetting sizerSetting) {
-    super(sizerSetting);
-  }
-
-  public MagickSizer(BeLittleSizerSetting sizerSetting, FuzzyFile executable) {
-    super(sizerSetting);
+  public MagickSizer(FuzzyFile executable) {
     setExecutable(executable);
   }
 
   @Override
-  public BeLittleResult resize(ImageInputFile file) {
+  public BufferedImage resize(ImageInputFile file) {
     // TODO if MIME type is JPEG, add this option "-define
     // jpeg:generate=200x200" and substitute a
     // size that is twice the size of the desired thumbnail.
@@ -59,24 +53,16 @@ public class MagickSizer extends ExternalProcessSizer {
         (PrivilegedAction<Void>)
             () -> {
               Stream2BufferedImage outputConsumer = new Stream2BufferedImage();
-              op.thumbnail(sizerSetting.getWidth(), sizerSetting.getHeight());
+              op.thumbnail(width, height);
 
               // Read the image from std in
               op.addImage(STD_IN);
               file.doWithInputStream(
                   (inputStream) -> {
                     command.setInputProvider(new Pipe(inputStream, null));
-
-                    // Write the image to std out
-                    String configuredOutputFormat = sizerSetting.getProperty(OUTPUT_FORMAT_KEY);
-                    if (configuredOutputFormat == null) {
-                      configuredOutputFormat = DEFAULT_OUTPUT_FORMAT;
-                    }
-
-                    String outputFormatDirectedToStandardOut = configuredOutputFormat + STD_OUT;
+                    String outputFormatDirectedToStandardOut = DEFAULT_OUTPUT_FORMAT + STD_OUT;
                     op.addImage(outputFormatDirectedToStandardOut);
                     command.setOutputConsumer(outputConsumer);
-
                     command.setSearchPath(getExecutable().getParent());
                     try {
                       command.run(op);
@@ -88,11 +74,10 @@ public class MagickSizer extends ExternalProcessSizer {
                   });
               return null;
             });
-    return result;
+    return result.getOutput();
   }
 
-  @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
-    return new MagickSizer(sizerSetting, this.executable);
+  public ImageSizer getNew() {
+    return new MagickSizer(this.executable);
   }
 }

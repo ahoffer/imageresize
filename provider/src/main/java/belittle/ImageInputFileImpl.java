@@ -1,7 +1,6 @@
 package belittle;
 
 import com.google.common.io.Files;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +13,7 @@ import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.tika.Tika;
 
-public class ImageInputFileImpl implements ImageInputFile, Closeable, AutoCloseable {
+public class ImageInputFileImpl implements ImageInputFile {
 
   public static final String UNKNOWN_MIME_TYPE = "application/octet-stream";
   protected File file;
@@ -57,6 +56,15 @@ public class ImageInputFileImpl implements ImageInputFile, Closeable, AutoClosea
 
   public File getFile() {
     return file;
+  }
+
+  @Override
+  public String getResolvedPath() {
+    try {
+      return file.getCanonicalPath();
+    } catch (IOException e) {
+      return file.getAbsolutePath();
+    }
   }
 
   @Override

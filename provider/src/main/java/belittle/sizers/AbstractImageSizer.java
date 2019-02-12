@@ -4,10 +4,9 @@ import belittle.BeLittleMessage;
 import belittle.BeLittleMessage.BeLittleSeverity;
 import belittle.BeLittleResult;
 import belittle.BeLittleResultImpl;
-import belittle.BeLittleSizerSetting;
-import belittle.BeLittleSizerSettingImpl;
+import belittle.ImageInputFile;
 import belittle.ImageSizer;
-import javax.imageio.ImageReader;
+import java.awt.image.BufferedImage;
 
 /**
  * The primary functionality for all ImageSizers is implemented int this class.
@@ -31,13 +30,17 @@ import javax.imageio.ImageReader;
  */
 public abstract class AbstractImageSizer implements ImageSizer {
 
-  BeLittleSizerSetting sizerSetting;
   BeLittleResult result;
+  int height, width;
 
-  public AbstractImageSizer(BeLittleSizerSetting sizerSettings) {
-    this.sizerSetting = new BeLittleSizerSettingImpl(sizerSettings);
+  public BufferedImage resize(int width, int height, ImageInputFile file) {
     result = new BeLittleResultImpl();
+    this.width = width;
+    this.height = height;
+    return resize(file);
   }
+
+  public abstract BufferedImage resize(ImageInputFile file);
 
   public BeLittleResult getResult() {
     return result;
@@ -61,10 +64,6 @@ public abstract class AbstractImageSizer implements ImageSizer {
 
   void prepare() {
     stampNameOnResults();
-  }
-
-  public ImageSizer getNew() {
-    return getNew(sizerSetting);
   }
 
   public void addMessage(BeLittleMessage message) {
@@ -98,12 +97,6 @@ public abstract class AbstractImageSizer implements ImageSizer {
   /** Adds informational message that gives the class name of the sizer */
   protected void stampNameOnResults() {
     addInfo(this.getClass().getSimpleName());
-  }
-
-  protected void closeImageReader(ImageReader reader) {
-    if (reader != null) {
-      reader.dispose();
-    }
   }
 
   public abstract boolean isAvailable();

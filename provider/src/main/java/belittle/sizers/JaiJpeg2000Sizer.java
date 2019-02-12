@@ -1,7 +1,5 @@
 package belittle.sizers;
 
-import belittle.BeLittleResult;
-import belittle.BeLittleSizerSetting;
 import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.ComputeResolutionLevel;
@@ -29,10 +27,6 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
 
   Jpeg2000MetadataMicroReader metadata;
 
-  public JaiJpeg2000Sizer(BeLittleSizerSetting sizerSetting) {
-    super(sizerSetting);
-  }
-
   @Override
   public boolean isAvailable() {
     return true;
@@ -57,12 +51,12 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
     return new ComputeResolutionLevel()
         .setMaxResolutionLevels(metadata.getMinNumResolutionLevels())
         .setInputSize(metadata.getWidth(), metadata.getHeight())
-        .setOutputSize(sizerSetting.getWidth(), sizerSetting.getHeight())
+        .setOutputSize(width, height)
         .compute();
   }
 
   @Override
-  public BeLittleResult resize(ImageInputFile file) {
+  public BufferedImage resize(ImageInputFile file) {
     readMetadata(file);
     J2KImageReadParamJava param = new J2KImageReadParamJava();
     int reductionFactor = getReductionFactor();
@@ -80,18 +74,18 @@ public class JaiJpeg2000Sizer extends AbstractImageSizer {
           BufferedImage decodedImage = reader.read(0, param);
           result.setOutput(decodedImage);
         });
-    return result;
+    return result.getOutput();
   }
 
   private int getSamplingPeriod(int width, int height) {
     return new ComputeSubSamplingPeriod()
         .setInputSize(width, height)
-        .setOutputSize(sizerSetting.getWidth(), sizerSetting.getWidth())
+        .setOutputSize(width, height)
         .compute();
   }
 
   @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
-    return new JaiJpeg2000Sizer(sizerSetting);
+  public ImageSizer getNew() {
+    return new JaiJpeg2000Sizer();
   }
 }

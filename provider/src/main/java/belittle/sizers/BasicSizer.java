@@ -1,7 +1,5 @@
 package belittle.sizers;
 
-import belittle.BeLittleResult;
-import belittle.BeLittleSizerSetting;
 import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import java.awt.image.BufferedImage;
@@ -10,8 +8,8 @@ import net.coobird.thumbnailator.Thumbnails;
 
 public class BasicSizer extends AbstractImageSizer {
 
-  public BasicSizer(BeLittleSizerSetting sizerSetting) {
-    super(sizerSetting);
+  public BasicSizer() {
+    super();
   }
 
   @Override
@@ -20,24 +18,19 @@ public class BasicSizer extends AbstractImageSizer {
   }
 
   @Override
-  public BeLittleResult resize(ImageInputFile file) {
+  public BufferedImage resize(ImageInputFile file) {
     BufferedImage image = null;
     try {
-      image =
-          Thumbnails.of(file.getFile())
-              .size(sizerSetting.getWidth(), sizerSetting.getHeight())
-              .asBufferedImage();
+      image = Thumbnails.of(file.getFile()).size(width, height).asBufferedImage();
+      result.setOutput(image);
     } catch (IOException e) {
       addError("Thumnailator error", e);
-      throw new RuntimeException(e);
     }
-
-    result.setOutput(image);
-    return result;
+    return image;
   }
 
   @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
-    return new BasicSizer(sizerSetting);
+  public ImageSizer getNew() {
+    return new BasicSizer();
   }
 }

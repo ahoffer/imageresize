@@ -2,8 +2,6 @@ package belittle.sizers;
 
 import belittle.BeLittleMessage.BeLittleSeverity;
 import belittle.BeLittleMessageImpl;
-import belittle.BeLittleResult;
-import belittle.BeLittleSizerSetting;
 import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.ComputeResolutionLevel;
@@ -42,16 +40,11 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   int reductionFactor;
   //  Process process;
 
-  public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting) {
-    super(sizerSetting);
+  public OpenJpeg2000Sizer(FuzzyFile executable) {
+    setExecutable(executable);
   }
 
-  public OpenJpeg2000Sizer(BeLittleSizerSetting sizerSetting, FuzzyFile executable) {
-    super(sizerSetting);
-    this.setExecutable(executable);
-  }
-
-  public BeLittleResult resize(ImageInputFile file) {
+  public BufferedImage resize(ImageInputFile file) {
     AccessController.doPrivileged(
         (PrivilegedAction<Void>)
             () -> {
@@ -87,17 +80,14 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
               } while (reductionFactor > 0 && isTooSmall(outputFile));
 
               try {
-                result.setOutput(
-                    Thumbnails.of(outputFile)
-                        .size(sizerSetting.getWidth(), sizerSetting.getHeight())
-                        .asBufferedImage());
+                result.setOutput(Thumbnails.of(outputFile).size(width, height).asBufferedImage());
               } catch (IOException e) {
                 addError("Could not resize with Thumbnailator", e);
                 throw new RuntimeException(e);
               }
               return null;
             });
-    return result;
+    return result.getOutput();
   }
 
   boolean isTooSmall(File outputFile) {
@@ -111,8 +101,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       return false;
     }
 
-    return intermediateImage.getWidth() < sizerSetting.getWidth()
-        || intermediateImage.getHeight() < sizerSetting.getHeight();
+    return intermediateImage.getWidth() < width || intermediateImage.getHeight() < height;
   }
 
   // THIS ONE DOES NOT SEEM TO BLOCK THE WAY I WANT.
@@ -229,7 +218,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       return new ComputeResolutionLevel()
           .setMaxResolutionLevels(metadata.getMinNumResolutionLevels())
           .setInputSize(metadata.getWidth(), metadata.getHeight())
-          .setOutputSize(sizerSetting.getWidth(), sizerSetting.getHeight())
+          .setOutputSize(width, height)
           .compute();
 
     } else {
@@ -238,8 +227,8 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   }
 
   @Override
-  public ImageSizer getNew(BeLittleSizerSetting sizerSetting) {
-    return new OpenJpeg2000Sizer(sizerSetting, getExecutable());
+  public ImageSizer getNew() {
+    return new OpenJpeg2000Sizer(getExecutable());
   }
 
   //  String getStdError(InputStream inputStream) {

@@ -18,23 +18,20 @@ import javax.imageio.stream.ImageInputStream;
 public class ResizableImageFactoryImpl implements ResizableImageFactory {
 
   ImageSizerCollection sizerCollection;
-  BeLittleSizerSetting sizerSetting;
 
-  public ResizableImageFactoryImpl(BeLittleSizerSetting setting, ImageSizerCollection collection) {
+  public ResizableImageFactoryImpl(ImageSizerCollection collection) {
     this.sizerCollection = collection;
-    this.sizerSetting = setting;
   }
 
-  public ResizableImage newResizeableImage(File file, BeLittleSizerSetting sizerSetting) {
-    return new ResizableImageImpl(new ImageInputFileImpl(file), sizerSetting, sizerCollection);
+  public ResizableImage newResizeableImage(File file) {
+    return newResizeableImage(new ImageInputFileImpl(file));
   }
 
-  public ResizableImage newResizeableImage(ImageInputFile iif, BeLittleSizerSetting sizerSetting) {
-    return new ResizableImageImpl(iif, sizerSetting, sizerCollection);
+  public ResizableImage newResizeableImage(ImageInputFile iif) {
+    return new ResizableImageImpl(sizerCollection).setInputFile(iif);
   }
 
-  public ResizableImage newResizeableImage(ImageInputStream iis, BeLittleSizerSetting sizerSetting)
-      throws IOException {
-    return new ResizableImageImpl(new ImageInputFileImpl(iis), sizerSetting, sizerCollection);
+  public ResizableImage newResizeableImage(ImageInputStream iis) throws IOException {
+    return newResizeableImage(new ImageInputFileImpl(iis));
   }
 }

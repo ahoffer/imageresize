@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="setting" class="belittle.BeLittleSizerSettingImpl">
+    <bean id="sizerSettings" class="belittle.SizerSettingsImpl">
         <property name="width" value="200"/>
         <property name="height" value="200"/>
     </bean>
@@ -13,7 +13,7 @@
         <argument value="convert.exe"/>
     </bean>
     <bean id="magick" class="belittle.sizers.MagickSizer">
-        <argument ref="setting"/>
+        <argument ref="sizerSettings"/>
         <property name="executable" ref="magickExecutable"/>
     </bean>
 
@@ -25,24 +25,23 @@
     </bean>
 
     <bean id="openJpeg" class="belittle.sizers.OpenJpeg2000Sizer">
-        <argument ref="setting"/>
+        <argument ref="sizerSettings"/>
         <property name="executable" ref="openJpegExecutable"/>
     </bean>
 
     <bean id="sampling" class="belittle.sizers.SamplingSizer">
-        <argument ref="setting"/>
+        <argument ref="sizerSettings"/>
     </bean>
 
     <bean id="basic" class="belittle.sizers.BasicSizer">
-        <argument ref="setting"/>
+        <argument ref="sizerSettings"/>
     </bean>
 
     <bean id="jpeg2000" class="belittle.sizers.JaiJpeg2000Sizer">
-        <argument ref="setting"/>
+        <argument ref="sizerSettings"/>
     </bean>
 
-    <bean id="factory" class="belittle.BeLittleFactoryImpl">
-        <argument ref="setting"/>
+    <bean id="sizerCollection" class="belittle.ImageSizerCollection">
         <argument>
             <map>
                 <entry key="application/octet-stream">
@@ -60,6 +59,11 @@
                 </entry>
             </map>
         </argument>
+    </bean>
+
+    <bean id="factory" class="belittle.ResizableImageFactoryImpl">
+        <argument ref="sizerSettings"/>
+        <argument ref="sizerCollection"/>
     </bean>
 
     <service ref="factory" interface="belittle.ResizableImageFactory"/>

@@ -5,7 +5,7 @@ import java.io.InputStream;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-public interface ImageInputFile {
+public interface ImageInputFile extends AutoCloseable {
 
   boolean doWithInputStream(IoConsumer<InputStream> consumer);
 
@@ -16,6 +16,8 @@ public interface ImageInputFile {
   String getMimeType();
 
   File getFile();
+
+  String getResolvedPath();
 
   boolean copyTo(File destination);
 }

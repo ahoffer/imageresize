@@ -1,8 +1,10 @@
 package belittle;
 
+import java.awt.image.BufferedImage;
+
 public interface ImageSizer {
 
-  BeLittleResult resize(ImageInputFile file);
+  BufferedImage resize(int width, int height, ImageInputFile file);
 
   /**
    * Create a new instance of the concrete implementor of the image sizer. ImageSizers are intended
@@ -13,8 +15,6 @@ public interface ImageSizer {
    *
    * @return instance of a concrete image sizer
    */
-  ImageSizer getNew(BeLittleSizerSetting sizerSetting);
-
   ImageSizer getNew();
 
   BeLittleResult getResult();

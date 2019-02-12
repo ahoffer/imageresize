@@ -1,6 +1,5 @@
 package belittle.sizers;
 
-import belittle.BeLittleSizerSetting;
 import belittle.support.FuzzyFile;
 
 /**
@@ -10,10 +9,6 @@ import belittle.support.FuzzyFile;
 public abstract class ExternalProcessSizer extends AbstractImageSizer {
 
   FuzzyFile executable;
-
-  public ExternalProcessSizer(BeLittleSizerSetting sizerSettings) {
-    super(sizerSettings);
-  }
 
   public FuzzyFile getExecutable() {
     return executable;
