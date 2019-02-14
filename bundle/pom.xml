@@ -83,7 +83,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-exec</artifactId>
-            <version>1.3</version>
+            <version>1.2</version>
         </dependency>
     </dependencies>
     <build>
@@ -102,15 +102,11 @@
                             belittle-provider,
                             commons-io,
                             im4java,
-                            <!--jai-imageio-core,-->
-                            <!--jai-imageio-jpeg2000,-->
-                            thumbnailator,
-                            commons-exec
+                            thumbnailator
                         </Embed-Dependency>
                         <Import-Package>
-                            !sun.security.action
-                            ,!belittle
-                            ,*
+                            !sun.security.action,
+                            *
                         </Import-Package>
                         <Export-Package>
                             belittle

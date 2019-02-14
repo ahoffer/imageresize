@@ -22,7 +22,8 @@ public class ResizableImageImpl implements ResizableImage, Closeable, AutoClosea
 
   public BufferedImage resize() {
     results = new ArrayList<>();
-    List<ImageSizer> sizerList = sizerCollection.getSizersForMimeType(file.getMimeType());
+    String mimeType = file.getMimeType();
+    List<ImageSizer> sizerList = sizerCollection.getSizersForMimeType(mimeType);
     for (ImageSizer sizer : sizerList) {
       BeLittleResult result = sizer.getResult();
       results.add(result);

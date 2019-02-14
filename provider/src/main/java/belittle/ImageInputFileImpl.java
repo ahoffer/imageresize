@@ -22,7 +22,6 @@ public class ImageInputFileImpl implements ImageInputFile {
 
   public ImageInputFileImpl(File sourceFile) {
     this.file = sourceFile;
-    initialize();
   }
 
   public ImageInputFileImpl(ImageInputStream iis, File newFile) throws IOException {
@@ -32,13 +31,8 @@ public class ImageInputFileImpl implements ImageInputFile {
   }
 
   public ImageInputFileImpl(ImageInputStream iis) throws IOException {
-    this.file = File.createTempFile("belittle", null);
-    write(iis);
+    this(iis, File.createTempFile("belittle", null));
     manageTempFile = true;
-  }
-
-  protected void initialize() {
-    mimeType = readFileMimeType();
   }
 
   protected String readFileMimeType() {
@@ -51,6 +45,9 @@ public class ImageInputFileImpl implements ImageInputFile {
   }
 
   public String getMimeType() {
+    if (mimeType == null) {
+      mimeType = readFileMimeType();
+    }
     return mimeType;
   }
 
@@ -82,7 +79,7 @@ public class ImageInputFileImpl implements ImageInputFile {
 
     AtomicReference<ImageInputStream> iis = new AtomicReference<>();
     try {
-      return doWithImageInputStream(
+      return doWithInputStream(
           (istream) -> {
             iis.set(ImageIO.createImageInputStream(istream));
             consumer.accept(iis.get());

@@ -114,6 +114,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     cmdLine.addArgument(file.toString());
     cmdLine.addArgument("-o");
     cmdLine.addArgument(outputFile.toString());
+    addInfo(cmdLine.toString());
     Executor executor = new DefaultExecutor();
     ExecuteWatchdog watchdog = new ExecuteWatchdog(60 * 1000);
     executor.setWatchdog(watchdog);

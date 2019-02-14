@@ -25,7 +25,7 @@ public class BeLittleResultImpl implements BeLittleResult {
 
   @Override
   public BufferedImage getOutput() {
-    return (output);
+    return output;
   }
 
   @Override

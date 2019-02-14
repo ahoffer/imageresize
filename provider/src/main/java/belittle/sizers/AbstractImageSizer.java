@@ -33,8 +33,11 @@ public abstract class AbstractImageSizer implements ImageSizer {
   BeLittleResult result;
   int height, width;
 
-  public BufferedImage resize(int width, int height, ImageInputFile file) {
+  public AbstractImageSizer() {
     result = new BeLittleResultImpl();
+  }
+
+  public BufferedImage resize(int width, int height, ImageInputFile file) {
     this.width = width;
     this.height = height;
     return resize(file);
