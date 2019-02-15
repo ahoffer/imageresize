@@ -2,20 +2,14 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <bean id="magickExecutable" class="belittle.support.FuzzyFile">
-        <argument value="/Users/aaronhoffer/bin/ImageMagick-7.0.8/bin/"/>
-        <argument value="convert"/>
-        <argument value="c:\space blah;other\path\blah"/>
-        <argument value="convert.exe"/>
+        <argument value="/Users/aaronhoffer/bin/ImageMagick-7.0.8/bin/convert"/>
     </bean>
     <bean id="magick" class="belittle.sizers.MagickSizer">
         <argument ref="magickExecutable"/>
     </bean>
 
-    <bean id="openJpegExecutable" class="belittle.support.FuzzyFile">
-        <argument value="/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin"/>
-        <argument value="opj_decompress"/>
-        <argument value="c:\space blah;other\path\blah"/>
-        <argument value="opj_decompress.exe"/>
+    <bean id="openJpegExecutable" class="File">
+        <argument value="/Users/aaronhoffer/bin/openjpeg-v2.3.0-osx-x86_64/bin/opj_decompress"/>
     </bean>
 
     <bean id="openJpeg" class="belittle.sizers.OpenJpeg2000Sizer">

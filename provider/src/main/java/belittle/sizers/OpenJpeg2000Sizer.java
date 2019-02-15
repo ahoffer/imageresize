@@ -5,7 +5,6 @@ import belittle.BeLittleMessageImpl;
 import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.ComputeResolutionLevel;
-import belittle.support.FuzzyFile;
 import belittle.support.Jpeg2000MetadataMicroReader;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -27,7 +26,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpenJpeg2000Sizer extends ExternalProcessSizer {
+public class OpenJpeg2000Sizer extends AbstractImageSizer {
 
   // There is a limited number of output formats to choose from.
   // For Open JPEG v2.3.0 they are: PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|RAW|RAWL|TGA
@@ -38,56 +37,59 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
   public static String OUTPUT_FORMAT_EXT = ".bmp";
   Jpeg2000MetadataMicroReader metadata;
   int reductionFactor;
+  File executable;
   //  Process process;
 
-  public OpenJpeg2000Sizer(FuzzyFile executable) {
+  public OpenJpeg2000Sizer(File executable) {
     setExecutable(executable);
   }
 
   public BufferedImage resize(ImageInputFile file) {
     AccessController.doPrivileged(
         (PrivilegedAction<Void>)
-            () -> {
-              if (!isAvailable()) {
-                addError(
-                    String.format(
-                        "%s not available or executable", getExecutable().getExecutableName()));
-                return null;
-              }
-
-              file.doWithInputStream((istream) -> readMetadata(istream));
-              reductionFactor = getReductionFactor();
-              addInfo(String.format("Starting with reduction factor %d", reductionFactor));
-              File sourceWithNewExtension = null;
-              File outputFile = null;
-              try {
-                // Open JPEG command line utility is very picky about the extension.
-                sourceWithNewExtension = File.createTempFile("belittle", getProperFileExt());
-                outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
-              } catch (IOException e) {
-                addError("Failed to open temporary files. Cannot proceed.", e);
-                return null;
-              }
-
-              if (!file.copyTo(sourceWithNewExtension)) {
-                addError("Failed to copy input file. Cannot proceed.");
-                return null;
-              }
-
-              do {
-                doIt(sourceWithNewExtension, outputFile);
-                reductionFactor--;
-              } while (reductionFactor > 0 && isTooSmall(outputFile));
-
-              try {
-                result.setOutput(Thumbnails.of(outputFile).size(width, height).asBufferedImage());
-              } catch (IOException e) {
-                addError("Could not resize with Thumbnailator", e);
-                throw new RuntimeException(e);
-              }
-              return null;
-            });
+            () -> innerResize(file));
     return result.getOutput();
+  }
+
+  Void innerResize(ImageInputFile file) {
+    if (!isAvailable()) {
+      addError(
+          String.format(
+              "%s not available or not executable", getExecutable().getName()));
+      return null;
+    }
+
+    file.doWithInputStream((istream) -> readMetadata(istream));
+    reductionFactor = getReductionFactor();
+    addInfo(String.format("Starting with reduction factor %d", reductionFactor));
+    File sourceWithNewExtension = null;
+    File outputFile = null;
+    try {
+      // Open JPEG command line utility is very picky about the extension.
+      sourceWithNewExtension = File.createTempFile("belittle", getProperFileExt());
+      outputFile = File.createTempFile("belittle", OUTPUT_FORMAT_EXT);
+    } catch (IOException e) {
+      addError("Failed to open temporary files. Cannot proceed.", e);
+      return null;
+    }
+
+    if (!file.copyTo(sourceWithNewExtension)) {
+      addError("Failed to copy input file. Cannot proceed.");
+      return null;
+    }
+
+    do {
+      doIt(sourceWithNewExtension, outputFile);
+      reductionFactor--;
+    } while (reductionFactor > 0 && isTooSmall(outputFile));
+
+    try {
+      result.setOutput(Thumbnails.of(outputFile).size(width, height).asBufferedImage());
+    } catch (IOException e) {
+      addError("Could not resize with Thumbnailator", e);
+      throw new RuntimeException(e);
+    }
+    return null;
   }
 
   boolean isTooSmall(File outputFile) {
@@ -106,7 +108,7 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
 
   // THIS ONE DOES NOT SEEM TO BLOCK THE WAY I WANT.
   private void doIt(File file, File outputFile) {
-    String path = getExecutable().getPath();
+    String path = getExecutable().getAbsolutePath();
     CommandLine cmdLine = new CommandLine(path);
     cmdLine.addArgument("-r");
     cmdLine.addArgument(String.valueOf(reductionFactor));
@@ -130,7 +132,6 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
       }
     } catch (IOException e) {
       addError("Failed to exeute Open JPEG 2000 command line decompressor", e);
-      throw new RuntimeException(e);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new RuntimeException(e);
@@ -262,5 +263,18 @@ public class OpenJpeg2000Sizer extends ExternalProcessSizer {
     //    if (process.isAlive()) {
     //      process.destroy();
     //    }
+  }
+
+  public File getExecutable() {
+    return executable;
+  }
+
+  public void setExecutable(File executable) {
+    this.executable = executable;
+  }
+
+  @Override
+  public boolean isAvailable() {
+    return getExecutable().canExecute();
   }
 }

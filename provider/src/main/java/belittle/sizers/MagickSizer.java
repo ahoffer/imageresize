@@ -4,6 +4,7 @@ import belittle.ImageInputFile;
 import belittle.ImageSizer;
 import belittle.support.FuzzyFile;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -13,7 +14,7 @@ import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 import org.im4java.process.Pipe;
 
-public class MagickSizer extends ExternalProcessSizer {
+public class MagickSizer extends AbstractImageSizer {
 
   /**
    * JPEG compresses well, but is designed for large real world images, not small thumbnails. It
@@ -31,10 +32,11 @@ public class MagickSizer extends ExternalProcessSizer {
   public static final String STD_IN = "-";
 
   public static final String STD_OUT = ":-";
+  File executable;
 
   private String outputFormatExtension = "bmp";
 
-  public MagickSizer(FuzzyFile executable) {
+  public MagickSizer(File executable) {
     setExecutable(executable);
   }
 
@@ -86,5 +88,18 @@ public class MagickSizer extends ExternalProcessSizer {
 
   public void setOutputFormatExtension(String outputFormatExtension) {
     this.outputFormatExtension = outputFormatExtension;
+  }
+
+  public File getExecutable() {
+    return executable;
+  }
+
+  public void setExecutable(File executable) {
+    this.executable = executable;
+  }
+
+  @Override
+  public boolean isAvailable() {
+    return getExecutable().canExecute();
   }
 }
