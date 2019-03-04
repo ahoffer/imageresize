@@ -2,7 +2,6 @@ package belittle.sizers;
 
 import belittle.ImageInputFile;
 import belittle.ImageSizer;
-import belittle.support.FuzzyFile;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;

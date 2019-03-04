@@ -45,17 +45,13 @@ public class OpenJpeg2000Sizer extends AbstractImageSizer {
   }
 
   public BufferedImage resize(ImageInputFile file) {
-    AccessController.doPrivileged(
-        (PrivilegedAction<Void>)
-            () -> innerResize(file));
+    AccessController.doPrivileged((PrivilegedAction<Void>) () -> innerResize(file));
     return result.getOutput();
   }
 
   Void innerResize(ImageInputFile file) {
     if (!isAvailable()) {
-      addError(
-          String.format(
-              "%s not available or not executable", getExecutable().getName()));
+      addError(String.format("%s not available or not executable", getExecutable().getName()));
       return null;
     }
 
